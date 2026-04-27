@@ -10,6 +10,9 @@ import HR from './pages/HR';
 import Inventory from './pages/Inventory';
 import Monitoring from './pages/Monitoring';
 import Cash from './pages/Cash';
+import DataCollection from './pages/DataCollection';
+import Reports from './pages/Reports';
+import DocumentArchive from './pages/DocumentArchive';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -31,6 +34,9 @@ function AppRoutes() {
       <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
       <Route path="/monitoring" element={<ProtectedRoute><Monitoring /></ProtectedRoute>} />
       <Route path="/cash" element={<ProtectedRoute><Cash /></ProtectedRoute>} />
+      <Route path="/data-collection" element={<ProtectedRoute><DataCollection /></ProtectedRoute>} />
+      <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+      <Route path="/documents" element={<ProtectedRoute><DocumentArchive /></ProtectedRoute>} />
     </Routes>
   );
 }

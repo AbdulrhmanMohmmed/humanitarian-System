@@ -3,7 +3,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
   LayoutDashboard, Users, FolderKanban, Wallet, UserCog,
-  Package, BarChart3, Banknote, LogOut, Menu, X, ChevronLeft
+  Package, BarChart3, Banknote, LogOut, Menu, X, ChevronLeft,
+  ClipboardList, FileSpreadsheet, FolderArchive
 } from 'lucide-react';
 
 const navItems = [
@@ -14,6 +15,9 @@ const navItems = [
   { path: '/hr', label: 'الموارد البشرية', icon: UserCog },
   { path: '/inventory', label: 'المخازن والتوزيع', icon: Package },
   { path: '/monitoring', label: 'المتابعة والتقييم', icon: BarChart3 },
+  { path: '/data-collection', label: 'جمع البيانات', icon: ClipboardList },
+  { path: '/reports', label: 'التقارير', icon: FileSpreadsheet },
+  { path: '/documents', label: 'أرشيف الوثائق', icon: FolderArchive },
   { path: '/cash', label: 'التحويلات النقدية', icon: Banknote },
 ];
 
