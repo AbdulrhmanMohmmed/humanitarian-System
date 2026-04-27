@@ -830,7 +830,7 @@ class LogFrame(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    children = relationship("LogFrame", backref="parent", remote_side="LogFrame.id")
+    children = relationship("LogFrame", backref="parent")
 
 
 # -- Data Quality Assessment --

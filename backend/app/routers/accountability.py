@@ -4,6 +4,7 @@ from typing import List, Optional
 from datetime import datetime
 import random
 import string
+from sqlalchemy.exc import IntegrityError
 from app.database import get_db
 from app.models import Complaint, ComplaintResponse, User, ComplaintStatus
 from app.schemas import (
@@ -16,7 +17,7 @@ router = APIRouter(prefix="/api/accountability", tags=["المساءلة"])
 
 
 def _generate_ref():
-    return f"CFM-{datetime.utcnow().strftime('%Y%m')}-{''.join(random.choices(string.digits, k=4))}"
+    return f"CFM-{datetime.utcnow().strftime('%Y%m')}-{''.join(random.choices(string.digits, k=8))}"
 
 
 @router.get("/complaints", response_model=List[ComplaintOut])
@@ -53,15 +54,20 @@ def create_complaint(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    complaint = Complaint(
-        reference_number=_generate_ref(),
-        **data.model_dump(),
-        created_by=current_user.id,
-    )
-    db.add(complaint)
-    db.commit()
-    db.refresh(complaint)
-    return complaint
+    for _ in range(5):
+        try:
+            complaint = Complaint(
+                reference_number=_generate_ref(),
+                **data.model_dump(),
+                created_by=current_user.id,
+            )
+            db.add(complaint)
+            db.commit()
+            db.refresh(complaint)
+            return complaint
+        except IntegrityError:
+            db.rollback()
+    raise HTTPException(status_code=500, detail="تعذر توليد رقم مرجعي فريد")
 
 
 @router.get("/complaints/{complaint_id}", response_model=ComplaintOut)

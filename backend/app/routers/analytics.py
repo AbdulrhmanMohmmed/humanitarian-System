@@ -159,6 +159,9 @@ def sample_calculator(
     p = 0.5
     e = margin_error / 100
 
+    if e == 0 or population <= 0:
+        raise HTTPException(status_code=400, detail="حجم السكان يجب أن يكون أكبر من صفر وهامش الخطأ يجب أن يكون أكبر من صفر")
+
     n0 = (z * z * p * (1 - p)) / (e * e)
     n = n0 / (1 + (n0 - 1) / population)
     sample_size = math.ceil(n)
