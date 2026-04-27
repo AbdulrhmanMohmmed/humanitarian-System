@@ -18,6 +18,12 @@ import Learning from './pages/Learning';
 import LogFramePage from './pages/LogFramePage';
 import EvaluationTools from './pages/EvaluationTools';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
+import RiskManagement from './pages/RiskManagement';
+import MEALPlan from './pages/MEALPlan';
+import Safeguarding from './pages/Safeguarding';
+import ActivityTracker from './pages/ActivityTracker';
+import NeedsAssessment from './pages/NeedsAssessment';
+import ExecutiveDashboard from './pages/ExecutiveDashboard';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -47,6 +53,12 @@ function AppRoutes() {
       <Route path="/logframe" element={<ProtectedRoute><LogFramePage /></ProtectedRoute>} />
       <Route path="/evaluation" element={<ProtectedRoute><EvaluationTools /></ProtectedRoute>} />
       <Route path="/analytics" element={<ProtectedRoute><AnalyticsDashboard /></ProtectedRoute>} />
+      <Route path="/risks" element={<ProtectedRoute><RiskManagement /></ProtectedRoute>} />
+      <Route path="/meal-plan" element={<ProtectedRoute><MEALPlan /></ProtectedRoute>} />
+      <Route path="/safeguarding" element={<ProtectedRoute><Safeguarding /></ProtectedRoute>} />
+      <Route path="/activities" element={<ProtectedRoute><ActivityTracker /></ProtectedRoute>} />
+      <Route path="/needs-assessment" element={<ProtectedRoute><NeedsAssessment /></ProtectedRoute>} />
+      <Route path="/executive" element={<ProtectedRoute><ExecutiveDashboard /></ProtectedRoute>} />
     </Routes>
   );
 }

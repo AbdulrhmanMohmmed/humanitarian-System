@@ -214,6 +214,50 @@ class DQAStatus(str, enum.Enum):
     POOR = "poor"
     CRITICAL = "critical"
 
+class RiskLikelihood(str, enum.Enum):
+    VERY_LOW = "very_low"
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    VERY_HIGH = "very_high"
+
+class RiskImpact(str, enum.Enum):
+    NEGLIGIBLE = "negligible"
+    MINOR = "minor"
+    MODERATE = "moderate"
+    MAJOR = "major"
+    SEVERE = "severe"
+
+class RiskStatus(str, enum.Enum):
+    IDENTIFIED = "identified"
+    MITIGATING = "mitigating"
+    MONITORING = "monitoring"
+    RESOLVED = "resolved"
+    ACCEPTED = "accepted"
+
+class MEALPlanStatus(str, enum.Enum):
+    DRAFT = "draft"
+    ACTIVE = "active"
+    COMPLETED = "completed"
+
+class NotificationType(str, enum.Enum):
+    DEADLINE = "deadline"
+    COMPLAINT = "complaint"
+    RISK = "risk"
+    TASK = "task"
+    SYSTEM = "system"
+
+class CHSCommitment(str, enum.Enum):
+    CHS1 = "chs1"
+    CHS2 = "chs2"
+    CHS3 = "chs3"
+    CHS4 = "chs4"
+    CHS5 = "chs5"
+    CHS6 = "chs6"
+    CHS7 = "chs7"
+    CHS8 = "chs8"
+    CHS9 = "chs9"
+
 
 # ==================== MODELS ====================
 
@@ -302,13 +346,19 @@ class Activity(Base):
     description = Column(Text)
     start_date = Column(Date)
     end_date = Column(Date)
+    actual_start = Column(Date)
+    actual_end = Column(Date)
     budget = Column(Float, default=0)
     spent = Column(Float, default=0)
     progress = Column(Float, default=0)
     status = Column(SAEnum(ProjectStatus), default=ProjectStatus.PLANNED)
+    responsible = Column(String(255))
+    parent_id = Column(Integer, ForeignKey("activities.id"))
+    order = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     project = relationship("Project", back_populates="activities")
+    children = relationship("Activity", backref="parent")
 
 
 # -- Financial Management --
@@ -852,4 +902,125 @@ class DataQualityAssessment(Base):
     findings = Column(Text)
     recommendations = Column(Text)
     assessed_by = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+# -- Risk Management --
+
+class Risk(Base):
+    __tablename__ = "risks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(500), nullable=False)
+    description = Column(Text)
+    category = Column(String(100))
+    project_id = Column(Integer, ForeignKey("projects.id"))
+    likelihood = Column(SAEnum(RiskLikelihood), default=RiskLikelihood.MEDIUM)
+    impact = Column(SAEnum(RiskImpact), default=RiskImpact.MODERATE)
+    risk_score = Column(Integer, default=0)
+    status = Column(SAEnum(RiskStatus), default=RiskStatus.IDENTIFIED)
+    mitigation_plan = Column(Text)
+    contingency_plan = Column(Text)
+    owner = Column(Integer, ForeignKey("users.id"))
+    review_date = Column(Date)
+    created_by = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+# -- MEAL Plan --
+
+class MEALPlan(Base):
+    __tablename__ = "meal_plans"
+
+    id = Column(Integer, primary_key=True, index=True)
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
+    title = Column(String(500), nullable=False)
+    status = Column(SAEnum(MEALPlanStatus), default=MEALPlanStatus.DRAFT)
+    monitoring_approach = Column(Text)
+    evaluation_plan = Column(Text)
+    accountability_mechanisms = Column(Text)
+    learning_strategy = Column(Text)
+    data_collection_methods = Column(Text)
+    reporting_schedule = Column(Text)
+    resources_needed = Column(Text)
+    indicators_summary = Column(Text)
+    start_date = Column(Date)
+    end_date = Column(Date)
+    created_by = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+# -- CHS Compliance --
+
+class CHSAssessment(Base):
+    __tablename__ = "chs_assessments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    project_id = Column(Integer, ForeignKey("projects.id"))
+    commitment = Column(SAEnum(CHSCommitment), nullable=False)
+    score = Column(Integer, default=0)
+    evidence = Column(Text)
+    gaps = Column(Text)
+    action_plan = Column(Text)
+    assessed_by = Column(Integer, ForeignKey("users.id"))
+    assessment_date = Column(Date, default=date.today)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+# -- Safeguarding Reports --
+
+class SafeguardingReport(Base):
+    __tablename__ = "safeguarding_reports"
+
+    id = Column(Integer, primary_key=True, index=True)
+    reference_number = Column(String(50), unique=True, index=True)
+    incident_type = Column(String(100), nullable=False)
+    description = Column(Text, nullable=False)
+    incident_date = Column(Date)
+    location = Column(String(255))
+    is_confidential = Column(Boolean, default=True)
+    status = Column(String(50), default="reported")
+    action_taken = Column(Text)
+    reported_by = Column(Integer, ForeignKey("users.id"))
+    assigned_to = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+# -- Notifications --
+
+class Notification(Base):
+    __tablename__ = "notifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    title = Column(String(500), nullable=False)
+    message = Column(Text)
+    type = Column(SAEnum(NotificationType), default=NotificationType.SYSTEM)
+    is_read = Column(Boolean, default=False)
+    link = Column(String(500))
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+# -- Needs Assessment Templates --
+
+class NeedsAssessment(Base):
+    __tablename__ = "needs_assessments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    project_id = Column(Integer, ForeignKey("projects.id"))
+    title = Column(String(500), nullable=False)
+    sector = Column(String(100), nullable=False)
+    governorate = Column(String(100))
+    district = Column(String(100))
+    assessment_date = Column(Date)
+    methodology = Column(Text)
+    findings = Column(Text)
+    priorities = Column(Text)
+    recommendations = Column(Text)
+    sample_size = Column(Integer)
+    households_surveyed = Column(Integer)
+    created_by = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime, default=datetime.utcnow)

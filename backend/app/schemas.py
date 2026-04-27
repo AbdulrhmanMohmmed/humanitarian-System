@@ -8,7 +8,8 @@ from app.models import (
     IndicatorType, Currency, FormStatus, FieldType, SubmissionStatus,
     DocumentCategory, ReportType, ComplaintChannel, ComplaintStatus,
     ComplaintPriority, ComplaintCategory, LessonCategory, LogFrameLevel,
-    DQAStatus
+    DQAStatus, RiskLikelihood, RiskImpact, RiskStatus, MEALPlanStatus,
+    NotificationType, CHSCommitment
 )
 
 
@@ -968,6 +969,233 @@ class DQAOut(BaseModel):
     findings: Optional[str] = None
     recommendations: Optional[str] = None
     assessed_by: Optional[int] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# ==================== RISK MANAGEMENT ====================
+
+class RiskCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    category: Optional[str] = None
+    project_id: Optional[int] = None
+    likelihood: RiskLikelihood = RiskLikelihood.MEDIUM
+    impact: RiskImpact = RiskImpact.MODERATE
+    mitigation_plan: Optional[str] = None
+    contingency_plan: Optional[str] = None
+    owner: Optional[int] = None
+    review_date: Optional[date] = None
+
+class RiskUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    category: Optional[str] = None
+    likelihood: Optional[RiskLikelihood] = None
+    impact: Optional[RiskImpact] = None
+    status: Optional[RiskStatus] = None
+    mitigation_plan: Optional[str] = None
+    contingency_plan: Optional[str] = None
+    owner: Optional[int] = None
+    review_date: Optional[date] = None
+
+class RiskOut(BaseModel):
+    id: int
+    title: str
+    description: Optional[str] = None
+    category: Optional[str] = None
+    project_id: Optional[int] = None
+    likelihood: RiskLikelihood
+    impact: RiskImpact
+    risk_score: int
+    status: RiskStatus
+    mitigation_plan: Optional[str] = None
+    contingency_plan: Optional[str] = None
+    owner: Optional[int] = None
+    review_date: Optional[date] = None
+    created_by: Optional[int] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# ==================== MEAL PLAN ====================
+
+class MEALPlanCreate(BaseModel):
+    project_id: int
+    title: str
+    monitoring_approach: Optional[str] = None
+    evaluation_plan: Optional[str] = None
+    accountability_mechanisms: Optional[str] = None
+    learning_strategy: Optional[str] = None
+    data_collection_methods: Optional[str] = None
+    reporting_schedule: Optional[str] = None
+    resources_needed: Optional[str] = None
+    indicators_summary: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+
+class MEALPlanOut(BaseModel):
+    id: int
+    project_id: int
+    title: str
+    status: MEALPlanStatus
+    monitoring_approach: Optional[str] = None
+    evaluation_plan: Optional[str] = None
+    accountability_mechanisms: Optional[str] = None
+    learning_strategy: Optional[str] = None
+    data_collection_methods: Optional[str] = None
+    reporting_schedule: Optional[str] = None
+    resources_needed: Optional[str] = None
+    indicators_summary: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    created_by: Optional[int] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# ==================== CHS & SAFEGUARDING ====================
+
+class CHSAssessmentCreate(BaseModel):
+    project_id: Optional[int] = None
+    commitment: CHSCommitment
+    score: int = 0
+    evidence: Optional[str] = None
+    gaps: Optional[str] = None
+    action_plan: Optional[str] = None
+
+class CHSAssessmentOut(BaseModel):
+    id: int
+    project_id: Optional[int] = None
+    commitment: CHSCommitment
+    score: int
+    evidence: Optional[str] = None
+    gaps: Optional[str] = None
+    action_plan: Optional[str] = None
+    assessed_by: Optional[int] = None
+    assessment_date: date
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class SafeguardingCreate(BaseModel):
+    incident_type: str
+    description: str
+    incident_date: Optional[date] = None
+    location: Optional[str] = None
+
+class SafeguardingOut(BaseModel):
+    id: int
+    reference_number: str
+    incident_type: str
+    description: str
+    incident_date: Optional[date] = None
+    location: Optional[str] = None
+    is_confidential: bool
+    status: str
+    action_taken: Optional[str] = None
+    reported_by: Optional[int] = None
+    assigned_to: Optional[int] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# ==================== NOTIFICATIONS ====================
+
+class NotificationOut(BaseModel):
+    id: int
+    user_id: int
+    title: str
+    message: Optional[str] = None
+    type: NotificationType
+    is_read: bool
+    link: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# ==================== ACTIVITY TRACKING ====================
+
+class ActivityCreate(BaseModel):
+    project_id: int
+    name: str
+    description: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    responsible: Optional[str] = None
+    parent_id: Optional[int] = None
+
+class ActivityUpdate(BaseModel):
+    name: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    actual_start: Optional[date] = None
+    actual_end: Optional[date] = None
+    progress: Optional[int] = None
+    status: Optional[str] = None
+
+class ActivityOut(BaseModel):
+    id: int
+    project_id: int
+    name: str
+    description: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    actual_start: Optional[date] = None
+    actual_end: Optional[date] = None
+    progress: int
+    status: str
+    responsible: Optional[str] = None
+    parent_id: Optional[int] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# ==================== NEEDS ASSESSMENT ====================
+
+class NeedsAssessmentCreate(BaseModel):
+    project_id: Optional[int] = None
+    title: str
+    sector: str
+    governorate: Optional[str] = None
+    district: Optional[str] = None
+    assessment_date: Optional[date] = None
+    methodology: Optional[str] = None
+    findings: Optional[str] = None
+    priorities: Optional[str] = None
+    recommendations: Optional[str] = None
+    sample_size: Optional[int] = None
+    households_surveyed: Optional[int] = None
+
+class NeedsAssessmentOut(BaseModel):
+    id: int
+    project_id: Optional[int] = None
+    title: str
+    sector: str
+    governorate: Optional[str] = None
+    district: Optional[str] = None
+    assessment_date: Optional[date] = None
+    methodology: Optional[str] = None
+    findings: Optional[str] = None
+    priorities: Optional[str] = None
+    recommendations: Optional[str] = None
+    sample_size: Optional[int] = None
+    households_surveyed: Optional[int] = None
+    created_by: Optional[int] = None
     created_at: datetime
 
     class Config:
