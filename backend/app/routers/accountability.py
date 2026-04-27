@@ -65,8 +65,10 @@ def create_complaint(
             db.commit()
             db.refresh(complaint)
             return complaint
-        except IntegrityError:
+        except IntegrityError as e:
             db.rollback()
+            if "reference_number" not in str(e.orig):
+                raise HTTPException(status_code=400, detail=str(e.orig))
     raise HTTPException(status_code=500, detail="تعذر توليد رقم مرجعي فريد")
 
 
