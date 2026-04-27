@@ -4,7 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 import {
   LayoutDashboard, Users, FolderKanban, Wallet, UserCog,
   Package, BarChart3, Banknote, LogOut, Menu, X, ChevronLeft,
-  ClipboardList, FileSpreadsheet, FolderArchive
+  ClipboardList, FileSpreadsheet, FolderArchive,
+  MessageSquare, Lightbulb, Target, Calculator, TrendingUp
 } from 'lucide-react';
 
 const navItems = [
@@ -19,6 +20,11 @@ const navItems = [
   { path: '/reports', label: 'التقارير', icon: FileSpreadsheet },
   { path: '/documents', label: 'أرشيف الوثائق', icon: FolderArchive },
   { path: '/cash', label: 'التحويلات النقدية', icon: Banknote },
+  { path: '/accountability', label: 'المساءلة (CFM)', icon: MessageSquare },
+  { path: '/learning', label: 'التعلم', icon: Lightbulb },
+  { path: '/logframe', label: 'الإطار المنطقي', icon: Target },
+  { path: '/evaluation', label: 'أدوات التقييم', icon: Calculator },
+  { path: '/analytics', label: 'التحليلات', icon: TrendingUp },
 ];
 
 export default function Layout({ children }) {

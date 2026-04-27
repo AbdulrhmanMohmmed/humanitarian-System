@@ -6,7 +6,9 @@ from app.models import (
     GrantStatus, EmployeeStatus, LeaveType, LeaveStatus, ItemCategory,
     DistributionStatus, CashTransferStatus, CashTransferMethod,
     IndicatorType, Currency, FormStatus, FieldType, SubmissionStatus,
-    DocumentCategory, ReportType
+    DocumentCategory, ReportType, ComplaintChannel, ComplaintStatus,
+    ComplaintPriority, ComplaintCategory, LessonCategory, LogFrameLevel,
+    DQAStatus
 )
 
 
@@ -748,3 +750,225 @@ class ReportGenerateRequest(BaseModel):
     governorate: Optional[str] = None
     form_id: Optional[int] = None
     title: Optional[str] = None
+
+
+# ==================== ACCOUNTABILITY ====================
+
+class ComplaintCreate(BaseModel):
+    channel: ComplaintChannel = ComplaintChannel.OTHER
+    category: ComplaintCategory = ComplaintCategory.OTHER
+    priority: ComplaintPriority = ComplaintPriority.MEDIUM
+    subject: str
+    description: str
+    complainant_name: Optional[str] = None
+    complainant_phone: Optional[str] = None
+    complainant_location: Optional[str] = None
+    is_anonymous: bool = False
+    is_sensitive: bool = False
+    project_id: Optional[int] = None
+    response_deadline: Optional[datetime] = None
+
+class ComplaintUpdate(BaseModel):
+    status: Optional[ComplaintStatus] = None
+    priority: Optional[ComplaintPriority] = None
+    assigned_to: Optional[int] = None
+    resolution: Optional[str] = None
+    category: Optional[ComplaintCategory] = None
+
+class ComplaintOut(BaseModel):
+    id: int
+    reference_number: str
+    channel: ComplaintChannel
+    category: ComplaintCategory
+    priority: ComplaintPriority
+    status: ComplaintStatus
+    subject: str
+    description: str
+    complainant_name: Optional[str] = None
+    complainant_phone: Optional[str] = None
+    complainant_location: Optional[str] = None
+    is_anonymous: bool
+    is_sensitive: bool
+    project_id: Optional[int] = None
+    assigned_to: Optional[int] = None
+    resolution: Optional[str] = None
+    resolution_date: Optional[datetime] = None
+    response_deadline: Optional[datetime] = None
+    created_at: datetime
+    responses: List["ComplaintResponseOut"] = []
+
+    class Config:
+        from_attributes = True
+
+class ComplaintResponseCreate(BaseModel):
+    response_text: str
+    action_taken: Optional[str] = None
+
+class ComplaintResponseOut(BaseModel):
+    id: int
+    complaint_id: int
+    response_text: str
+    action_taken: Optional[str] = None
+    responded_by: Optional[int] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# ==================== LEARNING ====================
+
+class LessonLearnedCreate(BaseModel):
+    title: str
+    description: str
+    category: LessonCategory = LessonCategory.OTHER
+    lesson_type: Optional[str] = None
+    project_id: Optional[int] = None
+    sector: Optional[str] = None
+    governorate: Optional[str] = None
+    recommendations: Optional[str] = None
+    impact: Optional[str] = None
+    tags: Optional[str] = None
+
+class LessonLearnedOut(BaseModel):
+    id: int
+    title: str
+    description: str
+    category: LessonCategory
+    lesson_type: Optional[str] = None
+    project_id: Optional[int] = None
+    sector: Optional[str] = None
+    governorate: Optional[str] = None
+    recommendations: Optional[str] = None
+    impact: Optional[str] = None
+    tags: Optional[str] = None
+    created_by: Optional[int] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class ActionReviewCreate(BaseModel):
+    title: str
+    activity_name: str
+    project_id: Optional[int] = None
+    review_date: Optional[date] = None
+    what_was_planned: Optional[str] = None
+    what_happened: Optional[str] = None
+    what_went_well: Optional[str] = None
+    what_to_improve: Optional[str] = None
+    action_items: Optional[str] = None
+    participants: Optional[str] = None
+
+class ActionReviewOut(BaseModel):
+    id: int
+    title: str
+    activity_name: str
+    project_id: Optional[int] = None
+    review_date: Optional[date] = None
+    what_was_planned: Optional[str] = None
+    what_happened: Optional[str] = None
+    what_went_well: Optional[str] = None
+    what_to_improve: Optional[str] = None
+    action_items: Optional[str] = None
+    participants: Optional[str] = None
+    created_by: Optional[int] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class CaseStudyCreate(BaseModel):
+    title: str
+    summary: str
+    background: Optional[str] = None
+    intervention: Optional[str] = None
+    results: Optional[str] = None
+    impact_statement: Optional[str] = None
+    quotes: Optional[str] = None
+    project_id: Optional[int] = None
+    sector: Optional[str] = None
+    governorate: Optional[str] = None
+    beneficiary_name: Optional[str] = None
+    consent_obtained: bool = False
+    tags: Optional[str] = None
+
+class CaseStudyOut(BaseModel):
+    id: int
+    title: str
+    summary: str
+    background: Optional[str] = None
+    intervention: Optional[str] = None
+    results: Optional[str] = None
+    impact_statement: Optional[str] = None
+    quotes: Optional[str] = None
+    project_id: Optional[int] = None
+    sector: Optional[str] = None
+    governorate: Optional[str] = None
+    beneficiary_name: Optional[str] = None
+    consent_obtained: bool
+    photo_url: Optional[str] = None
+    tags: Optional[str] = None
+    is_published: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# ==================== LOGFRAME ====================
+
+class LogFrameCreate(BaseModel):
+    project_id: int
+    level: LogFrameLevel
+    code: Optional[str] = None
+    description: str
+    indicators: Optional[str] = None
+    means_of_verification: Optional[str] = None
+    assumptions: Optional[str] = None
+    parent_id: Optional[int] = None
+    order: int = 0
+
+class LogFrameOut(BaseModel):
+    id: int
+    project_id: int
+    level: LogFrameLevel
+    code: Optional[str] = None
+    description: str
+    indicators: Optional[str] = None
+    means_of_verification: Optional[str] = None
+    assumptions: Optional[str] = None
+    parent_id: Optional[int] = None
+    order: int
+    created_at: datetime
+    children: List["LogFrameOut"] = []
+
+    class Config:
+        from_attributes = True
+
+
+# ==================== DATA QUALITY ====================
+
+class DQACreate(BaseModel):
+    project_id: Optional[int] = None
+    form_id: Optional[int] = None
+
+class DQAOut(BaseModel):
+    id: int
+    project_id: Optional[int] = None
+    form_id: Optional[int] = None
+    assessment_date: date
+    total_records: int
+    complete_records: int
+    accuracy_score: float
+    timeliness_score: float
+    consistency_score: float
+    overall_score: float
+    status: DQAStatus
+    findings: Optional[str] = None
+    recommendations: Optional[str] = None
+    assessed_by: Optional[int] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
