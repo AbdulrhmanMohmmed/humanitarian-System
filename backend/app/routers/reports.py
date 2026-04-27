@@ -385,3 +385,73 @@ def list_report_types(current_user: User = Depends(get_current_user)):
         {"value": "distribution_report", "label": "تقرير التوزيعات"},
         {"value": "survey_analysis", "label": "تحليل الاستبيانات"},
     ]
+
+
+# -- Cluster & Donor Report Templates --
+
+CLUSTER_TEMPLATES = {
+    "WASH": {"name": "تقرير قطاع المياه والصرف الصحي", "sections": ["الأنشطة المنفذة", "المستفيدون", "المؤشرات", "التحديات", "التوصيات"]},
+    "FSL": {"name": "تقرير قطاع الأمن الغذائي", "sections": ["التوزيعات الغذائية", "برامج سبل العيش", "المستفيدون", "الأمن الغذائي", "التحديات"]},
+    "Protection": {"name": "تقرير قطاع الحماية", "sections": ["حالات الحماية", "الإحالات", "التوعية", "الأنشطة النفسية", "التحديات"]},
+    "Health": {"name": "تقرير القطاع الصحي", "sections": ["الخدمات الصحية", "التطعيمات", "التغذية", "صحة الأم والطفل", "الأوبئة"]},
+    "Education": {"name": "تقرير قطاع التعليم", "sections": ["الالتحاق", "المدارس المدعومة", "المعلمون", "المستلزمات", "التحديات"]},
+    "Shelter": {"name": "تقرير قطاع المأوى", "sections": ["المآوي المقدمة", "الترميمات", "المواد", "المستفيدون", "التحديات"]},
+}
+
+DONOR_TEMPLATES = {
+    "USAID": {"name": "تقرير USAID", "sections": ["ملخص تنفيذي", "تقدم المؤشرات", "النتائج الرئيسية", "الإنفاق المالي", "الدروس المستفادة", "الخطة القادمة"]},
+    "ECHO": {"name": "تقرير ECHO", "sections": ["نظرة عامة", "الأنشطة والنتائج", "المستفيدون", "الميزانية", "التنسيق", "الاستدامة"]},
+    "OCHA": {"name": "تقرير OCHA", "sections": ["الملخص", "الاحتياجات", "الاستجابة", "الفجوات", "التمويل", "التنسيق"]},
+    "UNICEF": {"name": "تقرير UNICEF", "sections": ["ملخص تنفيذي", "نتائج البرنامج", "الأطفال المستفيدون", "المالية", "المخاطر", "الخطوات القادمة"]},
+    "WFP": {"name": "تقرير WFP", "sections": ["التوزيعات", "المستفيدون", "سلسلة الإمداد", "المراقبة", "التمويل"]},
+}
+
+
+@router.get("/templates/cluster")
+def get_cluster_templates(current_user: User = Depends(get_current_user)):
+    return CLUSTER_TEMPLATES
+
+
+@router.get("/templates/donor")
+def get_donor_templates(current_user: User = Depends(get_current_user)):
+    return DONOR_TEMPLATES
+
+
+@router.get("/generate-cluster/{sector}")
+def generate_cluster_report(
+    sector: str,
+    project_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    template = CLUSTER_TEMPLATES.get(sector)
+    if not template:
+        raise HTTPException(status_code=404, detail="القالب غير موجود")
+
+    query = db.query(Project)
+    if project_id:
+        query = query.filter(Project.id == project_id)
+    if sector != "all":
+        query = query.filter(Project.sector == sector)
+    projects = query.all()
+
+    total_beneficiaries = 0
+    total_budget = 0
+    project_data = []
+    for p in projects:
+        bcount = db.query(Beneficiary).filter(Beneficiary.project_id == p.id).count()
+        total_beneficiaries += bcount
+        total_budget += p.budget or 0
+        project_data.append({"name": p.name, "beneficiaries": bcount, "budget": p.budget or 0, "governorate": p.governorate})
+
+    return {
+        "template": template,
+        "sector": sector,
+        "generated_at": datetime.utcnow().isoformat(),
+        "summary": {
+            "total_projects": len(projects),
+            "total_beneficiaries": total_beneficiaries,
+            "total_budget": total_budget,
+        },
+        "projects": project_data,
+    }

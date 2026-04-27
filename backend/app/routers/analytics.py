@@ -318,3 +318,91 @@ def check_duplicates(
         "total_duplicates": len(results),
         "duplicate_groups": results,
     }
+
+
+@router.get("/cross-project-comparison")
+def cross_project_comparison(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    projects = db.query(Project).all()
+    comparison = []
+    for p in projects:
+        indicators = db.query(Indicator).filter(Indicator.project_id == p.id).all()
+        beneficiaries = db.query(Beneficiary).filter(Beneficiary.project_id == p.id).count()
+        submissions = db.query(FormSubmission).join(DataCollectionForm).filter(
+            DataCollectionForm.project_id == p.id
+        ).count()
+        achieved = sum(1 for i in indicators if i.actual_value >= i.target_value)
+        total_ind = len(indicators)
+        comparison.append({
+            "id": p.id,
+            "name": p.name,
+            "status": p.status.value if p.status else "unknown",
+            "sector": p.sector,
+            "governorate": p.governorate,
+            "budget": p.budget or 0,
+            "spent": p.spent or 0,
+            "budget_utilization": round((p.spent / p.budget * 100) if p.budget else 0, 1),
+            "beneficiaries": beneficiaries,
+            "submissions": submissions,
+            "indicators_total": total_ind,
+            "indicators_achieved": achieved,
+            "indicator_rate": round(achieved / total_ind * 100 if total_ind else 0, 1),
+        })
+    return comparison
+
+
+@router.get("/gis-data")
+def gis_data(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    YEMEN_GOVERNORATES = {
+        "صنعاء": {"lat": 15.3694, "lng": 44.1910},
+        "عدن": {"lat": 12.7855, "lng": 45.0187},
+        "تعز": {"lat": 13.5789, "lng": 44.0219},
+        "الحديدة": {"lat": 14.7980, "lng": 42.9540},
+        "إب": {"lat": 13.9670, "lng": 44.1720},
+        "حضرموت": {"lat": 15.3320, "lng": 48.5164},
+        "مأرب": {"lat": 15.4630, "lng": 45.3266},
+        "أبين": {"lat": 13.6360, "lng": 45.6330},
+        "لحج": {"lat": 13.0550, "lng": 44.8820},
+        "الضالع": {"lat": 13.6940, "lng": 44.7310},
+        "شبوة": {"lat": 14.5310, "lng": 47.0130},
+        "المهرة": {"lat": 16.5160, "lng": 52.2700},
+        "ذمار": {"lat": 14.5426, "lng": 44.4014},
+        "عمران": {"lat": 15.6600, "lng": 43.9440},
+        "حجة": {"lat": 15.6930, "lng": 43.6030},
+        "صعدة": {"lat": 16.9400, "lng": 43.7600},
+        "الجوف": {"lat": 16.2000, "lng": 45.5000},
+        "البيضاء": {"lat": 14.1670, "lng": 45.5720},
+        "ريمة": {"lat": 14.4280, "lng": 43.6510},
+        "المحويت": {"lat": 15.4710, "lng": 43.5430},
+        "سقطرى": {"lat": 12.6340, "lng": 53.9058},
+    }
+    projects = db.query(Project).all()
+    locations = {}
+    for p in projects:
+        gov = p.governorate or "غير محدد"
+        if gov not in locations:
+            coords = YEMEN_GOVERNORATES.get(gov, {"lat": 15.0, "lng": 44.0})
+            locations[gov] = {
+                "governorate": gov,
+                "lat": coords["lat"],
+                "lng": coords["lng"],
+                "projects": 0,
+                "beneficiaries": 0,
+                "budget": 0,
+                "project_names": [],
+            }
+        locations[gov]["projects"] += 1
+        locations[gov]["budget"] += p.budget or 0
+        locations[gov]["project_names"].append(p.name)
+        bcount = db.query(Beneficiary).filter(Beneficiary.project_id == p.id).count()
+        locations[gov]["beneficiaries"] += bcount
+
+    return {
+        "locations": list(locations.values()),
+        "governorate_coords": YEMEN_GOVERNORATES,
+    }

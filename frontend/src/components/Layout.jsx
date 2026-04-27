@@ -5,26 +5,53 @@ import {
   LayoutDashboard, Users, FolderKanban, Wallet, UserCog,
   Package, BarChart3, Banknote, LogOut, Menu, X, ChevronLeft,
   ClipboardList, FileSpreadsheet, FolderArchive,
-  MessageSquare, Lightbulb, Target, Calculator, TrendingUp
+  MessageSquare, Lightbulb, Target, Calculator, TrendingUp,
+  ShieldAlert, ClipboardCheck, Shield, Calendar, FileSearch, Gauge
 } from 'lucide-react';
 
-const navItems = [
-  { path: '/', label: 'لوحة المعلومات', icon: LayoutDashboard },
-  { path: '/beneficiaries', label: 'المستفيدين', icon: Users },
-  { path: '/projects', label: 'المشاريع', icon: FolderKanban },
-  { path: '/finance', label: 'الإدارة المالية', icon: Wallet },
-  { path: '/hr', label: 'الموارد البشرية', icon: UserCog },
-  { path: '/inventory', label: 'المخازن والتوزيع', icon: Package },
-  { path: '/monitoring', label: 'المتابعة والتقييم', icon: BarChart3 },
-  { path: '/data-collection', label: 'جمع البيانات', icon: ClipboardList },
-  { path: '/reports', label: 'التقارير', icon: FileSpreadsheet },
-  { path: '/documents', label: 'أرشيف الوثائق', icon: FolderArchive },
-  { path: '/cash', label: 'التحويلات النقدية', icon: Banknote },
-  { path: '/accountability', label: 'المساءلة (CFM)', icon: MessageSquare },
-  { path: '/learning', label: 'التعلم', icon: Lightbulb },
-  { path: '/logframe', label: 'الإطار المنطقي', icon: Target },
-  { path: '/evaluation', label: 'أدوات التقييم', icon: Calculator },
-  { path: '/analytics', label: 'التحليلات', icon: TrendingUp },
+const navSections = [
+  {
+    title: 'الرئيسية',
+    items: [
+      { path: '/', label: 'لوحة المعلومات', icon: LayoutDashboard },
+      { path: '/executive', label: 'اللوحة التنفيذية', icon: Gauge },
+    ],
+  },
+  {
+    title: 'إدارة البرامج',
+    items: [
+      { path: '/beneficiaries', label: 'المستفيدين', icon: Users },
+      { path: '/projects', label: 'المشاريع', icon: FolderKanban },
+      { path: '/activities', label: 'تتبع الأنشطة', icon: Calendar },
+      { path: '/cash', label: 'التحويلات النقدية', icon: Banknote },
+    ],
+  },
+  {
+    title: 'MEAL',
+    items: [
+      { path: '/meal-plan', label: 'خطة MEAL', icon: ClipboardCheck },
+      { path: '/monitoring', label: 'المتابعة', icon: BarChart3 },
+      { path: '/logframe', label: 'الإطار المنطقي', icon: Target },
+      { path: '/data-collection', label: 'جمع البيانات', icon: ClipboardList },
+      { path: '/evaluation', label: 'أدوات التقييم', icon: Calculator },
+      { path: '/needs-assessment', label: 'تقييم الاحتياجات', icon: FileSearch },
+      { path: '/accountability', label: 'المساءلة (CFM)', icon: MessageSquare },
+      { path: '/safeguarding', label: 'الحماية و CHS', icon: Shield },
+      { path: '/learning', label: 'التعلم', icon: Lightbulb },
+      { path: '/analytics', label: 'التحليلات', icon: TrendingUp },
+      { path: '/reports', label: 'التقارير', icon: FileSpreadsheet },
+    ],
+  },
+  {
+    title: 'الإدارة',
+    items: [
+      { path: '/finance', label: 'الإدارة المالية', icon: Wallet },
+      { path: '/hr', label: 'الموارد البشرية', icon: UserCog },
+      { path: '/inventory', label: 'المخازن والتوزيع', icon: Package },
+      { path: '/risks', label: 'إدارة المخاطر', icon: ShieldAlert },
+      { path: '/documents', label: 'أرشيف الوثائق', icon: FolderArchive },
+    ],
+  },
 ];
 
 export default function Layout({ children }) {
@@ -54,25 +81,32 @@ export default function Layout({ children }) {
           </button>
         </div>
 
-        <nav className="flex-1 py-4 overflow-y-auto">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const active = location.pathname === item.path;
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition-all ${
-                  active
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : 'text-gray-300 hover:bg-white/10 hover:text-white'
-                }`}
-              >
-                <Icon size={20} />
-                {sidebarOpen && <span className="text-sm">{item.label}</span>}
-              </Link>
-            );
-          })}
+        <nav className="flex-1 py-2 overflow-y-auto">
+          {navSections.map((section) => (
+            <div key={section.title} className="mb-1">
+              {sidebarOpen && (
+                <p className="px-4 py-2 text-xs text-gray-500 uppercase font-bold tracking-wider">{section.title}</p>
+              )}
+              {section.items.map((item) => {
+                const Icon = item.icon;
+                const active = location.pathname === item.path;
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={`flex items-center gap-3 px-4 py-2.5 mx-2 rounded-lg transition-all ${
+                      active
+                        ? 'bg-blue-600 text-white shadow-lg'
+                        : 'text-gray-300 hover:bg-white/10 hover:text-white'
+                    }`}
+                  >
+                    <Icon size={18} />
+                    {sidebarOpen && <span className="text-sm">{item.label}</span>}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
         </nav>
 
         <div className="p-4 border-t border-white/10">
