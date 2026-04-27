@@ -66,7 +66,7 @@ def update_plan(
 @router.put("/{plan_id}/status")
 def update_status(
     plan_id: int,
-    status: str,
+    status: MEALPlanStatus,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):

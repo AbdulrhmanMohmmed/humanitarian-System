@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, distinct
 from typing import List, Optional
 import io
 import json
@@ -439,7 +439,9 @@ def generate_cluster_report(
     total_budget = 0
     project_data = []
     for p in projects:
-        bcount = db.query(Beneficiary).filter(Beneficiary.project_id == p.id).count()
+        bcount = db.query(func.count(distinct(DistributionItem.beneficiary_id))).join(
+            Distribution, DistributionItem.distribution_id == Distribution.id
+        ).filter(Distribution.project_id == p.id).scalar() or 0
         total_beneficiaries += bcount
         total_budget += p.budget or 0
         project_data.append({"name": p.name, "beneficiaries": bcount, "budget": p.budget or 0, "governorate": p.governorate})
