@@ -13,6 +13,11 @@ import Cash from './pages/Cash';
 import DataCollection from './pages/DataCollection';
 import Reports from './pages/Reports';
 import DocumentArchive from './pages/DocumentArchive';
+import Accountability from './pages/Accountability';
+import Learning from './pages/Learning';
+import LogFramePage from './pages/LogFramePage';
+import EvaluationTools from './pages/EvaluationTools';
+import AnalyticsDashboard from './pages/AnalyticsDashboard';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -37,6 +42,11 @@ function AppRoutes() {
       <Route path="/data-collection" element={<ProtectedRoute><DataCollection /></ProtectedRoute>} />
       <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
       <Route path="/documents" element={<ProtectedRoute><DocumentArchive /></ProtectedRoute>} />
+      <Route path="/accountability" element={<ProtectedRoute><Accountability /></ProtectedRoute>} />
+      <Route path="/learning" element={<ProtectedRoute><Learning /></ProtectedRoute>} />
+      <Route path="/logframe" element={<ProtectedRoute><LogFramePage /></ProtectedRoute>} />
+      <Route path="/evaluation" element={<ProtectedRoute><EvaluationTools /></ProtectedRoute>} />
+      <Route path="/analytics" element={<ProtectedRoute><AnalyticsDashboard /></ProtectedRoute>} />
     </Routes>
   );
 }

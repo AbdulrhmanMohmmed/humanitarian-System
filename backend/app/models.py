@@ -155,6 +155,65 @@ class Currency(str, enum.Enum):
     SAR = "SAR"
     EUR = "EUR"
 
+class ComplaintChannel(str, enum.Enum):
+    PHONE = "phone"
+    BOX = "box"
+    EMAIL = "email"
+    IN_PERSON = "in_person"
+    SMS = "sms"
+    WHATSAPP = "whatsapp"
+    WEBSITE = "website"
+    OTHER = "other"
+
+class ComplaintStatus(str, enum.Enum):
+    RECEIVED = "received"
+    UNDER_REVIEW = "under_review"
+    IN_PROGRESS = "in_progress"
+    RESOLVED = "resolved"
+    CLOSED = "closed"
+    ESCALATED = "escalated"
+
+class ComplaintPriority(str, enum.Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+class ComplaintCategory(str, enum.Enum):
+    SERVICE_QUALITY = "service_quality"
+    STAFF_BEHAVIOR = "staff_behavior"
+    TARGETING = "targeting"
+    DISTRIBUTION = "distribution"
+    PROTECTION = "protection"
+    SAFEGUARDING = "safeguarding"
+    FRAUD = "fraud"
+    SUGGESTION = "suggestion"
+    APPRECIATION = "appreciation"
+    OTHER = "other"
+
+class LessonCategory(str, enum.Enum):
+    PROGRAM = "program"
+    OPERATIONS = "operations"
+    COORDINATION = "coordination"
+    MONITORING = "monitoring"
+    FINANCE = "finance"
+    HR = "hr"
+    LOGISTICS = "logistics"
+    PROTECTION = "protection"
+    OTHER = "other"
+
+class LogFrameLevel(str, enum.Enum):
+    GOAL = "goal"
+    PURPOSE = "purpose"
+    OUTPUT = "output"
+    ACTIVITY = "activity"
+
+class DQAStatus(str, enum.Enum):
+    GOOD = "good"
+    ACCEPTABLE = "acceptable"
+    POOR = "poor"
+    CRITICAL = "critical"
+
 
 # ==================== MODELS ====================
 
@@ -645,3 +704,152 @@ class ReportTemplate(Base):
     created_by = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+# -- Accountability: Complaints & Feedback Mechanism --
+
+class Complaint(Base):
+    __tablename__ = "complaints"
+
+    id = Column(Integer, primary_key=True, index=True)
+    reference_number = Column(String(50), unique=True, index=True)
+    channel = Column(SAEnum(ComplaintChannel), default=ComplaintChannel.OTHER)
+    category = Column(SAEnum(ComplaintCategory), default=ComplaintCategory.OTHER)
+    priority = Column(SAEnum(ComplaintPriority), default=ComplaintPriority.MEDIUM)
+    status = Column(SAEnum(ComplaintStatus), default=ComplaintStatus.RECEIVED)
+    subject = Column(String(500), nullable=False)
+    description = Column(Text, nullable=False)
+    complainant_name = Column(String(255))
+    complainant_phone = Column(String(50))
+    complainant_location = Column(String(255))
+    is_anonymous = Column(Boolean, default=False)
+    is_sensitive = Column(Boolean, default=False)
+    project_id = Column(Integer, ForeignKey("projects.id"))
+    assigned_to = Column(Integer, ForeignKey("users.id"))
+    resolution = Column(Text)
+    resolution_date = Column(DateTime)
+    response_deadline = Column(DateTime)
+    created_by = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    responses = relationship("ComplaintResponse", back_populates="complaint")
+
+
+class ComplaintResponse(Base):
+    __tablename__ = "complaint_responses"
+
+    id = Column(Integer, primary_key=True, index=True)
+    complaint_id = Column(Integer, ForeignKey("complaints.id"), nullable=False)
+    response_text = Column(Text, nullable=False)
+    action_taken = Column(Text)
+    responded_by = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    complaint = relationship("Complaint", back_populates="responses")
+
+
+# -- Learning: Lessons Learned, AAR, Case Studies --
+
+class LessonLearned(Base):
+    __tablename__ = "lessons_learned"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(500), nullable=False)
+    description = Column(Text, nullable=False)
+    category = Column(SAEnum(LessonCategory), default=LessonCategory.OTHER)
+    lesson_type = Column(String(50))
+    project_id = Column(Integer, ForeignKey("projects.id"))
+    sector = Column(String(100))
+    governorate = Column(String(100))
+    recommendations = Column(Text)
+    impact = Column(Text)
+    tags = Column(Text)
+    created_by = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class ActionReview(Base):
+    __tablename__ = "action_reviews"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(500), nullable=False)
+    activity_name = Column(String(500), nullable=False)
+    project_id = Column(Integer, ForeignKey("projects.id"))
+    review_date = Column(Date)
+    what_was_planned = Column(Text)
+    what_happened = Column(Text)
+    what_went_well = Column(Text)
+    what_to_improve = Column(Text)
+    action_items = Column(Text)
+    participants = Column(Text)
+    created_by = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class CaseStudy(Base):
+    __tablename__ = "case_studies"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(500), nullable=False)
+    summary = Column(Text, nullable=False)
+    background = Column(Text)
+    intervention = Column(Text)
+    results = Column(Text)
+    impact_statement = Column(Text)
+    quotes = Column(Text)
+    project_id = Column(Integer, ForeignKey("projects.id"))
+    sector = Column(String(100))
+    governorate = Column(String(100))
+    beneficiary_name = Column(String(255))
+    consent_obtained = Column(Boolean, default=False)
+    photo_url = Column(String(1000))
+    tags = Column(Text)
+    is_published = Column(Boolean, default=False)
+    created_by = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+# -- LogFrame & Results Framework --
+
+class LogFrame(Base):
+    __tablename__ = "logframes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
+    level = Column(SAEnum(LogFrameLevel), nullable=False)
+    code = Column(String(50))
+    description = Column(Text, nullable=False)
+    indicators = Column(Text)
+    means_of_verification = Column(Text)
+    assumptions = Column(Text)
+    parent_id = Column(Integer, ForeignKey("logframes.id"))
+    order = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    children = relationship("LogFrame", backref="parent", remote_side="LogFrame.id")
+
+
+# -- Data Quality Assessment --
+
+class DataQualityAssessment(Base):
+    __tablename__ = "data_quality_assessments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    project_id = Column(Integer, ForeignKey("projects.id"))
+    form_id = Column(Integer, ForeignKey("data_collection_forms.id"))
+    assessment_date = Column(Date, default=date.today)
+    total_records = Column(Integer, default=0)
+    complete_records = Column(Integer, default=0)
+    accuracy_score = Column(Float, default=0)
+    timeliness_score = Column(Float, default=0)
+    consistency_score = Column(Float, default=0)
+    overall_score = Column(Float, default=0)
+    status = Column(SAEnum(DQAStatus), default=DQAStatus.GOOD)
+    findings = Column(Text)
+    recommendations = Column(Text)
+    assessed_by = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
