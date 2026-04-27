@@ -99,6 +99,56 @@ class IndicatorType(str, enum.Enum):
     OUTCOME = "outcome"
     IMPACT = "impact"
 
+class FormStatus(str, enum.Enum):
+    DRAFT = "draft"
+    PUBLISHED = "published"
+    CLOSED = "closed"
+    ARCHIVED = "archived"
+
+class FieldType(str, enum.Enum):
+    TEXT = "text"
+    NUMBER = "number"
+    SELECT = "select"
+    MULTI_SELECT = "multi_select"
+    DATE = "date"
+    DATETIME = "datetime"
+    TEXTAREA = "textarea"
+    RADIO = "radio"
+    CHECKBOX = "checkbox"
+    FILE = "file"
+    GPS = "gps"
+    PHOTO = "photo"
+    RATING = "rating"
+    MATRIX = "matrix"
+    SECTION = "section"
+
+class SubmissionStatus(str, enum.Enum):
+    DRAFT = "draft"
+    SUBMITTED = "submitted"
+    VALIDATED = "validated"
+    REJECTED = "rejected"
+
+class DocumentCategory(str, enum.Enum):
+    PROJECT_PROPOSAL = "project_proposal"
+    REPORT = "report"
+    ASSESSMENT = "assessment"
+    AGREEMENT = "agreement"
+    BUDGET = "budget"
+    MEETING_MINUTES = "meeting_minutes"
+    POLICY = "policy"
+    PHOTO = "photo"
+    MAP = "map"
+    OTHER = "other"
+
+class ReportType(str, enum.Enum):
+    PROJECT_PROGRESS = "project_progress"
+    BENEFICIARY_LIST = "beneficiary_list"
+    FINANCIAL_SUMMARY = "financial_summary"
+    INDICATOR_TRACKING = "indicator_tracking"
+    DISTRIBUTION_REPORT = "distribution_report"
+    SURVEY_ANALYSIS = "survey_analysis"
+    CUSTOM = "custom"
+
 class Currency(str, enum.Enum):
     YER = "YER"
     USD = "USD"
@@ -492,3 +542,106 @@ class SurveyResponse(Base):
     governorate = Column(String(100))
 
     question = relationship("SurveyQuestion", back_populates="responses")
+
+
+# -- Data Collection Forms (KoBoToolbox-like) --
+
+class DataCollectionForm(Base):
+    __tablename__ = "data_collection_forms"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False)
+    description = Column(Text)
+    project_id = Column(Integer, ForeignKey("projects.id"))
+    status = Column(SAEnum(FormStatus), default=FormStatus.DRAFT)
+    version = Column(Integer, default=1)
+    allow_edit_after_submit = Column(Boolean, default=False)
+    collect_gps = Column(Boolean, default=False)
+    require_authentication = Column(Boolean, default=True)
+    submission_limit = Column(Integer)
+    created_by = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    fields = relationship("FormField", back_populates="form", order_by="FormField.order")
+    submissions = relationship("FormSubmission", back_populates="form")
+
+
+class FormField(Base):
+    __tablename__ = "form_fields"
+
+    id = Column(Integer, primary_key=True, index=True)
+    form_id = Column(Integer, ForeignKey("data_collection_forms.id"), nullable=False)
+    field_name = Column(String(255), nullable=False)
+    label = Column(String(500), nullable=False)
+    field_type = Column(SAEnum(FieldType), default=FieldType.TEXT)
+    is_required = Column(Boolean, default=False)
+    options = Column(Text)
+    default_value = Column(Text)
+    validation_rules = Column(Text)
+    help_text = Column(Text)
+    order = Column(Integer, default=0)
+    section_name = Column(String(255))
+    skip_logic = Column(Text)
+    appearance = Column(String(100))
+
+    form = relationship("DataCollectionForm", back_populates="fields")
+
+
+class FormSubmission(Base):
+    __tablename__ = "form_submissions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    form_id = Column(Integer, ForeignKey("data_collection_forms.id"), nullable=False)
+    data = Column(Text, nullable=False)
+    status = Column(SAEnum(SubmissionStatus), default=SubmissionStatus.SUBMITTED)
+    submitted_by = Column(Integer, ForeignKey("users.id"))
+    beneficiary_id = Column(Integer, ForeignKey("beneficiaries.id"))
+    governorate = Column(String(100))
+    district = Column(String(100))
+    gps_latitude = Column(Float)
+    gps_longitude = Column(Float)
+    notes = Column(Text)
+    validated_by = Column(Integer, ForeignKey("users.id"))
+    validated_at = Column(DateTime)
+    submitted_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    form = relationship("DataCollectionForm", back_populates="submissions")
+
+
+# -- Document Archive --
+
+class Document(Base):
+    __tablename__ = "documents"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False)
+    description = Column(Text)
+    category = Column(SAEnum(DocumentCategory), default=DocumentCategory.OTHER)
+    file_name = Column(String(500), nullable=False)
+    file_path = Column(String(1000), nullable=False)
+    file_size = Column(Integer, default=0)
+    file_type = Column(String(100))
+    project_id = Column(Integer, ForeignKey("projects.id"))
+    tags = Column(Text)
+    version = Column(Integer, default=1)
+    is_archived = Column(Boolean, default=False)
+    uploaded_by = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+# -- Report Templates --
+
+class ReportTemplate(Base):
+    __tablename__ = "report_templates"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), nullable=False)
+    description = Column(Text)
+    report_type = Column(SAEnum(ReportType), default=ReportType.CUSTOM)
+    template_config = Column(Text)
+    created_by = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
