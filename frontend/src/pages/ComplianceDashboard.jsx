@@ -76,7 +76,7 @@ export default function ComplianceDashboard() {
                   <CheckCircle size={14} className="mt-1 text-gray-300" />
                   <div>
                     <span className="font-mono text-xs text-gray-400">{s.code}</span>
-                    <p>{s.name}</p>
+                    <p>{s.requirement || s.name}</p>
                   </div>
                 </div>
               ))}
