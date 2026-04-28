@@ -30,14 +30,10 @@ export default function AssessmentTools() {
 
       <div className="grid grid-cols-3 gap-4 mb-6">
         {templateList.map(t => (
-          <div key={t.type} onClick={() => viewTemplate(t.type)} className="bg-white rounded-xl border p-5 hover:border-indigo-300 hover:shadow-md cursor-pointer transition">
-            <div className="text-3xl mb-3">{TYPE_ICONS[t.type] || '📄'}</div>
-            <h3 className="font-bold text-sm mb-1">{TYPE_LABELS[t.type] || t.type}</h3>
+          <div key={t.key} onClick={() => viewTemplate(t.key)} className="bg-white rounded-xl border p-5 hover:border-indigo-300 hover:shadow-md cursor-pointer transition">
+            <div className="text-3xl mb-3">{TYPE_ICONS[t.key] || '📄'}</div>
+            <h3 className="font-bold text-sm mb-1">{TYPE_LABELS[t.key] || t.key}</h3>
             <p className="text-xs text-gray-500">{t.description}</p>
-            <div className="mt-3 flex items-center gap-3 text-xs text-gray-400">
-              <span>{t.total_sections} أقسام</span>
-              <span>{t.total_questions} سؤال</span>
-            </div>
           </div>
         ))}
       </div>
@@ -59,7 +55,7 @@ export default function AssessmentTools() {
                 <div className="space-y-3">
                   {(section.questions || []).map((q, qi) => (
                     <div key={qi} className="bg-gray-50 rounded-lg p-3">
-                      <p className="text-sm font-medium mb-1">{q.question || q.label || q.text}</p>
+                      <p className="text-sm font-medium mb-1">{q.q || q.question || q.label || q.text}</p>
                       <div className="flex items-center gap-3 text-xs text-gray-400">
                         <span>النوع: {q.type}</span>
                         {q.required && <span className="text-red-500">مطلوب</span>}

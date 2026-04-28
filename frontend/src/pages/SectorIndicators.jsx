@@ -13,7 +13,7 @@ export default function SectorIndicators() {
   const [form, setForm] = useState({ name: '', sector: 'protection', unit: '', description: '', calculation_method: '' });
 
   useEffect(() => {
-    api.get('/sector-indicators/templates').then(r => setTemplates(r.data));
+    api.get('/sector-indicators/templates').then(r => setTemplates(Object.entries(r.data).map(([k, v]) => ({ sector: k, ...v }))));
     api.get('/sector-indicators/').then(r => setIndicators(r.data));
   }, []);
 
