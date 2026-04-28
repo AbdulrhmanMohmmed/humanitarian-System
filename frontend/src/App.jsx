@@ -31,6 +31,13 @@ import ComplianceDashboard from './pages/ComplianceDashboard';
 import AuditTrail from './pages/AuditTrail';
 import SectorIndicators from './pages/SectorIndicators';
 import AssessmentTools from './pages/AssessmentTools';
+import AIInsights from './pages/AIInsights';
+import OfflineMode from './pages/OfflineMode';
+import KoBoIntegration from './pages/KoBoIntegration';
+import RemoteMonitoring from './pages/RemoteMonitoring';
+import FeedbackLoop from './pages/FeedbackLoop';
+import ScheduledReports from './pages/ScheduledReports';
+import Integrations from './pages/Integrations';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -73,6 +80,13 @@ function AppRoutes() {
       <Route path="/audit" element={<ProtectedRoute><AuditTrail /></ProtectedRoute>} />
       <Route path="/sector-indicators" element={<ProtectedRoute><SectorIndicators /></ProtectedRoute>} />
       <Route path="/assessment-tools" element={<ProtectedRoute><AssessmentTools /></ProtectedRoute>} />
+      <Route path="/ai-insights" element={<ProtectedRoute><AIInsights /></ProtectedRoute>} />
+      <Route path="/offline" element={<ProtectedRoute><OfflineMode /></ProtectedRoute>} />
+      <Route path="/kobo" element={<ProtectedRoute><KoBoIntegration /></ProtectedRoute>} />
+      <Route path="/remote-monitoring" element={<ProtectedRoute><RemoteMonitoring /></ProtectedRoute>} />
+      <Route path="/feedback-loop" element={<ProtectedRoute><FeedbackLoop /></ProtectedRoute>} />
+      <Route path="/scheduled-reports" element={<ProtectedRoute><ScheduledReports /></ProtectedRoute>} />
+      <Route path="/integrations" element={<ProtectedRoute><Integrations /></ProtectedRoute>} />
     </Routes>
   );
 }

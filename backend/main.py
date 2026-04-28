@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from app.database import engine, Base
-from app.routers import auth, beneficiaries, projects, finance, hr, inventory, monitoring, cash, dashboard, data_collection, reports, documents, accountability, learning, logframe, analytics, risks, meal_plan, safeguarding, activities, needs_assessment, notifications, executive, iptt, field_visits, recommendations, compliance, audit, sector_indicators, assessment_tools
+from app.routers import auth, beneficiaries, projects, finance, hr, inventory, monitoring, cash, dashboard, data_collection, reports, documents, accountability, learning, logframe, analytics, risks, meal_plan, safeguarding, activities, needs_assessment, notifications, executive, iptt, field_visits, recommendations, compliance, audit, sector_indicators, assessment_tools, offline_sync, kobo_integration, ai_assistant, yemen_locations, scheduled_reports, remote_monitoring, feedback_loop, integrations
 from app.seed import seed_database
 
 # Create tables
@@ -55,6 +55,14 @@ app.include_router(compliance.router)
 app.include_router(audit.router)
 app.include_router(sector_indicators.router)
 app.include_router(assessment_tools.router)
+app.include_router(offline_sync.router)
+app.include_router(kobo_integration.router)
+app.include_router(ai_assistant.router)
+app.include_router(yemen_locations.router)
+app.include_router(scheduled_reports.router)
+app.include_router(remote_monitoring.router)
+app.include_router(feedback_loop.router)
+app.include_router(integrations.router)
 
 # Serve frontend static files
 FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "dist")

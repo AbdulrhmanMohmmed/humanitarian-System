@@ -7,7 +7,8 @@ import {
   ClipboardList, FileSpreadsheet, FolderArchive,
   MessageSquare, Lightbulb, Target, Calculator, TrendingUp,
   ShieldAlert, ClipboardCheck, Shield, Calendar, FileSearch, Gauge,
-  MapPin, ListChecks, FileText, Layers
+  MapPin, ListChecks, FileText, Layers,
+  Brain, WifiOff, FileSpreadsheet as KoBoIcon, Radio, ArrowRightLeft, Clock, Plug
 } from 'lucide-react';
 
 const navSections = [
@@ -46,6 +47,18 @@ const navSections = [
       { path: '/assessment-tools', label: 'أدوات التقييم الجاهزة', icon: ClipboardList },
       { path: '/analytics', label: 'التحليلات', icon: TrendingUp },
       { path: '/reports', label: 'التقارير', icon: FileSpreadsheet },
+    ],
+  },
+  {
+    title: 'الذكاء والتكامل',
+    items: [
+      { path: '/ai-insights', label: 'الذكاء الاصطناعي', icon: Brain },
+      { path: '/offline', label: 'وضع Offline', icon: WifiOff },
+      { path: '/kobo', label: 'تكامل KoBo', icon: KoBoIcon },
+      { path: '/remote-monitoring', label: 'مراقبة عن بُعد', icon: Radio },
+      { path: '/feedback-loop', label: 'حلقة التغذية الراجعة', icon: ArrowRightLeft },
+      { path: '/scheduled-reports', label: 'تقارير مجدولة', icon: Clock },
+      { path: '/integrations', label: 'التكامل الخارجي', icon: Plug },
     ],
   },
   {
