@@ -62,7 +62,7 @@ def export_to_xlsform(
             "type": xls_type,
             "name": f"field_{field.id}",
             "label": field.label,
-            "required": "yes" if field.required else "",
+            "required": "yes" if field.is_required else "",
         }
 
         if field.validation_rules:

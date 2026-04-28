@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import Optional, List
 from datetime import datetime, timedelta
+import calendar
 from app.database import get_db
 from app.models import User, Project, Indicator, Complaint, ComplaintStatus, Recommendation, RecommendationStatus, Risk, IPTTEntry, FieldVisit
 from app.auth import get_current_user
@@ -20,7 +21,7 @@ def create_schedule(
 ):
     """Create a scheduled report"""
     schedule = {
-        "id": len(REPORT_SCHEDULES) + 1,
+        "id": (max(s["id"] for s in REPORT_SCHEDULES) + 1) if REPORT_SCHEDULES else 1,
         "project_id": data.get("project_id"),
         "report_type": data.get("report_type", "monthly_meal"),
         "frequency": data.get("frequency", "monthly"),
@@ -41,12 +42,14 @@ def create_schedule(
         schedule["next_run"] = (today + timedelta(days=days_ahead or 7)).strftime("%Y-%m-%d")
     elif schedule["frequency"] == "monthly":
         today = datetime.utcnow()
-        if today.day <= schedule["day_of_month"]:
-            schedule["next_run"] = today.replace(day=schedule["day_of_month"]).strftime("%Y-%m-%d")
+        dom = min(schedule["day_of_month"], calendar.monthrange(today.year, today.month)[1])
+        if today.day <= dom:
+            schedule["next_run"] = today.replace(day=dom).strftime("%Y-%m-%d")
         else:
             month = today.month + 1 if today.month < 12 else 1
             year = today.year if today.month < 12 else today.year + 1
-            schedule["next_run"] = datetime(year, month, schedule["day_of_month"]).strftime("%Y-%m-%d")
+            dom = min(schedule["day_of_month"], calendar.monthrange(year, month)[1])
+            schedule["next_run"] = datetime(year, month, dom).strftime("%Y-%m-%d")
 
     REPORT_SCHEDULES.append(schedule)
     return schedule
@@ -97,7 +100,7 @@ def generate_infographic_data(
     visits = db.query(FieldVisit).filter(FieldVisit.project_id == project_id).all()
 
     total_target = sum(i.target_value or 0 for i in indicators)
-    total_actual = sum(i.current_value or 0 for i in indicators)
+    total_actual = sum(i.actual_value or 0 for i in indicators)
 
     return {
         "project": {
@@ -116,9 +119,9 @@ def generate_infographic_data(
         },
         "performance": {
             "overall_achievement": round(total_actual / total_target * 100, 1) if total_target else 0,
-            "on_track": sum(1 for i in indicators if i.target_value and i.current_value and i.current_value / i.target_value >= 0.8),
-            "at_risk": sum(1 for i in indicators if i.target_value and i.current_value and 0.5 <= i.current_value / i.target_value < 0.8),
-            "off_track": sum(1 for i in indicators if i.target_value and i.current_value and i.current_value / i.target_value < 0.5),
+            "on_track": sum(1 for i in indicators if i.target_value and i.actual_value and i.actual_value / i.target_value >= 0.8),
+            "at_risk": sum(1 for i in indicators if i.target_value and i.actual_value and 0.5 <= i.actual_value / i.target_value < 0.8),
+            "off_track": sum(1 for i in indicators if i.target_value and i.actual_value and i.actual_value / i.target_value < 0.5),
         },
         "accountability": {
             "total_complaints": len(complaints),
