@@ -16,7 +16,7 @@ export default function ComplianceDashboard() {
   const [form, setForm] = useState({ project_id: '', area: 'chs', standard_code: '', score: 0, status: 'not_assessed', evidence: '', gaps: '' });
 
   useEffect(() => {
-    api.get('/compliance/standards').then(r => setStandards(r.data));
+    api.get('/compliance/standards').then(r => setStandards(Object.entries(r.data).map(([k, v]) => ({ area: k, standards: v.requirements || [], name: v.name }))));
     api.get('/projects/').then(r => setProjects(r.data));
     api.get('/compliance/').then(r => setAssessments(r.data));
   }, []);

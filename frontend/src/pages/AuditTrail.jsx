@@ -14,7 +14,7 @@ export default function AuditTrail() {
     const params = {};
     if (filters.action) params.action = filters.action;
     if (filters.entity_type) params.entity_type = filters.entity_type;
-    api.get('/audit/', { params }).then(r => setLogs(r.data));
+    api.get('/audit/', { params }).then(r => setLogs(r.data.logs || []));
     api.get('/audit/summary').then(r => setSummary(r.data));
   };
   useEffect(load, []);
