@@ -32,9 +32,9 @@ def export_power_bi_dataset(
             "indicators": {
                 "columns": ["indicator_id", "name", "type", "target", "actual", "achievement_pct"],
                 "rows": [
-                    [i.id, i.name, i.indicator_type.value if i.indicator_type else None,
-                     i.target_value, i.current_value,
-                     round(i.current_value / i.target_value * 100, 1) if i.target_value and i.current_value else 0]
+                    [i.id, i.name, i.type.value if i.type else None,
+                     i.target_value, i.actual_value,
+                     round(i.actual_value / i.target_value * 100, 1) if i.target_value and i.actual_value else 0]
                     for i in indicators
                 ],
             },
@@ -66,7 +66,7 @@ def export_activity_info(
                 "indicators": [
                     {
                         "name": ind.name,
-                        "category": ind.indicator_type.value if ind.indicator_type else "output",
+                        "category": ind.type.value if ind.type else "output",
                         "units": ind.unit or "عدد",
                         "aggregation": "SUM",
                     }
@@ -148,9 +148,9 @@ def export_csv_data(
             "entity": entity,
             "columns": ["id", "name", "type", "unit", "target", "actual", "achievement_pct", "project_id"],
             "rows": [
-                [i.id, i.name, i.indicator_type.value if i.indicator_type else None, i.unit,
-                 i.target_value, i.current_value,
-                 round(i.current_value / i.target_value * 100, 1) if i.target_value and i.current_value else 0,
+                [i.id, i.name, i.type.value if i.type else None, i.unit,
+                 i.target_value, i.actual_value,
+                 round(i.actual_value / i.target_value * 100, 1) if i.target_value and i.actual_value else 0,
                  i.project_id]
                 for i in items
             ],
@@ -167,7 +167,7 @@ def export_csv_data(
             "rows": [
                 [c.id, c.reference_number, c.category.value if c.category else None,
                  c.channel.value if c.channel else None, c.status.value if c.status else None,
-                 c.priority.value if c.priority else None, c.governorate,
+                 c.priority.value if c.priority else None, c.complainant_location,
                  c.created_at.isoformat() if c.created_at else None]
                 for c in items
             ],

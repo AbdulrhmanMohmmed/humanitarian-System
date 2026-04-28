@@ -83,16 +83,16 @@ def generate_auto_report(
             Measurement.indicator_id == ind.id
         ).order_by(Measurement.date).all()
         values = [m.value for m in measurements]
-        achievement = (ind.current_value / ind.target_value * 100) if ind.target_value else 0
+        achievement = (ind.actual_value / ind.target_value * 100) if ind.target_value else 0
         trend = _analyze_indicator_trend(values)
         status = "on_track" if achievement >= 80 else "at_risk" if achievement >= 50 else "off_track"
         indicator_analysis.append({
-            "name": ind.name, "target": ind.target_value, "actual": ind.current_value,
+            "name": ind.name, "target": ind.target_value, "actual": ind.actual_value,
             "achievement_pct": round(achievement, 1), "trend": trend, "status": status,
             "corrective_actions": _generate_corrective_actions("low_achievement", {}) if status == "off_track" else [],
         })
 
-    complaints = db.query(Complaint).filter(Complaint.created_at >= month_ago).all()
+    complaints = db.query(Complaint).filter(Complaint.project_id == project_id, Complaint.created_at >= month_ago).all()
     complaint_analysis = {
         "total": len(complaints),
         "resolved": sum(1 for c in complaints if c.status == ComplaintStatus.RESOLVED),
@@ -284,8 +284,8 @@ def detect_risks(
             })
 
     indicators = db.query(Indicator).filter(Indicator.project_id == project_id).all()
-    low_performing = [i for i in indicators if i.target_value and i.current_value and
-                      (i.current_value / i.target_value * 100) < 50]
+    low_performing = [i for i in indicators if i.target_value and i.actual_value and
+                      (i.actual_value / i.target_value * 100) < 50]
     if len(low_performing) > len(indicators) * 0.5 and indicators:
         detected_risks.append({
             "type": "performance", "severity": "high",
@@ -398,8 +398,8 @@ def suggest_corrective_actions(
 
     indicators = db.query(Indicator).filter(Indicator.project_id == project_id).all()
     for ind in indicators:
-        if ind.target_value and ind.current_value:
-            pct = ind.current_value / ind.target_value * 100
+        if ind.target_value and ind.actual_value:
+            pct = ind.actual_value / ind.target_value * 100
             if pct < 30:
                 suggestions.append({
                     "area": "indicators", "priority": "high",
