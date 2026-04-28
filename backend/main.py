@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from app.database import engine, Base
-from app.routers import auth, beneficiaries, projects, finance, hr, inventory, monitoring, cash, dashboard, data_collection, reports, documents, accountability, learning, logframe, analytics, risks, meal_plan, safeguarding, activities, needs_assessment, notifications, executive
+from app.routers import auth, beneficiaries, projects, finance, hr, inventory, monitoring, cash, dashboard, data_collection, reports, documents, accountability, learning, logframe, analytics, risks, meal_plan, safeguarding, activities, needs_assessment, notifications, executive, iptt, field_visits, recommendations, compliance, audit, sector_indicators, assessment_tools
 from app.seed import seed_database
 
 # Create tables
@@ -48,6 +48,13 @@ app.include_router(activities.router)
 app.include_router(needs_assessment.router)
 app.include_router(notifications.router)
 app.include_router(executive.router)
+app.include_router(iptt.router)
+app.include_router(field_visits.router)
+app.include_router(recommendations.router)
+app.include_router(compliance.router)
+app.include_router(audit.router)
+app.include_router(sector_indicators.router)
+app.include_router(assessment_tools.router)
 
 # Serve frontend static files
 FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "dist")

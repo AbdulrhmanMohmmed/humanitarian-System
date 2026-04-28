@@ -9,7 +9,8 @@ from app.models import (
     DocumentCategory, ReportType, ComplaintChannel, ComplaintStatus,
     ComplaintPriority, ComplaintCategory, LessonCategory, LogFrameLevel,
     DQAStatus, RiskLikelihood, RiskImpact, RiskStatus, MEALPlanStatus,
-    NotificationType, CHSCommitment
+    NotificationType, CHSCommitment, FieldVisitStatus, RecommendationStatus,
+    ComplianceArea, ComplianceStatus, SatisfactionLevel, SensitivityLevel
 )
 
 

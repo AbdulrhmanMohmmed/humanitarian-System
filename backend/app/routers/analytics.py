@@ -8,7 +8,7 @@ from datetime import date, datetime
 from app.database import get_db
 from app.models import (
     Project, Beneficiary, Indicator, Measurement,
-    DataCollectionForm, FormSubmission, Distribution,
+    DataCollectionForm, FormSubmission, Distribution, DistributionItem,
     DataQualityAssessment, User, DQAStatus, FormStatus
 )
 from app.schemas import DQACreate, DQAOut
@@ -329,7 +329,9 @@ def cross_project_comparison(
     comparison = []
     for p in projects:
         indicators = db.query(Indicator).filter(Indicator.project_id == p.id).all()
-        beneficiaries = db.query(Beneficiary).filter(Beneficiary.project_id == p.id).count()
+        beneficiaries = db.query(func.count(func.distinct(DistributionItem.beneficiary_id))).join(
+            Distribution, DistributionItem.distribution_id == Distribution.id
+        ).filter(Distribution.project_id == p.id).scalar() or 0
         submissions = db.query(FormSubmission).join(DataCollectionForm).filter(
             DataCollectionForm.project_id == p.id
         ).count()
@@ -399,7 +401,9 @@ def gis_data(
         locations[gov]["projects"] += 1
         locations[gov]["budget"] += p.budget or 0
         locations[gov]["project_names"].append(p.name)
-        bcount = db.query(Beneficiary).filter(Beneficiary.project_id == p.id).count()
+        bcount = db.query(func.count(func.distinct(DistributionItem.beneficiary_id))).join(
+            Distribution, DistributionItem.distribution_id == Distribution.id
+        ).filter(Distribution.project_id == p.id).scalar() or 0
         locations[gov]["beneficiaries"] += bcount
 
     return {
