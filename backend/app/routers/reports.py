@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, distinct
 from typing import List, Optional
 import io
 import json
@@ -17,7 +17,9 @@ from app.database import get_db
 from app.models import (
     ReportTemplate, User, Project, Beneficiary, Transaction, Indicator,
     Measurement, Distribution, DistributionItem, CashTransfer,
-    DataCollectionForm, FormSubmission, ReportType,
+    DataCollectionForm, FormSubmission, ReportType, IPTTEntry,
+    Complaint, ComplaintStatus, FieldVisit, ComplianceAssessment,
+    Recommendation, RecommendationStatus, LessonLearned,
 )
 from app.schemas import (
     ReportTemplateCreate, ReportTemplateOut, ReportGenerateRequest,
@@ -439,7 +441,9 @@ def generate_cluster_report(
     total_budget = 0
     project_data = []
     for p in projects:
-        bcount = db.query(Beneficiary).filter(Beneficiary.project_id == p.id).count()
+        bcount = db.query(func.count(distinct(DistributionItem.beneficiary_id))).join(
+            Distribution, DistributionItem.distribution_id == Distribution.id
+        ).filter(Distribution.project_id == p.id).scalar() or 0
         total_beneficiaries += bcount
         total_budget += p.budget or 0
         project_data.append({"name": p.name, "beneficiaries": bcount, "budget": p.budget or 0, "governorate": p.governorate})
@@ -454,4 +458,172 @@ def generate_cluster_report(
             "total_budget": total_budget,
         },
         "projects": project_data,
+    }
+
+
+@router.get("/generate-monthly-meal/{project_id}")
+def generate_monthly_meal_report(
+    project_id: int,
+    year: Optional[int] = None,
+    month: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    project = db.query(Project).filter(Project.id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="المشروع غير موجود")
+
+    indicators = db.query(Indicator).filter(Indicator.project_id == project_id).all()
+    iptt_q = db.query(IPTTEntry).filter(IPTTEntry.project_id == project_id)
+    if year:
+        iptt_q = iptt_q.filter(IPTTEntry.year == year)
+    if month:
+        iptt_q = iptt_q.filter(IPTTEntry.month == month)
+    iptt_entries = iptt_q.all()
+
+    complaints = db.query(Complaint).filter(Complaint.project_id == project_id).all()
+    visits = db.query(FieldVisit).filter(FieldVisit.project_id == project_id).all()
+    lessons = db.query(LessonLearned).filter(LessonLearned.project_id == project_id).all()
+    recommendations = db.query(Recommendation).filter(Recommendation.project_id == project_id).all()
+
+    green = sum(1 for e in iptt_entries if e.status_color == "green")
+    yellow = sum(1 for e in iptt_entries if e.status_color == "yellow")
+    red = sum(1 for e in iptt_entries if e.status_color == "red")
+
+    return {
+        "report_type": "monthly_meal",
+        "project": {"id": project.id, "name": project.name, "sector": project.sector},
+        "generated_at": datetime.utcnow().isoformat(),
+        "monitoring": {
+            "total_indicators": len(indicators),
+            "iptt_entries": len(iptt_entries),
+            "performance": {"green": green, "yellow": yellow, "red": red},
+        },
+        "evaluation": {
+            "field_visits": len(visits),
+        },
+        "accountability": {
+            "total_complaints": len(complaints),
+            "resolved": sum(1 for c in complaints if c.status in [ComplaintStatus.RESOLVED, ComplaintStatus.CLOSED]),
+            "pending": sum(1 for c in complaints if c.status in [ComplaintStatus.RECEIVED, ComplaintStatus.IN_PROGRESS]),
+        },
+        "learning": {
+            "lessons_learned": len(lessons),
+            "total_recommendations": len(recommendations),
+            "completed_recommendations": sum(1 for r in recommendations if r.status == RecommendationStatus.COMPLETED),
+        },
+    }
+
+
+@router.get("/generate-iptt/{project_id}")
+def generate_iptt_report(
+    project_id: int,
+    year: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    project = db.query(Project).filter(Project.id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="المشروع غير موجود")
+
+    indicators = db.query(Indicator).filter(Indicator.project_id == project_id).all()
+    result = []
+    for ind in indicators:
+        q = db.query(IPTTEntry).filter(IPTTEntry.indicator_id == ind.id)
+        if year:
+            q = q.filter(IPTTEntry.year == year)
+        entries = q.order_by(IPTTEntry.year, IPTTEntry.month).all()
+        latest = entries[-1] if entries else None
+        result.append({
+            "code": ind.code, "name": ind.name, "type": ind.type.value if ind.type else None,
+            "unit": ind.unit, "baseline": ind.baseline, "annual_target": ind.target_value,
+            "cumulative_actual": latest.cumulative_actual if latest else 0,
+            "achievement_rate": latest.achievement_rate if latest else 0,
+            "status_color": latest.status_color if latest else "green",
+            "monthly": [{"month": e.month, "target": e.target_value, "actual": e.actual_value} for e in entries],
+        })
+
+    return {
+        "report_type": "iptt",
+        "project": {"id": project.id, "name": project.name},
+        "generated_at": datetime.utcnow().isoformat(),
+        "indicators": result,
+    }
+
+
+@router.get("/generate-cfm")
+def generate_cfm_report(
+    project_id: Optional[int] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    query = db.query(Complaint)
+    if project_id:
+        query = query.filter(Complaint.project_id == project_id)
+    complaints = query.all()
+
+    by_status = {}
+    by_channel = {}
+    by_category = {}
+    for c in complaints:
+        s = c.status.value if c.status else "unknown"
+        by_status[s] = by_status.get(s, 0) + 1
+        ch = c.channel.value if c.channel else "unknown"
+        by_channel[ch] = by_channel.get(ch, 0) + 1
+        cat = c.category.value if c.category else "unknown"
+        by_category[cat] = by_category.get(cat, 0) + 1
+
+    resolved = [c for c in complaints if c.resolution_date and c.created_at]
+    avg_days = round(
+        sum((c.resolution_date - c.created_at).days for c in resolved) / len(resolved), 1
+    ) if resolved else 0
+
+    return {
+        "report_type": "cfm",
+        "generated_at": datetime.utcnow().isoformat(),
+        "total_complaints": len(complaints),
+        "by_status": by_status,
+        "by_channel": by_channel,
+        "by_category": by_category,
+        "avg_resolution_days": avg_days,
+        "sensitive_cases": sum(1 for c in complaints if c.is_sensitive),
+    }
+
+
+@router.get("/generate-compliance/{project_id}")
+def generate_compliance_report(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    assessments = db.query(ComplianceAssessment).filter(
+        ComplianceAssessment.project_id == project_id
+    ).all()
+
+    by_area = {}
+    for a in assessments:
+        area = a.area.value if a.area else "unknown"
+        if area not in by_area:
+            by_area[area] = {"total": 0, "compliant": 0, "partial": 0, "non_compliant": 0, "scores": []}
+        by_area[area]["total"] += 1
+        by_area[area]["scores"].append(a.score)
+        st = a.status.value if a.status else ""
+        if st == "compliant":
+            by_area[area]["compliant"] += 1
+        elif st == "partially_compliant":
+            by_area[area]["partial"] += 1
+        elif st == "non_compliant":
+            by_area[area]["non_compliant"] += 1
+
+    for area in by_area:
+        scores = by_area[area]["scores"]
+        by_area[area]["avg_score"] = round(sum(scores) / len(scores), 1) if scores else 0
+        del by_area[area]["scores"]
+
+    return {
+        "report_type": "compliance",
+        "project_id": project_id,
+        "generated_at": datetime.utcnow().isoformat(),
+        "total_assessments": len(assessments),
+        "by_area": by_area,
     }

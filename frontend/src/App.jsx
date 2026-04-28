@@ -24,6 +24,13 @@ import Safeguarding from './pages/Safeguarding';
 import ActivityTracker from './pages/ActivityTracker';
 import NeedsAssessment from './pages/NeedsAssessment';
 import ExecutiveDashboard from './pages/ExecutiveDashboard';
+import IPTTDashboard from './pages/IPTTDashboard';
+import FieldVisits from './pages/FieldVisits';
+import Recommendations from './pages/Recommendations';
+import ComplianceDashboard from './pages/ComplianceDashboard';
+import AuditTrail from './pages/AuditTrail';
+import SectorIndicators from './pages/SectorIndicators';
+import AssessmentTools from './pages/AssessmentTools';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -59,6 +66,13 @@ function AppRoutes() {
       <Route path="/activities" element={<ProtectedRoute><ActivityTracker /></ProtectedRoute>} />
       <Route path="/needs-assessment" element={<ProtectedRoute><NeedsAssessment /></ProtectedRoute>} />
       <Route path="/executive" element={<ProtectedRoute><ExecutiveDashboard /></ProtectedRoute>} />
+      <Route path="/iptt" element={<ProtectedRoute><IPTTDashboard /></ProtectedRoute>} />
+      <Route path="/field-visits" element={<ProtectedRoute><FieldVisits /></ProtectedRoute>} />
+      <Route path="/recommendations" element={<ProtectedRoute><Recommendations /></ProtectedRoute>} />
+      <Route path="/compliance" element={<ProtectedRoute><ComplianceDashboard /></ProtectedRoute>} />
+      <Route path="/audit" element={<ProtectedRoute><AuditTrail /></ProtectedRoute>} />
+      <Route path="/sector-indicators" element={<ProtectedRoute><SectorIndicators /></ProtectedRoute>} />
+      <Route path="/assessment-tools" element={<ProtectedRoute><AssessmentTools /></ProtectedRoute>} />
     </Routes>
   );
 }

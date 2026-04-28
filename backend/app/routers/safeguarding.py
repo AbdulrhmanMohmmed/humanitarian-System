@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from typing import List, Optional
 from datetime import datetime
 import random
@@ -49,15 +50,20 @@ def create_report(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    report = SafeguardingReport(
-        reference_number=_gen_sg_ref(),
-        **data.model_dump(),
-        reported_by=current_user.id,
-    )
-    db.add(report)
-    db.commit()
-    db.refresh(report)
-    return report
+    for attempt in range(5):
+        report = SafeguardingReport(
+            reference_number=_gen_sg_ref(),
+            **data.model_dump(),
+            reported_by=current_user.id,
+        )
+        db.add(report)
+        try:
+            db.commit()
+            db.refresh(report)
+            return report
+        except IntegrityError:
+            db.rollback()
+    raise HTTPException(status_code=400, detail="فشل في إنشاء البلاغ بسبب خطأ في البيانات")
 
 
 @router.put("/reports/{report_id}/status")

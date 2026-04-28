@@ -6,7 +6,8 @@ import {
   Package, BarChart3, Banknote, LogOut, Menu, X, ChevronLeft,
   ClipboardList, FileSpreadsheet, FolderArchive,
   MessageSquare, Lightbulb, Target, Calculator, TrendingUp,
-  ShieldAlert, ClipboardCheck, Shield, Calendar, FileSearch, Gauge
+  ShieldAlert, ClipboardCheck, Shield, Calendar, FileSearch, Gauge,
+  MapPin, ListChecks, FileText, Layers
 } from 'lucide-react';
 
 const navSections = [
@@ -38,6 +39,11 @@ const navSections = [
       { path: '/accountability', label: 'المساءلة (CFM)', icon: MessageSquare },
       { path: '/safeguarding', label: 'الحماية و CHS', icon: Shield },
       { path: '/learning', label: 'التعلم', icon: Lightbulb },
+      { path: '/iptt', label: 'IPTT', icon: BarChart3 },
+      { path: '/field-visits', label: 'الزيارات الميدانية', icon: MapPin },
+      { path: '/recommendations', label: 'التوصيات', icon: ListChecks },
+      { path: '/sector-indicators', label: 'المؤشرات القطاعية', icon: Layers },
+      { path: '/assessment-tools', label: 'أدوات التقييم الجاهزة', icon: ClipboardList },
       { path: '/analytics', label: 'التحليلات', icon: TrendingUp },
       { path: '/reports', label: 'التقارير', icon: FileSpreadsheet },
     ],
@@ -50,6 +56,8 @@ const navSections = [
       { path: '/inventory', label: 'المخازن والتوزيع', icon: Package },
       { path: '/risks', label: 'إدارة المخاطر', icon: ShieldAlert },
       { path: '/documents', label: 'أرشيف الوثائق', icon: FolderArchive },
+      { path: '/compliance', label: 'الامتثال والجودة', icon: Shield },
+      { path: '/audit', label: 'سجل التدقيق', icon: FileText },
     ],
   },
 ];
