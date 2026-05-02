@@ -1,6 +1,9 @@
 # نظام إدارة العمل الإنساني - اليمن
 ## Humanitarian Aid Management System - Yemen
 
+> Strategic direction: Humanitarian Intelligence & Accountability Operating System.
+> See [HIAOS implementation roadmap](docs/HIAOS_IMPLEMENTATION_ROADMAP.md).
+
 نظام ويب شامل ومتكامل لإدارة منظمات العمل الإنساني في اليمن. يغطي جميع الجوانب التشغيلية من إدارة المستفيدين إلى التقارير المالية.
 
 ---
