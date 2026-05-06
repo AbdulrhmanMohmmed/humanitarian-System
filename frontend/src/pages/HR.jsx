@@ -17,9 +17,18 @@ export default function HR() {
   const [leaveForm, setLeaveForm] = useState({ employee_id: '', leave_type: 'annual', start_date: '', end_date: '', reason: '' });
 
   const load = () => {
-    api.get('/hr/employees').then(r => setEmployees(r.data));
-    api.get('/hr/leaves').then(r => setLeaves(r.data));
-    api.get('/hr/employees/stats').then(r => setStats(r.data));
+    api.get('/hr/employees').then(r => setEmployees(r.data)).catch(() => {
+      const local = localStorage.getItem('hiaos_data_employees');
+      if (local) setEmployees(JSON.parse(local));
+    });
+    api.get('/hr/leaves').then(r => setLeaves(r.data)).catch(() => {
+      const local = localStorage.getItem('hiaos_data_leaves');
+      if (local) setLeaves(JSON.parse(local));
+    });
+    api.get('/hr/employees/stats').then(r => setStats(r.data)).catch(() => {
+      const local = localStorage.getItem('hiaos_data_hr_stats');
+      if (local) setStats(JSON.parse(local));
+    });
   };
   useEffect(() => { load(); }, []);
 

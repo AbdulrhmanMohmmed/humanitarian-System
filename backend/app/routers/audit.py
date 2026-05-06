@@ -4,7 +4,7 @@ from typing import List, Optional
 from datetime import datetime, date
 from app.database import get_db
 from app.models import AuditLog, AuditAction, User
-from app.auth import get_current_user
+from app.permissions import Permission, require_permission
 
 router = APIRouter(prefix="/api/audit", tags=["سجل التدقيق"])
 
@@ -31,7 +31,7 @@ def list_audit_logs(
     skip: int = 0,
     limit: int = 50,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(Permission.AUDIT_READ)),
 ):
     query = db.query(AuditLog)
     if entity_type:
@@ -69,7 +69,7 @@ def entity_history(
     entity_type: str,
     entity_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(Permission.AUDIT_READ)),
 ):
     logs = db.query(AuditLog).filter(
         AuditLog.entity_type == entity_type,
@@ -89,7 +89,7 @@ def entity_history(
 @router.get("/summary")
 def audit_summary(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_permission(Permission.AUDIT_READ)),
 ):
     total = db.query(AuditLog).count()
     by_action = {}

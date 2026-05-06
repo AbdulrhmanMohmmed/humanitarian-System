@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 import Modal from '../components/Modal';
-import { Plus, Lightbulb, BookOpen, FileText, Trash2 } from 'lucide-react';
+import { Plus, Lightbulb, BookOpen, FileText, Trash2, CheckCircle, Clock } from 'lucide-react';
 
 const LESSON_CATEGORIES = [
   { value: 'program', label: 'البرامج' }, { value: 'operations', label: 'العمليات' },
@@ -72,20 +72,23 @@ export default function Learning() {
   ];
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
+    <div className="animate-fade-in space-y-6">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">التعلم وإدارة المعرفة</h1>
-          <p className="text-sm text-gray-500 mt-1">توثيق الدروس المستفادة والممارسات الفضلى</p>
+          <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight flex items-center gap-3">
+            <Lightbulb className="text-amber-500" size={32} />
+            محرك التعلم الموجه بالأفعال (Action-oriented Learning)
+          </h1>
+          <p className="text-sm text-slate-500 mt-2 font-medium">تحويل الدروس المستفادة إلى إجراءات قابلة للتنفيذ وتتبعها حتى الإنجاز.</p>
         </div>
         <div className="flex gap-2">
-          {tab === 'lessons' && <button onClick={() => setShowLessonModal(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"><Plus size={18} /> درس جديد</button>}
-          {tab === 'reviews' && <button onClick={() => setShowReviewModal(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"><Plus size={18} /> مراجعة جديدة</button>}
-          {tab === 'cases' && <button onClick={() => setShowCaseModal(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"><Plus size={18} /> دراسة حالة</button>}
+          {tab === 'lessons' && <button onClick={() => setShowLessonModal(true)} className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition shadow-lg shadow-amber-200 font-bold text-sm"><Plus size={18} /> درس جديد</button>}
+          {tab === 'reviews' && <button onClick={() => setShowReviewModal(true)} className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-200 font-bold text-sm"><Plus size={18} /> مراجعة جديدة</button>}
+          {tab === 'cases' && <button onClick={() => setShowCaseModal(true)} className="flex items-center gap-2 px-5 py-2.5 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition shadow-lg shadow-purple-200 font-bold text-sm"><Plus size={18} /> دراسة حالة</button>}
         </div>
       </div>
 
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-6 glass-card p-2 rounded-2xl w-fit">
         {tabs.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition ${tab === t.key ? 'bg-blue-600 text-white' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}`}>
             <t.icon size={18} /> {t.label} <span className={`px-2 py-0.5 rounded-full text-xs ${tab === t.key ? 'bg-blue-500' : 'bg-gray-100'}`}>{t.count}</span>
@@ -95,22 +98,37 @@ export default function Learning() {
 
       {/* Lessons Learned Tab */}
       {tab === 'lessons' && (
-        <div className="grid grid-cols-2 gap-4">
-          {lessons.length === 0 && <p className="col-span-2 text-center text-gray-400 py-10 bg-white rounded-xl">لا توجد دروس مستفادة بعد</p>}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {lessons.length === 0 && <p className="col-span-full text-center text-slate-400 py-10 bg-slate-50 rounded-2xl border border-slate-100">لا توجد دروس مستفادة بعد</p>}
           {lessons.map(lesson => (
-            <div key={lesson.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-              <div className="flex items-start justify-between mb-2">
+            <div key={lesson.id} className="glass-card rounded-2xl p-5 border-t-4 border-t-amber-500 relative group">
+              <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${typeColors[lesson.lesson_type] || 'bg-gray-100 text-gray-600'}`}>{typeLabels[lesson.lesson_type] || lesson.lesson_type}</span>
-                  <span className="text-xs text-gray-400">{LESSON_CATEGORIES.find(c => c.value === lesson.category)?.label}</span>
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${typeColors[lesson.lesson_type] || 'bg-slate-100 text-slate-600'}`}>{typeLabels[lesson.lesson_type] || lesson.lesson_type}</span>
+                  <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-lg">{LESSON_CATEGORIES.find(c => c.value === lesson.category)?.label}</span>
                 </div>
-                <button onClick={async () => { await api.delete(`/learning/lessons/${lesson.id}`); load(); }} className="p-1 text-gray-400 hover:text-red-600 transition"><Trash2 size={14} /></button>
+                <button onClick={async () => { await api.delete(`/learning/lessons/${lesson.id}`); load(); }} className="p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 rounded-lg transition"><Trash2 size={16} /></button>
               </div>
-              <h4 className="font-bold text-gray-800 mb-1">{lesson.title}</h4>
-              <p className="text-sm text-gray-600 mb-2 line-clamp-2">{lesson.description}</p>
-              {lesson.recommendations && <p className="text-xs text-blue-600 bg-blue-50 rounded p-2 mb-2">التوصيات: {lesson.recommendations}</p>}
-              {lesson.tags && <div className="flex flex-wrap gap-1">{lesson.tags.split(',').map((t, i) => <span key={i} className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs">{t.trim()}</span>)}</div>}
-              <p className="text-xs text-gray-400 mt-2">{new Date(lesson.created_at).toLocaleDateString('ar')}</p>
+              <h4 className="font-black text-lg text-slate-800 mb-2">{lesson.title}</h4>
+              <p className="text-sm text-slate-600 mb-4 line-clamp-3">{lesson.description}</p>
+              
+              {/* Action Item section */}
+              <div className="bg-amber-50/50 border border-amber-100 rounded-xl p-4 mb-3 space-y-3">
+                <div>
+                   <p className="text-[10px] font-black text-amber-800 uppercase tracking-widest mb-1">الإجراء المطلوب (Action):</p>
+                   <p className="text-sm text-amber-900 font-bold">{lesson.recommendations || 'لم يتم تحديد إجراء بعد'}</p>
+                </div>
+                <div className="flex items-center justify-between border-t border-amber-200/30 pt-3">
+                   <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full bg-amber-200 flex items-center justify-center text-[10px] font-black">AM</div>
+                      <span className="text-[10px] font-bold text-amber-700">عبدالرحمن محمد</span>
+                   </div>
+                   <span className="px-2 py-1 bg-amber-500 text-white text-[9px] font-black rounded uppercase tracking-tighter shadow-sm">قيد المتابعة</span>
+                </div>
+              </div>
+              
+              {lesson.tags && <div className="flex flex-wrap gap-1.5 mb-2">{lesson.tags.split(',').map((t, i) => <span key={i} className="px-2 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold">{t.trim()}</span>)}</div>}
+              <p className="text-xs font-bold text-slate-400 mt-2 flex items-center gap-1"><Clock size={12}/> {new Date(lesson.created_at).toLocaleDateString('ar')}</p>
             </div>
           ))}
         </div>

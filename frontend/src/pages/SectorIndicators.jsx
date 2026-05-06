@@ -29,7 +29,9 @@ export default function SectorIndicators() {
     api.get('/sector-indicators/').then(r => setIndicators(r.data));
   };
 
-  const filtered = selectedSector ? indicators.filter(i => i.sector === selectedSector) : indicators;
+  const filtered = Array.isArray(indicators) 
+    ? (selectedSector ? indicators.filter(i => i.sector === selectedSector) : indicators)
+    : [];
 
   return (
     <div>

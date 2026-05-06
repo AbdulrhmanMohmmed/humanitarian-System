@@ -4,12 +4,12 @@ export default function Modal({ isOpen, onClose, title, children }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-5 border-b">
-          <h3 className="text-lg font-bold text-gray-800">{title}</h3>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg transition">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={onClose} />
+      <div className="relative glass-card w-full max-w-lg mx-auto max-h-[90vh] overflow-y-auto animate-fade-in custom-scrollbar">
+        <div className="flex items-center justify-between p-5 border-b border-[var(--border-color)]">
+          <h3 className="text-lg font-bold text-[var(--text-primary)]">{title}</h3>
+          <button onClick={onClose} className="p-1.5 text-[var(--text-secondary)] hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all">
             <X size={20} />
           </button>
         </div>

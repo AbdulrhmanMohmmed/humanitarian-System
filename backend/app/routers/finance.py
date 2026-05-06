@@ -4,7 +4,7 @@ from sqlalchemy import func
 from typing import List, Optional
 from app.database import get_db
 from app.models import Grant, Transaction, User
-from app.schemas import GrantCreate, GrantOut, TransactionCreate, TransactionOut
+from app.schemas import GrantCreate, GrantOut, GrantUpdate, TransactionCreate, TransactionOut, TransactionUpdate
 from app.auth import get_current_user
 
 router = APIRouter(prefix="/api/finance", tags=["الإدارة المالية"])
@@ -55,6 +55,28 @@ def get_grant(grant_id: int, db: Session = Depends(get_db), current_user: User =
     g = db.query(Grant).filter(Grant.id == grant_id).first()
     if not g:
         raise HTTPException(status_code=404, detail="المنحة غير موجودة")
+    return g
+
+
+@router.put("/grants/{grant_id}", response_model=GrantOut)
+def update_grant(
+    grant_id: int,
+    data: GrantUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    g = db.query(Grant).filter(Grant.id == grant_id).first()
+    if not g:
+        raise HTTPException(status_code=404, detail="المنحة غير موجودة")
+    update_data = data.model_dump(exclude_unset=True)
+    if "code" in update_data:
+        existing = db.query(Grant).filter(Grant.code == update_data["code"], Grant.id != grant_id).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="رمز المنحة موجود بالفعل")
+    for key, value in update_data.items():
+        setattr(g, key, value)
+    db.commit()
+    db.refresh(g)
     return g
 
 
@@ -111,3 +133,53 @@ def create_transaction(data: TransactionCreate, db: Session = Depends(get_db), c
             db.commit()
 
     return t
+
+
+def recalculate_grant_spent(db: Session, grant_id: int):
+    grant = db.query(Grant).filter(Grant.id == grant_id).first()
+    if grant:
+        grant.spent = db.query(func.sum(Transaction.amount)).filter(
+            Transaction.grant_id == grant_id,
+            Transaction.type == "expense",
+        ).scalar() or 0
+
+
+@router.put("/transactions/{transaction_id}", response_model=TransactionOut)
+def update_transaction(
+    transaction_id: int,
+    data: TransactionUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    t = db.query(Transaction).filter(Transaction.id == transaction_id).first()
+    if not t:
+        raise HTTPException(status_code=404, detail="المعاملة غير موجودة")
+    old_grant_id = t.grant_id
+    for key, value in data.model_dump(exclude_unset=True).items():
+        setattr(t, key, value)
+    db.commit()
+    if old_grant_id:
+        recalculate_grant_spent(db, old_grant_id)
+    if t.grant_id and t.grant_id != old_grant_id:
+        recalculate_grant_spent(db, t.grant_id)
+    db.commit()
+    db.refresh(t)
+    return t
+
+
+@router.delete("/transactions/{transaction_id}")
+def delete_transaction(
+    transaction_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    t = db.query(Transaction).filter(Transaction.id == transaction_id).first()
+    if not t:
+        raise HTTPException(status_code=404, detail="المعاملة غير موجودة")
+    grant_id = t.grant_id
+    db.delete(t)
+    db.commit()
+    if grant_id:
+        recalculate_grant_spent(db, grant_id)
+        db.commit()
+    return {"message": "تم حذف المعاملة بنجاح"}

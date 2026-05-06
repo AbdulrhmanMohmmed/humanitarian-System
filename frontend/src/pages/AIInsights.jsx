@@ -47,16 +47,37 @@ export default function AIInsights() {
   const statusColor = (s) => s === 'good' || s === 'on_track' ? 'text-green-400' : s === 'needs_attention' || s === 'at_risk' ? 'text-yellow-400' : 'text-red-400';
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2"><Brain size={28} /> الذكاء الاصطناعي - تحليلات MEAL</h1>
-        <select className="bg-gray-700 text-white rounded-lg px-4 py-2" value={selectedProject} onChange={e => loadData(e.target.value)}>
-          <option value="">اختر المشروع</option>
-          {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-        </select>
+    <div className="animate-fade-in space-y-6">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight flex items-center gap-3">
+            <FileText className="text-indigo-600" size={32} />
+            مصنع التقارير الذكية (Smart Reports)
+          </h1>
+          <p className="text-sm text-slate-500 mt-2 font-medium">توليد تقارير MEAL الدورية تلقائياً باستخدام تحليل الذكاء الاصطناعي الشامل.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold text-slate-600">المشروع:</span>
+          <select 
+            className="glass-card rounded-xl px-4 py-2 text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500" 
+            value={selectedProject} 
+            onChange={e => loadData(e.target.value)}
+          >
+            <option value="">اختر المشروع...</option>
+            {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+        </div>
       </div>
 
-      {!selectedProject && <div className="bg-gray-800 rounded-xl p-12 text-center text-gray-400"><Brain size={64} className="mx-auto mb-4 opacity-30" /><p>اختر مشروعاً لتوليد التحليلات الذكية</p></div>}
+      {!selectedProject && (
+        <div className="glass-card rounded-2xl p-16 text-center border border-slate-200/60">
+          <div className="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <FileText size={48} className="text-indigo-300" />
+          </div>
+          <h3 className="text-xl font-bold text-slate-700 mb-2">اختر مشروعاً للبدء</h3>
+          <p className="text-slate-500 max-w-md mx-auto">سوف يقوم المحرك بجمع كافة البيانات (مؤشرات، شكاوى، دروس مستفادة، تقييم) وتلخيصها في تقرير شهري جاهز.</p>
+        </div>
+      )}
 
       {selectedProject && (
         <>
@@ -69,38 +90,53 @@ export default function AIInsights() {
             ))}
           </div>
 
-          {loading && <div className="text-center py-12 text-gray-400">جاري التحليل بالذكاء الاصطناعي...</div>}
+          {loading && (
+            <div className="glass-card rounded-2xl p-16 text-center">
+              <div className="animate-spin w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+              <p className="text-slate-600 font-medium">جاري تحليل ملايين البيانات وتوليد التقرير...</p>
+            </div>
+          )}
 
           {!loading && activeTab === 'report' && report && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-gray-800 rounded-xl p-4 text-center">
-                  <p className="text-3xl font-bold text-white">{report.overall_score}%</p>
-                  <p className={`text-sm ${statusColor(report.overall_status)}`}>الأداء العام</p>
+            <div className="space-y-6">
+              <div className="flex justify-end gap-3 mb-4">
+                <button className="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-bold shadow-lg hover:bg-slate-700 transition">تصدير PDF</button>
+                <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition">تصدير Word</button>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+                <div className="glass-card rounded-2xl p-5 text-center border-b-4 border-b-blue-500">
+                  <p className="text-3xl font-black text-slate-800 mb-1">{report.overall_score}%</p>
+                  <p className={`text-sm font-bold ${statusColor(report.overall_status)}`}>مؤشر الأداء العام</p>
                 </div>
-                <div className="bg-gray-800 rounded-xl p-4 text-center">
-                  <p className="text-3xl font-bold text-green-400">{report.executive_summary?.indicators_on_track || 0}</p>
-                  <p className="text-sm text-gray-400">مؤشرات على المسار</p>
+                <div className="glass-card rounded-2xl p-5 text-center border-b-4 border-b-emerald-500">
+                  <p className="text-3xl font-black text-emerald-600 mb-1">{report.executive_summary?.indicators_on_track || 0}</p>
+                  <p className="text-sm font-bold text-slate-500">مؤشرات على المسار</p>
                 </div>
-                <div className="bg-gray-800 rounded-xl p-4 text-center">
-                  <p className="text-3xl font-bold text-yellow-400">{report.executive_summary?.complaints_received || 0}</p>
-                  <p className="text-sm text-gray-400">شكاوى مستلمة</p>
+                <div className="glass-card rounded-2xl p-5 text-center border-b-4 border-b-amber-500">
+                  <p className="text-3xl font-black text-amber-600 mb-1">{report.executive_summary?.complaints_received || 0}</p>
+                  <p className="text-sm font-bold text-slate-500">شكاوى مستلمة</p>
                 </div>
-                <div className="bg-gray-800 rounded-xl p-4 text-center">
-                  <p className="text-3xl font-bold text-red-400">{report.executive_summary?.recommendations_overdue || 0}</p>
-                  <p className="text-sm text-gray-400">توصيات متأخرة</p>
+                <div className="glass-card rounded-2xl p-5 text-center border-b-4 border-b-rose-500">
+                  <p className="text-3xl font-black text-rose-600 mb-1">{report.executive_summary?.recommendations_overdue || 0}</p>
+                  <p className="text-sm font-bold text-slate-500">توصيات متأخرة</p>
                 </div>
               </div>
+              
               {report.indicator_analysis?.length > 0 && (
-                <div className="bg-gray-800 rounded-xl p-4">
-                  <h3 className="text-lg font-semibold text-white mb-3">تحليل المؤشرات</h3>
-                  <div className="space-y-2">
+                <div className="glass-card rounded-2xl p-6">
+                  <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2"><BarChart3 className="text-indigo-500" size={20}/> تحليل المؤشرات المتقدم</h3>
+                  <div className="space-y-3">
                     {report.indicator_analysis.map((ind, i) => (
-                      <div key={i} className="flex items-center justify-between bg-gray-700 rounded-lg p-3">
-                        <span className="text-white">{ind.name}</span>
-                        <div className="flex items-center gap-4">
-                          <span className="text-gray-400">{ind.achievement_pct}%</span>
-                          <span className={`px-2 py-1 rounded text-xs ${ind.status === 'on_track' ? 'bg-green-900 text-green-300' : ind.status === 'at_risk' ? 'bg-yellow-900 text-yellow-300' : 'bg-red-900 text-red-300'}`}>{ind.trend}</span>
+                      <div key={i} className="flex items-center justify-between bg-slate-50 border border-slate-100 rounded-xl p-4 transition-all hover:shadow-md">
+                        <span className="font-bold text-slate-700">{ind.name}</span>
+                        <div className="flex items-center gap-6">
+                          <div className="text-right">
+                            <span className="text-xs text-slate-400 block">الإنجاز</span>
+                            <span className="text-lg font-black text-slate-800">{ind.achievement_pct}%</span>
+                          </div>
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold ${ind.status === 'on_track' ? 'bg-emerald-100 text-emerald-700' : ind.status === 'at_risk' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'}`}>
+                            {ind.status === 'on_track' ? 'على المسار' : ind.status === 'at_risk' ? 'في خطر' : 'متأخر'}
+                          </span>
                         </div>
                       </div>
                     ))}

@@ -9,6 +9,7 @@ from app.models import (
     Indicator, Measurement, Survey, SurveyQuestion
 )
 from app.auth import get_password_hash
+from app.schema_maintenance import ensure_runtime_columns
 
 GOVERNORATES = ["صنعاء", "عدن", "تعز", "الحديدة", "إب", "حضرموت", "مأرب", "ذمار", "حجة", "البيضاء"]
 DISTRICTS = ["المركز", "الشمالي", "الجنوبي", "الشرقي", "الغربي"]
@@ -19,6 +20,7 @@ DONORS = ["USAID", "ECHO", "UNICEF", "WFP", "DFID", "SIDA", "BMZ", "SDC"]
 
 def seed_database():
     Base.metadata.create_all(bind=engine)
+    ensure_runtime_columns()
     db = SessionLocal()
 
     if db.query(User).count() > 0:

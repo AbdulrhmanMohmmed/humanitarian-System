@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { LogIn } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
+import { Languages, ShieldCheck, User, Lock, ArrowRight } from 'lucide-react';
+import { cn } from '../lib/utils';
 
 export default function Login() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('admin');
+  const [password, setPassword] = useState('admin123');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const { t, toggleLanguage, language } = useLanguage();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -16,60 +19,126 @@ export default function Login() {
     setLoading(true);
     setError('');
     try {
-      await login(username, password);
+      await login(username.trim(), password);
       navigate('/');
     } catch {
-      setError('اسم المستخدم أو كلمة المرور غير صحيحة');
+      setError(t('loginError'));
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460]">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <LogIn size={32} className="text-white" />
+    <div className="min-h-screen w-full flex items-center justify-center p-6 relative overflow-hidden bg-[#0b0f1a]" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+      {/* Background Decor */}
+      <div className="absolute top-0 left-0 w-full h-full z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-600/20 blur-[120px] rounded-full" />
+      </div>
+
+      <div className="w-full max-w-5xl grid lg:grid-cols-2 gap-12 items-center relative z-10">
+        {/* Left Side: Branding */}
+        <div className="hidden lg:block space-y-8 text-white">
+          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
+            <ShieldCheck className="text-blue-400" size={24} />
+            <span className="text-sm font-black tracking-widest uppercase">{t('systemReady')}</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-800">نظام إدارة العمل الإنساني</h1>
-          <p className="text-gray-500 mt-2">اليمن</p>
+          
+          <h1 className="text-6xl font-black leading-tight tracking-tighter">
+            {t('appFullName').split(' ').map((word, i) => (
+              <span key={i} className={i === 2 ? "text-blue-500" : ""}>{word} </span>
+            ))}
+          </h1>
+          
+          <p className="text-xl text-slate-400 font-medium leading-relaxed max-w-lg">
+            {t('dashboardSubtitle')}
+          </p>
+
+          <div className="grid grid-cols-2 gap-4 pt-8">
+            {[
+              { label: t('beneficiaries'), val: '150k+' },
+              { label: t('projects'), val: '1.2k' },
+            ].map((item, idx) => (
+              <div key={idx} className="p-6 rounded-[2rem] bg-white/5 border border-white/10 backdrop-blur-sm">
+                <p className="text-sm font-bold text-slate-500 uppercase mb-1">{item.label}</p>
+                <p className="text-3xl font-black">{item.val}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {error && (
-          <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg mb-4">{error}</div>
-        )}
+        {/* Right Side: Login Form */}
+        <div className="w-full max-w-md mx-auto">
+          <div className="glass-panel border-white/10 p-10 rounded-[2.5rem] bg-white/5 backdrop-blur-2xl shadow-2xl">
+            <div className="flex justify-between items-center mb-10">
+              <div>
+                <h2 className="text-3xl font-black text-white mb-2">{t('login')}</h2>
+                <p className="text-sm font-medium text-slate-400">{t('appName')} Yemen</p>
+              </div>
+              <button 
+                onClick={toggleLanguage}
+                className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/10 transition-all"
+              >
+                <Languages size={20} />
+              </button>
+            </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">اسم المستخدم</label>
-            <input
-              type="text" value={username} onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-              placeholder="admin"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">كلمة المرور</label>
-            <input
-              type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-              placeholder="••••••••"
-              required
-            />
-          </div>
-          <button
-            type="submit" disabled={loading}
-            className="w-full py-3 bg-gradient-to-l from-blue-500 to-blue-600 text-white rounded-xl font-medium hover:from-blue-600 hover:to-blue-700 transition disabled:opacity-50"
-          >
-            {loading ? 'جاري الدخول...' : 'تسجيل الدخول'}
-          </button>
-        </form>
+            {error && (
+              <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm font-bold">
+                {error}
+              </div>
+            )}
 
-        <div className="mt-6 p-4 bg-gray-50 rounded-xl text-sm text-gray-500">
-          <p className="font-medium mb-1">بيانات الدخول التجريبية:</p>
-          <p>المستخدم: <span className="font-mono text-gray-700">admin</span></p>
-          <p>كلمة المرور: <span className="font-mono text-gray-700">admin123</span></p>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest px-1">{t('username')}</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-blue-500 transition-colors">
+                    <User size={18} />
+                  </div>
+                  <input 
+                    type="text" value={username} onChange={(e) => setUsername(e.target.value)}
+                    className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 text-white outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all font-bold"
+                    placeholder="admin"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest px-1">{t('password')}</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-blue-500 transition-colors">
+                    <Lock size={18} />
+                  </div>
+                  <input 
+                    type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+                    className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 text-white outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all font-bold"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+
+              <button 
+                type="submit" disabled={loading}
+                className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black text-lg shadow-xl shadow-blue-600/20 transition-all flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+              >
+                {loading ? t('loginLoading') : (
+                  <>
+                    {t('login')}
+                    <ArrowRight size={20} />
+                  </>
+                )}
+              </button>
+            </form>
+
+            <div className="mt-10 p-6 rounded-2xl bg-white/5 border border-white/5">
+              <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-3">{t('demoCredentials')}</p>
+              <div className="flex justify-between text-xs font-bold text-slate-400">
+                <span>{t('demoUser')}: <span className="text-white">admin</span></span>
+                <span>{t('demoPassword')}: <span className="text-white">admin123</span></span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

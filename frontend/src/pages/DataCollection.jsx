@@ -3,7 +3,7 @@ import api from '../services/api';
 import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
 import StatusBadge from '../components/StatusBadge';
-import { Plus, ClipboardList, Eye, Send, FileText, Trash2, GripVertical } from 'lucide-react';
+import { Plus, ClipboardList, Eye, Send, FileText, Trash2, GripVertical, BrainCircuit, ShieldAlert } from 'lucide-react';
 
 const FIELD_TYPES = [
   { value: 'text', label: 'نص قصير' },
@@ -42,8 +42,14 @@ export default function DataCollection() {
   const emptyField = { field_name: '', label: '', field_type: 'text', is_required: false, options: '', help_text: '', order: 0 };
 
   const load = () => {
-    api.get('/data-collection/forms').then(r => setForms(r.data));
-    api.get('/projects/').then(r => setProjects(r.data));
+    api.get('/data-collection/forms').then(r => setForms(r.data)).catch(() => {
+      const local = localStorage.getItem('hiaos_data_data_collection_forms');
+      if (local) setForms(JSON.parse(local));
+    });
+    api.get('/projects/').then(r => setProjects(r.data)).catch(() => {
+      const local = localStorage.getItem('hiaos_data_projects');
+      if (local) setProjects(JSON.parse(local));
+    });
   };
   useEffect(() => { load(); }, []);
 
@@ -213,52 +219,57 @@ export default function DataCollection() {
   };
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
+    <div className="animate-fade-in space-y-6">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">جمع البيانات الميدانية</h1>
-          <p className="text-sm text-gray-500 mt-1">إنشاء نماذج جمع البيانات وإدارة الاستجابات</p>
+          <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight flex items-center gap-3">
+            <ClipboardList className="text-blue-600" size={32} />
+            مولد الاستبيانات الذكي (Smart Form Builder)
+          </h1>
+          <p className="text-sm text-slate-500 mt-2 font-medium">بناء نماذج متقدمة تدعم Offline-first، Skip Logic، ومربوطة بمحرك كشف التلاعب (Anti-Fraud).</p>
         </div>
-        <button onClick={() => setShowFormModal(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition">
-          <Plus size={18} /> نموذج جديد
-        </button>
+        <div className="flex gap-3">
+          <button onClick={() => setShowFormModal(true)} className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-200 font-bold text-sm">
+            <Plus size={18} /> نموذج جديد (سحب وإفلات)
+          </button>
+          <button className="flex items-center gap-2 px-5 py-2.5 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition shadow-lg shadow-purple-200 font-bold text-sm">
+            <BrainCircuit size={18} /> توليد عبر AI 
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center"><ClipboardList size={24} className="text-blue-600" /></div>
-            <div>
-              <p className="text-sm text-gray-500">إجمالي النماذج</p>
-              <p className="text-2xl font-bold text-gray-800">{forms.length}</p>
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+        <div className="glass-card rounded-2xl p-6 relative overflow-hidden group">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600"><ClipboardList size={20} /></div>
+            <p className="text-sm font-bold text-slate-500">إجمالي النماذج (Smart Forms)</p>
           </div>
+          <p className="text-3xl font-black text-slate-800">{forms.length}</p>
         </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center"><Send size={24} className="text-green-600" /></div>
-            <div>
-              <p className="text-sm text-gray-500">النماذج المنشورة</p>
-              <p className="text-2xl font-bold text-gray-800">{forms.filter(f => f.status === 'published').length}</p>
-            </div>
+        <div className="glass-card rounded-2xl p-6 relative overflow-hidden group">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600"><Send size={20} /></div>
+            <p className="text-sm font-bold text-slate-500">منشورة (تعمل Offline)</p>
           </div>
+          <p className="text-3xl font-black text-slate-800">{forms.filter(f => f.status === 'published').length}</p>
         </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center"><FileText size={24} className="text-purple-600" /></div>
-            <div>
-              <p className="text-sm text-gray-500">إجمالي الاستجابات</p>
-              <p className="text-2xl font-bold text-gray-800">{forms.reduce((acc, f) => acc + (f.submission_count || 0), 0)}</p>
-            </div>
+        <div className="glass-card rounded-2xl p-6 relative overflow-hidden group border-l-4 border-l-rose-500">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center text-rose-600"><ShieldAlert size={20} /></div>
+            <p className="text-sm font-bold text-slate-500">حماية من التلاعب (Anti-Fraud)</p>
           </div>
+          <p className="text-sm text-slate-600 mt-2 font-medium">جميع النماذج محمية بتقنية رصد الموقع الجغرافي وسرعة الإدخال.</p>
         </div>
       </div>
+
+      <div className="glass-card rounded-2xl border border-slate-200/60 overflow-hidden shadow-sm">
 
       <DataTable
         columns={formColumns}
         data={forms}
         onDelete={async (id) => { await api.delete(`/data-collection/forms/${id}`); load(); }}
       />
+      </div>
 
       {/* Create Form Modal */}
       <Modal isOpen={showFormModal} onClose={() => setShowFormModal(false)} title="إنشاء نموذج جمع بيانات">

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
-import { Shield, Plus, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
+import { Shield, Plus, CheckCircle, AlertTriangle, XCircle, FileCheck } from 'lucide-react';
 
 const AREA_LABELS = { chs: 'CHS', aap: 'AAP', psea: 'PSEA', do_no_harm: 'عدم الإضرار', data_protection: 'حماية البيانات', safeguarding: 'الحماية', donor_compliance: 'امتثال المانحين' };
 const STATUS_COLORS = { compliant: 'bg-green-100 text-green-700', partially_compliant: 'bg-yellow-100 text-yellow-700', non_compliant: 'bg-red-100 text-red-700', not_assessed: 'bg-gray-100 text-gray-500' };
@@ -33,34 +33,47 @@ export default function ComplianceDashboard() {
   };
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
+    <div className="animate-fade-in space-y-6">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2"><Shield /> وحدة الامتثال والجودة</h1>
-          <p className="text-sm text-gray-500 mt-1">CHS, AAP, PSEA, عدم الإضرار، حماية البيانات، امتثال المانحين</p>
+          <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight flex items-center gap-3">
+            <Shield className="text-emerald-600" size={32} />
+            متتبع الامتثال التلقائي (CHS Auto-Tracker)
+          </h1>
+          <p className="text-sm text-slate-500 mt-2 font-medium">نظام آلي لتتبع معايير الجودة (CHS, AAP, PSEA) وتجهيز أدلة التدقيق (Audit Readiness).</p>
         </div>
-        <button onClick={() => setShowModal(true)} className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition">
-          <Plus size={18} /> تقييم جديد
-        </button>
+        <div className="flex gap-3">
+          <button className="flex items-center gap-2 px-5 py-2.5 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition shadow-lg font-bold text-sm">
+            <FileCheck size={18} /> توليد تقرير الجاهزية للتدقيق
+          </button>
+          <button onClick={() => setShowModal(true)} className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition shadow-lg shadow-emerald-200 font-bold text-sm">
+            <Plus size={18} /> تقييم جديد
+          </button>
+        </div>
       </div>
 
-      <div className="mb-4">
-        <select value={selectedProject} onChange={e => setSelectedProject(e.target.value)} className="border rounded-lg px-4 py-2 w-64">
-          <option value="">اختر المشروع للوحة المعلومات</option>
+      <div className="glass-card rounded-2xl p-5 mb-6 border border-slate-200/60 flex items-center gap-3">
+        <span className="text-sm font-bold text-slate-700">تصفية حسب المشروع:</span>
+        <select value={selectedProject} onChange={e => setSelectedProject(e.target.value)} className="border-none bg-slate-100 rounded-lg px-4 py-2 w-64 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-emerald-500">
+          <option value="">جميع المشاريع</option>
           {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
       </div>
 
       {dashboard && (
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
           {Object.entries(dashboard.areas || {}).map(([area, data]) => (
-            <div key={area} className="bg-white rounded-xl border p-4">
-              <h3 className="font-bold text-sm mb-2">{AREA_LABELS[area] || area}</h3>
-              <div className="flex items-center gap-2">
-                <div className="text-2xl font-bold">{data.avg_score?.toFixed(0) || 0}%</div>
-                <span className={`px-2 py-1 rounded-full text-xs ${STATUS_COLORS[data.overall_status] || ''}`}>{STATUS_LABELS[data.overall_status] || data.overall_status}</span>
+            <div key={area} className={`glass-card rounded-2xl p-6 relative overflow-hidden group border-t-4 ${data.overall_status === 'compliant' ? 'border-t-emerald-500' : data.overall_status === 'non_compliant' ? 'border-t-rose-500' : 'border-t-amber-500'}`}>
+              <h3 className="font-bold text-slate-700 mb-2">{AREA_LABELS[area] || area}</h3>
+              <div className="flex items-center gap-3">
+                <div className={`text-3xl font-black ${data.overall_status === 'compliant' ? 'text-emerald-600' : data.overall_status === 'non_compliant' ? 'text-rose-600' : 'text-amber-600'}`}>
+                  {data.avg_score?.toFixed(0) || 0}%
+                </div>
+                <span className={`px-3 py-1 rounded-full text-xs font-bold ${STATUS_COLORS[data.overall_status] || ''}`}>{STATUS_LABELS[data.overall_status] || data.overall_status}</span>
               </div>
-              <p className="text-xs text-gray-400 mt-1">{data.assessed}/{data.total} معايير تم تقييمها</p>
+              <p className="text-xs text-slate-500 mt-2 font-medium bg-slate-50 p-2 rounded-lg border border-slate-100">
+                التغطية: {data.assessed} من {data.total} معيار مقيم
+              </p>
             </div>
           ))}
         </div>

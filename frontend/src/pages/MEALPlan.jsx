@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
-import { ClipboardCheck, Plus, X, Eye } from 'lucide-react';
+import { ClipboardCheck, Plus, X, Eye, Pencil, Trash2, CheckCircle2 } from 'lucide-react';
 
 const STATUS_LABELS = { draft: 'مسودة', active: 'نشطة', completed: 'مكتملة' };
 const STATUS_COLORS = { draft: 'bg-gray-100 text-gray-600', active: 'bg-green-100 text-green-700', completed: 'bg-blue-100 text-blue-700' };
@@ -10,6 +10,7 @@ export default function MEALPlan() {
   const [projects, setProjects] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [viewPlan, setViewPlan] = useState(null);
+  const [editingPlan, setEditingPlan] = useState(null);
   const [form, setForm] = useState({
     project_id: '', title: '', monitoring_approach: '', evaluation_plan: '',
     accountability_mechanisms: '', learning_strategy: '', data_collection_methods: '',
@@ -24,9 +25,44 @@ export default function MEALPlan() {
 
   const submit = async () => {
     const payload = { ...form, project_id: parseInt(form.project_id) };
-    await api.post('/meal-plan/', payload);
+    if (editingPlan) {
+      await api.put(`/meal-plan/${editingPlan.id}`, payload);
+    } else {
+      await api.post('/meal-plan/', payload);
+    }
     setShowModal(false);
+    setEditingPlan(null);
     setForm({ project_id: '', title: '', monitoring_approach: '', evaluation_plan: '', accountability_mechanisms: '', learning_strategy: '', data_collection_methods: '', reporting_schedule: '', resources_needed: '', indicators_summary: '', start_date: '', end_date: '' });
+    load();
+  };
+
+  const openEdit = (plan) => {
+    setEditingPlan(plan);
+    setForm({
+      project_id: String(plan.project_id || ''),
+      title: plan.title || '',
+      monitoring_approach: plan.monitoring_approach || '',
+      evaluation_plan: plan.evaluation_plan || '',
+      accountability_mechanisms: plan.accountability_mechanisms || '',
+      learning_strategy: plan.learning_strategy || '',
+      data_collection_methods: plan.data_collection_methods || '',
+      reporting_schedule: plan.reporting_schedule || '',
+      resources_needed: plan.resources_needed || '',
+      indicators_summary: plan.indicators_summary || '',
+      start_date: plan.start_date || '',
+      end_date: plan.end_date || '',
+    });
+    setShowModal(true);
+  };
+
+  const updateStatus = async (plan, status) => {
+    await api.put(`/meal-plan/${plan.id}/status`, null, { params: { status } });
+    load();
+  };
+
+  const deletePlan = async (plan) => {
+    if (!confirm(`سيتم حذف خطة MEAL: ${plan.title}. هل أنت متأكد؟`)) return;
+    await api.delete(`/meal-plan/${plan.id}`);
     load();
   };
 
@@ -66,6 +102,13 @@ export default function MEALPlan() {
               <button onClick={() => setViewPlan(plan)} className="flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-800">
                 <Eye size={16} /> عرض التفاصيل
               </button>
+              <button onClick={() => openEdit(plan)} className="flex items-center gap-1 text-sm text-slate-600 hover:text-slate-900">
+                <Pencil size={16} /> تعديل
+              </button>
+              {plan.status !== 'active' && <button onClick={() => updateStatus(plan, 'active')} className="flex items-center gap-1 text-sm text-green-600 hover:text-green-800"><CheckCircle2 size={16} /> تفعيل</button>}
+              <button onClick={() => deletePlan(plan)} className="flex items-center gap-1 text-sm text-red-600 hover:text-red-800">
+                <Trash2 size={16} /> حذف
+              </button>
             </div>
           </div>
         ))}
@@ -95,8 +138,8 @@ export default function MEALPlan() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowModal(false)}>
           <div className="bg-white rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold">إنشاء خطة MEAL</h3>
-              <button onClick={() => setShowModal(false)}><X size={20} /></button>
+              <h3 className="text-lg font-bold">{editingPlan ? 'تعديل خطة MEAL' : 'إنشاء خطة MEAL'}</h3>
+              <button onClick={() => { setShowModal(false); setEditingPlan(null); }}><X size={20} /></button>
             </div>
             <div className="space-y-3">
               <input placeholder="عنوان الخطة *" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} className="w-full px-3 py-2 rounded-lg border border-gray-200 outline-none focus:ring-2 focus:ring-indigo-500" />

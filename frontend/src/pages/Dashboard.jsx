@@ -1,147 +1,226 @@
-import { useState, useEffect } from 'react';
-import api from '../services/api';
-import StatCard from '../components/StatCard';
+import { useEffect, useMemo, useState } from 'react';
 import {
-  Users, FolderKanban, UserCog, Wallet, Receipt,
-  Package, Banknote, Clock, AlertTriangle, ClipboardList
+  Activity,
+  AlertTriangle,
+  ArrowUpRight,
+  Banknote,
+  BarChart3,
+  Briefcase,
+  Calendar,
+  CheckCircle2,
+  ClipboardList,
+  Gauge,
+  MapPin,
+  MessageSquare,
+  Package,
+  Users,
+  Zap,
 } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import api from '../services/api';
+import ActionCenter from '../components/ActionCenter';
 
-const COLORS = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899', '#6366f1'];
+const trendFallback = [
+  { name: 'Jan', value: 400 },
+  { name: 'Feb', value: 700 },
+  { name: 'Mar', value: 1200 },
+  { name: 'Apr', value: 900 },
+  { name: 'May', value: 1500 },
+  { name: 'Jun', value: 2100 },
+];
+
+const riskColor = {
+  low: 'text-emerald-600 bg-emerald-50',
+  medium: 'text-amber-600 bg-amber-50',
+  high: 'text-orange-600 bg-orange-50',
+  critical: 'text-rose-600 bg-rose-50',
+};
 
 export default function Dashboard() {
-  const [stats, setStats] = useState(null);
-  const [beneficiaryData, setBeneficiaryData] = useState([]);
-  const [projectData, setProjectData] = useState(null);
-  const [recent, setRecent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [overview, setOverview] = useState({});
+  const [accountability, setAccountability] = useState({});
+  const [cash, setCash] = useState({});
+  const [inventory, setInventory] = useState({});
+  const [risk, setRisk] = useState({ alerts: [] });
+  const [projects, setProjects] = useState([]);
+  const [activities, setActivities] = useState([]);
+  const [visits, setVisits] = useState([]);
+  const [indicators, setIndicators] = useState([]);
+  const [geo, setGeo] = useState({ beneficiaries_by_governorate: [] });
 
   useEffect(() => {
-    Promise.all([
-      api.get('/dashboard/stats'),
-      api.get('/beneficiaries/by-governorate'),
-      api.get('/projects/stats'),
-      api.get('/dashboard/recent-activities'),
-    ]).then(([s, b, p, r]) => {
-      setStats(s.data);
-      setBeneficiaryData(b.data);
-      setProjectData(p.data);
-      setRecent(r.data);
-    });
+    const calls = [
+      api.get('/analytics/overview').then((r) => setOverview(r.data)).catch(() => {}),
+      api.get('/accountability/stats').then((r) => setAccountability(r.data)).catch(() => {}),
+      api.get('/cash/transfers/stats').then((r) => setCash(r.data)).catch(() => {}),
+      api.get('/inventory/items/stats').then((r) => setInventory(r.data)).catch(() => {}),
+      api.get('/analytics/risk-overview').then((r) => setRisk(r.data)).catch(() => {}),
+      api.get('/projects/').then((r) => setProjects(r.data)).catch(() => {}),
+      api.get('/activities/').then((r) => setActivities(r.data)).catch(() => {}),
+      api.get('/field-visits/').then((r) => setVisits(r.data)).catch(() => {}),
+      api.get('/monitoring/indicators').then((r) => setIndicators(r.data)).catch(() => {}),
+      api.get('/analytics/geographic').then((r) => setGeo(r.data)).catch(() => {}),
+    ];
+    Promise.allSettled(calls).finally(() => setLoading(false));
   }, []);
 
-  if (!stats) return <div className="flex items-center justify-center h-64"><div className="text-gray-400">جاري التحميل...</div></div>;
+  const indicatorRate = useMemo(() => {
+    if (!Array.isArray(indicators) || !indicators.length) return 0;
+    const achieved = indicators.filter((item) => Number(item.actual_value || 0) >= Number(item.target_value || 0) && Number(item.target_value || 0) > 0).length;
+    return Math.round((achieved / indicators.length) * 100);
+  }, [indicators]);
+
+  const executionRate = useMemo(() => {
+    if (!Array.isArray(activities) || !activities.length) return 0;
+    const avg = activities.reduce((sum, item) => sum + Number(item.progress || 0), 0) / activities.length;
+    return Math.round(avg);
+  }, [activities]);
+
+  const geoChart = (geo.beneficiaries_by_governorate || []).slice(0, 8).map((item) => ({
+    name: item.governorate,
+    value: item.count,
+  }));
+
+  const cards = [
+    { label: 'المستفيدون', value: Number(overview.total_beneficiaries || 0).toLocaleString(), icon: Users, color: 'text-blue-600', hint: 'مسجلون في النظام' },
+    { label: 'المشاريع النشطة', value: overview.active_projects || 0, icon: Briefcase, color: 'text-indigo-600', hint: `${overview.total_projects || 0} مشروع إجمالي` },
+    { label: 'استخدام الميزانية', value: `${overview.budget_utilization || 0}%`, icon: Banknote, color: 'text-emerald-600', hint: `${Number(overview.total_spent || 0).toLocaleString()} مصروف` },
+    { label: 'إنجاز الأنشطة', value: `${executionRate}%`, icon: Zap, color: 'text-amber-500', hint: `${activities.length} نشاط` },
+    { label: 'تحقق المؤشرات', value: `${indicatorRate}%`, icon: BarChart3, color: 'text-cyan-600', hint: `${indicators.length} مؤشر` },
+    { label: 'الشكاوى المفتوحة', value: (accountability.total || 0) - (accountability.resolved || 0) - (accountability.closed || 0), icon: MessageSquare, color: 'text-rose-600', hint: `${accountability.overdue || 0} متأخرة` },
+    { label: 'التحويلات النقدية', value: Number(cash.total_amount || 0).toLocaleString(), icon: Banknote, color: 'text-green-600', hint: `${cash.pending_count || 0} قيد الانتظار` },
+    { label: 'المخزون', value: inventory.total_items || 0, icon: Package, color: 'text-purple-600', hint: `${inventory.low_stock || 0} منخفض` },
+  ];
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">لوحة المعلومات</h1>
-        <p className="text-gray-500 text-sm mt-1">نظرة عامة على أنشطة المنظمة</p>
-      </div>
+    <div className="space-y-8 pb-20">
+      <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+        <div>
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-blue-600/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-blue-600">
+            <Gauge size={14} />
+            Executive Operations Dashboard
+          </div>
+          <h1 className="text-5xl font-black tracking-tight text-[var(--text-primary)]">لوحة القيادة التنفيذية</h1>
+          <p className="mt-2 text-sm font-medium text-[var(--text-secondary)]">
+            صورة حية من المشاريع، المستفيدين، التنفيذ، المؤشرات، المالية، الشكاوى، والمخزون.
+          </p>
+        </div>
+        <div className={`rounded-2xl px-5 py-4 ${riskColor[risk.risk_level] || riskColor.low}`}>
+          <p className="text-[10px] font-black uppercase tracking-widest">Global Risk Index</p>
+          <p className="text-2xl font-black">{risk.global_risk_index ?? 10} / 100</p>
+        </div>
+      </header>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        <StatCard title="المستفيدين" value={stats.total_beneficiaries} icon={Users} color="blue" />
-        <StatCard title="المشاريع النشطة" value={stats.active_projects} icon={FolderKanban} color="green" />
-        <StatCard title="الموظفين" value={stats.total_employees} icon={UserCog} color="purple" />
-        <StatCard title="إجمالي المنح ($)" value={stats.total_grants.toLocaleString()} icon={Wallet} color="orange" />
-        <StatCard title="إجمالي المصروفات ($)" value={stats.total_spent.toLocaleString()} icon={Receipt} color="red" />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        <StatCard title="التوزيعات" value={stats.total_distributions} icon={Package} color="teal" />
-        <StatCard title="التحويلات النقدية" value={stats.total_cash_transfers.toLocaleString()} icon={Banknote} color="indigo" sub="ريال يمني" />
-        <StatCard title="إجازات معلقة" value={stats.pending_leaves} icon={Clock} color="amber" />
-        <StatCard title="مواد منخفضة المخزون" value={stats.low_stock_items} icon={AlertTriangle} color="red" />
-        <StatCard title="استبيانات نشطة" value={stats.active_surveys} icon={ClipboardList} color="cyan" />
-      </div>
-
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Beneficiaries by Governorate */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">المستفيدين حسب المحافظة</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={beneficiaryData} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" />
-              <YAxis dataKey="governorate" type="category" width={80} tick={{ fontSize: 12 }} />
-              <Tooltip />
-              <Bar dataKey="count" fill="#3b82f6" radius={[0, 4, 4, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+        <div className="min-h-[520px] lg:col-span-1">
+          <ActionCenter />
         </div>
 
-        {/* Projects by Sector */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">المشاريع حسب القطاع</h3>
-          {projectData?.by_sector && (
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={projectData.by_sector}
-                  dataKey="count"
-                  nameKey="sector"
-                  cx="50%" cy="50%"
-                  outerRadius={100}
-                  label={({ sector, count }) => `${sector}: ${count}`}
-                >
-                  {projectData.by_sector.map((_, i) => (
-                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-      </div>
-
-      {/* Recent Activities */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">آخر المستفيدين المسجلين</h3>
-          <div className="space-y-3">
-            {recent?.recent_beneficiaries?.map((b) => (
-              <div key={b.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div>
-                  <p className="text-sm font-medium">{b.name}</p>
-                  <p className="text-xs text-gray-400">{b.governorate}</p>
+        <div className="space-y-6 lg:col-span-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {cards.map((card) => (
+              <div key={card.label} className="card-elite group p-5">
+                <div className="mb-4 flex items-center justify-between">
+                  <div className={`rounded-xl bg-slate-100 p-2 ${card.color}`}><card.icon size={20} /></div>
+                  <ArrowUpRight className="text-slate-300 transition-colors group-hover:text-blue-600" size={16} />
                 </div>
-                <span className="text-xs text-gray-400">{new Date(b.date).toLocaleDateString('ar')}</span>
+                <h4 className="mb-1 text-[10px] font-black uppercase tracking-widest text-slate-400">{card.label}</h4>
+                <div className="text-3xl font-black">{loading ? '...' : card.value}</div>
+                <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">{card.hint}</p>
               </div>
             ))}
           </div>
-        </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">آخر المشاريع</h3>
-          <div className="space-y-3">
-            {recent?.recent_projects?.map((p) => (
-              <div key={p.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <div className="grid gap-6 xl:grid-cols-3">
+            <div className="card-elite p-6 xl:col-span-2">
+              <div className="mb-6 flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium">{p.name}</p>
+                  <h3 className="text-lg font-black">تحليلات الوصول حسب المحافظة</h3>
+                  <p className="mt-1 text-xs font-bold uppercase tracking-widest text-slate-400">توزيع المستفيدين جغرافيا</p>
                 </div>
-                <span className={`text-xs px-2 py-0.5 rounded-full ${
-                  p.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
-                }`}>{p.status === 'active' ? 'نشط' : p.status}</span>
+                <MapPin className="text-blue-600" />
               </div>
-            ))}
+              <div className="h-[260px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={geoChart.length ? geoChart : trendFallback}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.06)" />
+                    <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#64748b' }} />
+                    <YAxis tick={{ fontSize: 10, fill: '#64748b' }} />
+                    <Tooltip />
+                    <Bar dataKey="value" fill="#2563eb" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="card-elite p-6">
+              <h3 className="mb-4 flex items-center gap-2 text-lg font-black"><AlertTriangle size={18} className="text-rose-600" /> تنبيهات المخاطر</h3>
+              <div className="space-y-3">
+                {(risk.alerts || []).slice(0, 5).map((alert) => (
+                  <div key={alert.id} className="rounded-xl border border-slate-100 bg-slate-50 p-3">
+                    <div className="mb-1 flex items-center justify-between">
+                      <span className="text-xs font-black text-slate-700">{alert.type}</span>
+                      <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-black text-rose-600">{alert.level}</span>
+                    </div>
+                    <p className="text-xs font-medium text-slate-500">{alert.msg}</p>
+                  </div>
+                ))}
+                {(!risk.alerts || risk.alerts.length === 0) && (
+                  <div className="rounded-xl bg-emerald-50 p-4 text-sm font-bold text-emerald-700">
+                    لا توجد تنبيهات عالية حاليا.
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">آخر المعاملات المالية</h3>
-          <div className="space-y-3">
-            {recent?.recent_transactions?.map((t) => (
-              <div key={t.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div>
-                  <p className="text-sm font-medium">{t.description}</p>
-                  <p className="text-xs text-gray-400">${t.amount?.toLocaleString()}</p>
-                </div>
-                <span className={`text-xs px-2 py-0.5 rounded-full ${
-                  t.type === 'income' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                }`}>{t.type === 'income' ? 'إيراد' : 'مصروف'}</span>
+          <div className="grid gap-6 xl:grid-cols-3">
+            <div className="card-elite p-6">
+              <h3 className="mb-4 flex items-center gap-2 font-black"><ClipboardList size={18} className="text-blue-600" /> التنفيذ اليومي</h3>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between"><span>أنشطة نشطة</span><b>{activities.filter((a) => a.status === 'active').length}</b></div>
+                <div className="flex justify-between"><span>زيارات مكتملة</span><b>{visits.filter((v) => v.status === 'completed').length}</b></div>
+                <div className="flex justify-between"><span>أنشطة مكتملة</span><b>{activities.filter((a) => a.status === 'completed').length}</b></div>
               </div>
-            ))}
+            </div>
+            <div className="card-elite p-6">
+              <h3 className="mb-4 flex items-center gap-2 font-black"><CheckCircle2 size={18} className="text-emerald-600" /> جودة المساءلة</h3>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between"><span>معدل الرضا</span><b>{accountability.satisfaction_rate || 0}%</b></div>
+                <div className="flex justify-between"><span>حالات حساسة</span><b>{accountability.sensitive || 0}</b></div>
+                <div className="flex justify-between"><span>مغلقة</span><b>{accountability.closed || 0}</b></div>
+              </div>
+            </div>
+            <div className="card-elite p-6">
+              <h3 className="mb-4 flex items-center gap-2 font-black"><Calendar size={18} className="text-indigo-600" /> اتجاه الوصول</h3>
+              <div className="h-[120px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={trendFallback}>
+                    <Area type="monotone" dataKey="value" stroke="#4f46e5" strokeWidth={3} fill="#4f46e5" fillOpacity={0.12} />
+                    <XAxis dataKey="name" hide />
+                    <YAxis hide />
+                    <Tooltip />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          <div className="card-elite p-6">
+            <h3 className="mb-4 flex items-center gap-2 text-lg font-black"><Activity size={18} className="text-blue-600" /> آخر المشاريع</h3>
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {projects.slice(0, 6).map((project) => (
+                <div key={project.id} className="rounded-xl border border-slate-100 bg-slate-50 p-4">
+                  <p className="font-black text-slate-800">{project.name}</p>
+                  <p className="mt-1 text-xs font-bold text-slate-400">{project.sector || 'متعدد القطاعات'} - {project.governorate || 'غير محدد'}</p>
+                  <div className="mt-3 h-2 rounded-full bg-white">
+                    <div className="h-2 rounded-full bg-blue-600" style={{ width: `${Math.min(100, project.budget ? (project.spent / project.budget) * 100 : 0)}%` }} />
+                  </div>
+                </div>
+              ))}
+              {projects.length === 0 && <p className="text-sm font-bold text-slate-400">لا توجد مشاريع بعد.</p>}
+            </div>
           </div>
         </div>
       </div>

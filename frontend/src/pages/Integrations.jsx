@@ -26,56 +26,79 @@ export default function Integrations() {
   };
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-white flex items-center gap-2"><Plug size={28} /> التكامل مع الأنظمة الخارجية</h1>
+    <div className="animate-fade-in space-y-6">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight flex items-center gap-3">
+            <Plug className="text-blue-600" size={32} />
+            أنابيب البيانات (Data Pipelines)
+          </h1>
+          <p className="text-sm text-slate-500 mt-2 font-medium">نظام تكامل مركزي لربط البيانات مع (KoBo, PowerBI, ActivityInfo) ومزامنتها بضغطة زر.</p>
+        </div>
+      </div>
 
       {status && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
           {status.integrations?.map((intg, i) => (
-            <div key={i} className="bg-gray-800 rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-2"><CheckCircle size={16} className="text-green-400" /><span className="text-white font-semibold">{intg.name}</span></div>
-              <p className="text-gray-400 text-sm mb-2">{intg.endpoint}</p>
-              <div className="space-y-1">{intg.features?.map((f, j) => <p key={j} className="text-gray-300 text-xs">• {f}</p>)}</div>
+            <div key={i} className="glass-card rounded-2xl p-6 border-t-4 border-t-emerald-500 relative overflow-hidden group">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-lg font-black text-slate-800">{intg.name}</span>
+                <div className="bg-emerald-100 text-emerald-600 p-1.5 rounded-lg"><CheckCircle size={18} /></div>
+              </div>
+              <p className="text-xs font-mono bg-slate-100 text-slate-600 p-2 rounded-lg mb-4 truncate" title={intg.endpoint}>{intg.endpoint}</p>
+              <div className="space-y-2">
+                {intg.features?.map((f, j) => (
+                  <div key={j} className="flex items-center gap-2 text-sm text-slate-600 font-medium">
+                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div> {f}
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-gray-800 rounded-xl p-6">
-          <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2"><Database size={18} /> تصدير حسب المشروع</h2>
+        <div className="glass-card rounded-2xl p-6 border border-slate-200/60">
+          <h2 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2 border-b border-slate-100 pb-3"><Database className="text-indigo-500" size={20} /> تصدير مخصص حسب المشروع</h2>
           {projects.map(p => (
-            <div key={p.id} className="bg-gray-700 rounded-lg p-3 mb-2">
-              <p className="text-white font-medium mb-2">{p.name}</p>
+            <div key={p.id} className="bg-slate-50 border border-slate-100 rounded-xl p-4 mb-3 hover:shadow-md transition">
+              <p className="font-bold text-slate-700 mb-3">{p.name}</p>
               <div className="flex gap-2 flex-wrap">
-                <button onClick={() => exportData('power-bi', p.id)} className="bg-yellow-600 hover:bg-yellow-500 px-3 py-1 rounded text-white text-xs">Power BI</button>
-                <button onClick={() => exportData('activity-info', p.id)} className="bg-blue-600 hover:bg-blue-500 px-3 py-1 rounded text-white text-xs">ActivityInfo</button>
-                <button onClick={() => exportData('csv-indicators', p.id)} className="bg-green-600 hover:bg-green-500 px-3 py-1 rounded text-white text-xs">CSV مؤشرات</button>
-                <button onClick={() => exportData('csv-complaints', p.id)} className="bg-purple-600 hover:bg-purple-500 px-3 py-1 rounded text-white text-xs">CSV شكاوى</button>
+                <button onClick={() => exportData('power-bi', p.id)} className="bg-amber-500 hover:bg-amber-600 px-3 py-1.5 rounded-lg text-white text-xs font-bold shadow-sm transition">Power BI Sync</button>
+                <button onClick={() => exportData('activity-info', p.id)} className="bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg text-white text-xs font-bold shadow-sm transition">ActivityInfo</button>
+                <button onClick={() => exportData('csv-indicators', p.id)} className="bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-lg text-white text-xs font-bold shadow-sm transition">مؤشرات CSV</button>
+                <button onClick={() => exportData('csv-complaints', p.id)} className="bg-purple-600 hover:bg-purple-700 px-3 py-1.5 rounded-lg text-white text-xs font-bold shadow-sm transition">شكاوى CSV</button>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="bg-gray-800 rounded-xl p-6">
-          <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2"><Globe size={18} /> تصدير عام</h2>
-          <div className="space-y-3">
-            <button onClick={() => exportData('ocha-3w')} className="w-full bg-gray-700 hover:bg-gray-600 rounded-lg p-4 text-right">
-              <p className="text-white font-medium">تقرير OCHA 3W</p>
-              <p className="text-gray-400 text-sm">من، ماذا، أين - لجميع المشاريع</p>
+        <div className="glass-card rounded-2xl p-6 border border-slate-200/60">
+          <h2 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2 border-b border-slate-100 pb-3"><Globe className="text-blue-500" size={20} /> تصدير مجمع (Global Export)</h2>
+          <div className="space-y-4">
+            <button onClick={() => exportData('ocha-3w')} className="w-full bg-slate-50 border border-slate-200 hover:bg-blue-50 hover:border-blue-200 transition rounded-xl p-5 text-right group flex justify-between items-center">
+              <div>
+                <p className="font-bold text-slate-800 group-hover:text-blue-700 transition">تقرير OCHA 3W</p>
+                <p className="text-slate-500 text-sm mt-1 font-medium">من، ماذا، أين - تقرير مجمع لجميع المشاريع</p>
+              </div>
+              <FileDown className="text-slate-400 group-hover:text-blue-500 transition" />
             </button>
-            <button onClick={() => exportData('csv-beneficiaries')} className="w-full bg-gray-700 hover:bg-gray-600 rounded-lg p-4 text-right">
-              <p className="text-white font-medium">تصدير المستفيدين CSV</p>
-              <p className="text-gray-400 text-sm">جميع بيانات المستفيدين</p>
+            <button onClick={() => exportData('csv-beneficiaries')} className="w-full bg-slate-50 border border-slate-200 hover:bg-emerald-50 hover:border-emerald-200 transition rounded-xl p-5 text-right group flex justify-between items-center">
+              <div>
+                <p className="font-bold text-slate-800 group-hover:text-emerald-700 transition">تصدير المستفيدين الشامل (CSV)</p>
+                <p className="text-slate-500 text-sm mt-1 font-medium">قاعدة بيانات جميع المستفيدين المسجلين</p>
+              </div>
+              <FileDown className="text-slate-400 group-hover:text-emerald-500 transition" />
             </button>
           </div>
         </div>
       </div>
 
       {exportResult && (
-        <div className="bg-gray-800 rounded-xl p-6">
-          <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2"><FileDown size={18} /> نتيجة التصدير ({exportType})</h2>
-          <pre className="bg-gray-900 rounded-lg p-4 text-green-400 text-xs overflow-x-auto max-h-96 overflow-y-auto">{JSON.stringify(exportResult, null, 2)}</pre>
+        <div className="glass-card rounded-2xl p-6 border border-emerald-200 bg-emerald-50/30">
+          <h2 className="text-lg font-bold text-emerald-800 mb-4 flex items-center gap-2"><FileDown size={20} /> نجح التصدير ({exportType})</h2>
+          <pre className="bg-slate-900 rounded-xl p-5 text-emerald-400 text-xs overflow-x-auto max-h-96 overflow-y-auto shadow-inner">{JSON.stringify(exportResult, null, 2)}</pre>
         </div>
       )}
     </div>

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from typing import List, Optional
+import json
 import os
 import shutil
 from datetime import datetime
@@ -48,6 +49,7 @@ async def upload_document(
     category: str = Form("other"),
     project_id: int = Form(None),
     tags: str = Form(None),
+    custom_values_json: str = Form("{}"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -61,6 +63,11 @@ async def upload_document(
 
     file_size = len(content)
 
+    try:
+        custom_values = json.loads(custom_values_json or "{}")
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid custom_values_json")
+
     doc = Document(
         title=title,
         description=description,
@@ -73,6 +80,7 @@ async def upload_document(
         tags=tags,
         uploaded_by=current_user.id,
     )
+    doc.custom_values = custom_values
     db.add(doc)
     db.commit()
     db.refresh(doc)

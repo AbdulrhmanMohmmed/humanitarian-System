@@ -96,8 +96,11 @@ export default function LogFramePage() {
 
   const load = () => {
     const url = selectedProject ? `/logframe/project/${selectedProject}` : '/logframe/all';
-    api.get(url).then(r => setLogframes(r.data));
-    api.get('/projects/').then(r => setProjects(r.data));
+    api.get(url).then(r => setLogframes(r.data)).catch(() => { });
+    api.get('/projects/').then(r => setProjects(r.data)).catch(() => {
+      const local = localStorage.getItem('hiaos_data_projects');
+      if (local) setProjects(JSON.parse(local));
+    });
   };
   useEffect(() => { load(); }, [selectedProject]);
 

@@ -6,9 +6,11 @@ from app.database import get_db
 from app.models import Warehouse, InventoryItem, Distribution, DistributionItem, User
 from app.schemas import (
     WarehouseCreate, WarehouseOut, InventoryItemCreate, InventoryItemOut,
-    DistributionCreate, DistributionOut
+    DistributionCreate, DistributionOut, DistributionUpdate,
+    DistributionItemCreate, DistributionItemOut, DistributionItemUpdate
 )
 from app.auth import get_current_user
+from datetime import datetime
 
 router = APIRouter(prefix="/api/inventory", tags=["المخازن وسلسلة الإمداد"])
 
@@ -124,6 +126,89 @@ def create_distribution(data: DistributionCreate, db: Session = Depends(get_db),
     db.commit()
     db.refresh(d)
     return d
+
+
+@router.put("/distributions/{dist_id}", response_model=DistributionOut)
+def update_distribution(
+    dist_id: int,
+    data: DistributionUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    d = db.query(Distribution).filter(Distribution.id == dist_id).first()
+    if not d:
+        raise HTTPException(status_code=404, detail="التوزيع غير موجود")
+    for key, value in data.model_dump(exclude_unset=True).items():
+        setattr(d, key, value)
+    db.commit()
+    db.refresh(d)
+    return d
+
+
+@router.get("/distributions/{dist_id}/items", response_model=List[DistributionItemOut])
+def list_distribution_items(
+    dist_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return db.query(DistributionItem).filter(DistributionItem.distribution_id == dist_id).all()
+
+
+@router.post("/distributions/{dist_id}/items", response_model=DistributionItemOut)
+def add_distribution_item(
+    dist_id: int,
+    data: DistributionItemCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    d = db.query(Distribution).filter(Distribution.id == dist_id).first()
+    if not d:
+        raise HTTPException(status_code=404, detail="التوزيع غير موجود")
+    item = DistributionItem(distribution_id=dist_id, **data.model_dump())
+    db.add(item)
+    d.total_beneficiaries = db.query(DistributionItem).filter(DistributionItem.distribution_id == dist_id).count() + 1
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+@router.put("/distribution-items/{item_id}", response_model=DistributionItemOut)
+def update_distribution_item(
+    item_id: int,
+    data: DistributionItemUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    item = db.query(DistributionItem).filter(DistributionItem.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="سجل التوزيع غير موجود")
+    update_data = data.model_dump(exclude_unset=True)
+    if update_data.get("received") and not update_data.get("received_date"):
+        update_data["received_date"] = datetime.utcnow()
+    for key, value in update_data.items():
+        setattr(item, key, value)
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+@router.delete("/distribution-items/{item_id}")
+def delete_distribution_item(
+    item_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    item = db.query(DistributionItem).filter(DistributionItem.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="سجل التوزيع غير موجود")
+    dist_id = item.distribution_id
+    db.delete(item)
+    db.commit()
+    d = db.query(Distribution).filter(Distribution.id == dist_id).first()
+    if d:
+        d.total_beneficiaries = db.query(DistributionItem).filter(DistributionItem.distribution_id == dist_id).count()
+        db.commit()
+    return {"message": "تم حذف سجل المستفيد من التوزيع"}
 
 
 @router.delete("/distributions/{dist_id}")

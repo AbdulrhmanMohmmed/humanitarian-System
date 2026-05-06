@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import date
+import json
 from app.database import get_db
 from app.models import FieldVisit, FieldVisitStatus, User
 from app.auth import get_current_user
@@ -38,6 +39,7 @@ def list_visits(
             "status": v.status.value if v.status else None,
             "visit_type": v.visit_type,
             "follow_up_date": v.follow_up_date.isoformat() if v.follow_up_date else None,
+            "custom_values": v.custom_values,
             "created_at": v.created_at.isoformat() if v.created_at else None,
         }
         for v in visits
@@ -57,9 +59,15 @@ def create_visit(
     team_members: Optional[str] = None,
     objectives: Optional[str] = None,
     visit_type: Optional[str] = None,
+    custom_values_json: str = "{}",
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    try:
+        custom_values = json.loads(custom_values_json or "{}")
+    except json.JSONDecodeError:
+        custom_values = {}
+
     visit = FieldVisit(
         title=title, project_id=project_id,
         visit_date=date.fromisoformat(visit_date),
@@ -68,10 +76,17 @@ def create_visit(
         team_members=team_members, objectives=objectives,
         visit_type=visit_type, created_by=current_user.id,
     )
+    visit.custom_values = custom_values
     db.add(visit)
     db.commit()
     db.refresh(visit)
-    return {"id": visit.id, "message": "تم إنشاء الزيارة بنجاح"}
+    return {
+        "id": visit.id,
+        "title": visit.title,
+        "visit_date": visit.visit_date.isoformat() if visit.visit_date else None,
+        "custom_values": visit.custom_values,
+        "message": "تم إنشاء الزيارة بنجاح",
+    }
 
 
 @router.put("/{visit_id}")
@@ -84,6 +99,7 @@ def update_visit(
     checklist: Optional[str] = None,
     status: Optional[str] = None,
     follow_up_date: Optional[str] = None,
+    custom_values_json: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -104,6 +120,11 @@ def update_visit(
         visit.status = FieldVisitStatus(status)
     if follow_up_date is not None:
         visit.follow_up_date = date.fromisoformat(follow_up_date)
+    if custom_values_json is not None:
+        try:
+            visit.custom_values = json.loads(custom_values_json or "{}")
+        except json.JSONDecodeError:
+            raise HTTPException(status_code=400, detail="Invalid custom_values_json")
     db.commit()
     return {"message": "تم تحديث الزيارة"}
 
