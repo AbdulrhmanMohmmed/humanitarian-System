@@ -23,3 +23,4 @@ from .logistics import Asset, Vehicle, FuelLog
 from .financial_engine import ExchangeRate, BudgetAllocation
 from .risk_management import IncidentReport, RiskMatrix
 from .partners import Partner, SubGrant
+from .approval import ApprovalRequest, ApprovalStep, ApprovalRule

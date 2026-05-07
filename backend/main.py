@@ -31,7 +31,7 @@ from app.routers import (
     system_architecture, customization, procurement, grants, logistics,
     hr_payroll, ai_hub, strategic,
     financial_engine, risk_management, partners,
-    communications,
+    communications, approvals,
 )
 from app.seed import seed_database
 
@@ -122,7 +122,7 @@ MODULE_MAP = {
     "projects": [
         projects.router, phase_one.router, strategic_review.router, operating.router
     ],
-    "finance": [finance.router, cash.router, grants.router],
+    "finance": [finance.router, cash.router, grants.router, approvals.router],
     "hr": [hr.router],
     "inventory": [inventory.router],
     "procurement": [procurement.router],
