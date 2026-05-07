@@ -15,6 +15,7 @@ from app.database import engine, Base
 from app.config import settings
 from app.middleware.logging import RequestLoggingMiddleware
 from app.middleware.error_handler import register_error_handlers
+from app.middleware.security_headers import SecurityHeadersMiddleware
 from app.websocket import router as ws_router
 
 # ── Import all routers ────────────────────────────────────────────────────────
@@ -78,7 +79,10 @@ app.add_middleware(SlowAPIMiddleware)
 # 2. Structured request logging
 app.add_middleware(RequestLoggingMiddleware)
 
-# 3. CORS — explicit methods and headers (not wildcard)
+# 3. Security headers (CSP, X-Frame-Options, HSTS, etc.)
+app.add_middleware(SecurityHeadersMiddleware)
+
+# 4. CORS — explicit methods and headers (not wildcard)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
