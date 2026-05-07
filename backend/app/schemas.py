@@ -38,6 +38,7 @@ class UserOut(BaseModel):
     is_active: bool
     phone: Optional[str] = None
     department: Optional[str] = None
+    permissions: Optional[List[str]] = None
     created_at: datetime
 
     class Config:
@@ -45,8 +46,10 @@ class UserOut(BaseModel):
 
 class Token(BaseModel):
     access_token: str
+    refresh_token: Optional[str] = None
     token_type: str
     user: UserOut
+    enabled_modules: Optional[List[str]] = None
 
 
 # ==================== BENEFICIARY ====================
