@@ -1,12 +1,12 @@
 from pydantic import BaseModel
 from typing import Any, Optional
 from datetime import date, datetime
-from app.models.enums import GrantStatus, TransactionType, Currency
+from app.models.enums import GrantStatus, GrantCategory, TransactionType, Currency
 
 class GrantCreate(BaseModel):
-    code: str
     name: str
-    donor: str
+    donor_id: Optional[int] = None
+    category: GrantCategory = GrantCategory.HUMANITARIAN
     amount: float
     currency: Currency = Currency.USD
     status: GrantStatus = GrantStatus.PENDING
@@ -17,9 +17,9 @@ class GrantCreate(BaseModel):
     custom_values: dict[str, Any] = {}
 
 class GrantUpdate(BaseModel):
-    code: Optional[str] = None
     name: Optional[str] = None
-    donor: Optional[str] = None
+    donor_id: Optional[int] = None
+    category: Optional[GrantCategory] = None
     amount: Optional[float] = None
     currency: Optional[Currency] = None
     status: Optional[GrantStatus] = None
@@ -31,9 +31,9 @@ class GrantUpdate(BaseModel):
 
 class GrantOut(BaseModel):
     id: int
-    code: str
     name: str
-    donor: str
+    donor_id: Optional[int] = None
+    category: Optional[GrantCategory] = None
     amount: float
     spent: float
     currency: Currency

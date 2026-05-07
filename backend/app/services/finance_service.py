@@ -45,8 +45,6 @@ def get_grant(db: Session, grant_id: int) -> Grant:
 
 
 def create_grant(db: Session, data: GrantCreate) -> Grant:
-    if db.query(Grant).filter(Grant.code == data.code).first():
-        raise ConflictError("رمز المنحة موجود بالفعل")
     g = Grant(**data.model_dump())
     db.add(g)
     db.commit()
@@ -57,14 +55,6 @@ def create_grant(db: Session, data: GrantCreate) -> Grant:
 def update_grant(db: Session, grant_id: int, data: GrantUpdate) -> Grant:
     g = get_grant(db, grant_id)
     update_data = data.model_dump(exclude_unset=True)
-    if "code" in update_data:
-        existing = (
-            db.query(Grant)
-            .filter(Grant.code == update_data["code"], Grant.id != grant_id)
-            .first()
-        )
-        if existing:
-            raise ConflictError("رمز المنحة موجود بالفعل")
     for key, value in update_data.items():
         setattr(g, key, value)
     db.commit()
