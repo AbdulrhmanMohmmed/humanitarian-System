@@ -23,7 +23,7 @@ def list_beneficiaries(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission(Permission.BENEFICIARIES_READ)),
 ):
-    query = db.query(Beneficiary)
+    query = db.query(Beneficiary).filter(Beneficiary.deleted_at.is_(None))
     if search:
         query = query.filter(
             or_(

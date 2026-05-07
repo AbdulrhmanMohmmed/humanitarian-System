@@ -4,8 +4,9 @@ from datetime import datetime
 from app.database import Base
 from app.custom_values import CustomValuesMixin
 from .enums import Gender, BeneficiaryStatus, DisabilityType
+from .mixins import SoftDeleteMixin
 
-class Beneficiary(CustomValuesMixin, Base):
+class Beneficiary(SoftDeleteMixin, CustomValuesMixin, Base):
     __tablename__ = "beneficiaries"
 
     id = Column(Integer, primary_key=True, index=True)

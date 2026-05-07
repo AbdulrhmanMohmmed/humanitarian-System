@@ -4,6 +4,7 @@ from datetime import datetime, date
 from app.database import Base
 from app.custom_values import CustomValuesMixin
 from .enums import GrantStatus, TransactionType, Currency, GrantCategory
+from .mixins import SoftDeleteMixin
 
 class Donor(Base):
     __tablename__ = "donors"
@@ -19,7 +20,7 @@ class Donor(Base):
 
     grants = relationship("Grant", back_populates="donor")
 
-class Grant(CustomValuesMixin, Base):
+class Grant(SoftDeleteMixin, CustomValuesMixin, Base):
     __tablename__ = "grants"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -43,7 +44,7 @@ class Grant(CustomValuesMixin, Base):
     project = relationship("Project", back_populates="grants")
     transactions = relationship("Transaction", back_populates="grant")
 
-class Transaction(CustomValuesMixin, Base):
+class Transaction(SoftDeleteMixin, CustomValuesMixin, Base):
     __tablename__ = "transactions"
 
     id = Column(Integer, primary_key=True, index=True)

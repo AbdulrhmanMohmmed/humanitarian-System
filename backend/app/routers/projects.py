@@ -19,7 +19,7 @@ def list_projects(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    query = db.query(Project)
+    query = db.query(Project).filter(Project.deleted_at.is_(None))
     if status:
         query = query.filter(Project.status == status)
     if sector:
