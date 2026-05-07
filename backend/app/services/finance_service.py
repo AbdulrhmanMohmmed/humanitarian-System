@@ -26,14 +26,14 @@ def grant_stats(db: Session) -> dict:
     total_spent = db.query(func.sum(Grant.spent)).scalar() or 0
     active_grants = db.query(Grant).filter(Grant.status == "active").count()
     by_donor = (
-        db.query(Grant.donor, func.sum(Grant.amount)).group_by(Grant.donor).all()
+        db.query(Grant.donor_id, func.sum(Grant.amount)).group_by(Grant.donor_id).all()
     )
     return {
         "total_amount": total_amount,
         "total_spent": total_spent,
         "remaining": total_amount - total_spent,
         "active_grants": active_grants,
-        "by_donor": [{"donor": d, "amount": a} for d, a in by_donor],
+        "by_donor": [{"donor_id": d, "amount": a} for d, a in by_donor],
     }
 
 

@@ -118,7 +118,7 @@ MODULE_MAP = {
     "projects": [
         projects.router, phase_one.router, strategic_review.router, operating.router
     ],
-    "finance": [finance.router, cash.router, grants.router],
+    "finance": [finance.router, cash.router],
     "hr": [hr.router],
     "inventory": [inventory.router],
     "procurement": [procurement.router],
@@ -131,7 +131,7 @@ MODULE_MAP = {
     "risk": [risk_management.router],
     "partners": [partners.router],
     "communications": [communications.router],
-    "gis": [projects.router],  # GIS currently uses project data
+    "gis": [],  # GIS uses project data; projects.router already in "projects" module
     "data_collection": [data_collection.router, kobo_integration.router, offline_sync.router],
     "beneficiaries": [beneficiaries.router],
     "documents": [documents.router],
@@ -145,9 +145,13 @@ MODULE_MAP = {
 api_v1 = APIRouter(prefix="/api/v1")
 api_compat = APIRouter(prefix="/api")
 
+_registered_routers: set[int] = set()
 for module_name, routers in MODULE_MAP.items():
     if settings.is_module_enabled(module_name):
         for router in routers:
+            if id(router) in _registered_routers:
+                continue
+            _registered_routers.add(id(router))
             api_v1.include_router(router)
             api_compat.include_router(router)
 
