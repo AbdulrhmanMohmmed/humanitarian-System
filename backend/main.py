@@ -14,6 +14,7 @@ from slowapi.middleware import SlowAPIMiddleware
 from app.database import engine, Base
 from app.config import settings
 from app.middleware.logging import RequestLoggingMiddleware
+from app.middleware.error_handler import register_error_handlers
 from app.websocket import router as ws_router
 
 # ── Import all routers ────────────────────────────────────────────────────────
@@ -65,6 +66,9 @@ app = FastAPI(
 )
 
 # ── Middleware Stack ──────────────────────────────────────────────────────────
+
+# 0. Unified error handlers (validation, DB errors, unhandled exceptions)
+register_error_handlers(app)
 
 # 1. Rate limiting
 app.state.limiter = limiter
