@@ -31,7 +31,7 @@ from app.routers import (
     system_architecture, customization, procurement, grants, logistics,
     hr_payroll, ai_hub, strategic,
     financial_engine, risk_management, partners,
-    communications, approvals, organizations, iati, chs,
+    communications, approvals, organizations, iati, chs, webhooks,
 )
 from app.seed import seed_database
 
@@ -140,7 +140,7 @@ MODULE_MAP = {
     "data_collection": [data_collection.router, kobo_integration.router, offline_sync.router],
     "beneficiaries": [beneficiaries.router],
     "documents": [documents.router],
-    "integrations": [integrations.router, iati.router],
+    "integrations": [integrations.router, iati.router, webhooks.router],
 }
 
 # ── Versioned API mounting ─────────────────────────────────────────────────────
