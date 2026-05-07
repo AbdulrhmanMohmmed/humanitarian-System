@@ -28,7 +28,7 @@ def calculate_vulnerability_score(data: BeneficiaryCreate | BeneficiaryUpdate) -
             score += 20.0
     return min(score, 100.0)
 
-router = APIRouter(prefix="/api/beneficiaries", tags=["المستفيدين"])
+router = APIRouter(prefix="/beneficiaries", tags=["المستفيدين"])
 
 
 @router.get("/", response_model=List[BeneficiaryOut])

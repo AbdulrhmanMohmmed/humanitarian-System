@@ -6,7 +6,7 @@ from app.models import Activity, User
 from app.schemas import ActivityCreate, ActivityUpdate, ActivityOut
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/activities", tags=["تتبع الأنشطة"])
+router = APIRouter(prefix="/activities", tags=["تتبع الأنشطة"])
 
 
 @router.get("/", response_model=List[ActivityOut])

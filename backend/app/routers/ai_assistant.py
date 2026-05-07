@@ -15,7 +15,7 @@ from app.auth import get_current_user
 from app.config import settings
 import logging
 
-router = APIRouter(prefix="/api/ai", tags=["AI Assistant"])
+router = APIRouter(prefix="/ai", tags=["AI Assistant"])
 logger = logging.getLogger(__name__)
 
 

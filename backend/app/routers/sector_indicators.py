@@ -5,7 +5,7 @@ from app.database import get_db
 from app.models import SectorIndicator, User
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/sector-indicators", tags=["المؤشرات القطاعية"])
+router = APIRouter(prefix="/sector-indicators", tags=["المؤشرات القطاعية"])
 
 
 STANDARD_INDICATORS = {

@@ -9,7 +9,7 @@ from app.models import (
 from app.schemas import DashboardStats
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/dashboard", tags=["لوحة المعلومات"])
+router = APIRouter(prefix="/dashboard", tags=["لوحة المعلومات"])
 
 
 @router.get("/stats", response_model=DashboardStats)

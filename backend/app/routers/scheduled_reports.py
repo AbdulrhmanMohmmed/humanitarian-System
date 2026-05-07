@@ -8,7 +8,7 @@ from app.database import get_db
 from app.models import User, Project, Indicator, Complaint, ComplaintStatus, Recommendation, RecommendationStatus, Risk, IPTTEntry, FieldVisit
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/scheduled-reports", tags=["Scheduled Reports"])
+router = APIRouter(prefix="/scheduled-reports", tags=["Scheduled Reports"])
 
 REPORT_SCHEDULES = []
 

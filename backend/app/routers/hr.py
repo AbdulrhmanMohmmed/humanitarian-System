@@ -7,7 +7,7 @@ from app.models import Employee, LeaveRequest, Attendance, User
 from app.schemas import EmployeeCreate, EmployeeUpdate, EmployeeOut, LeaveCreate, LeaveOut
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/hr", tags=["الموارد البشرية"])
+router = APIRouter(prefix="/hr", tags=["الموارد البشرية"])
 
 
 # Employees

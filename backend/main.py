@@ -2,7 +2,7 @@ import os
 import time
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import APIRouter, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
@@ -134,11 +134,21 @@ MODULE_MAP = {
     "integrations": [integrations.router],
 }
 
-# Include routers for enabled modules
+# ── Versioned API mounting ─────────────────────────────────────────────────────
+# All module routers are mounted under /api/v1/ (canonical)
+# and also under /api/ for backward compatibility.
+
+api_v1 = APIRouter(prefix="/api/v1")
+api_compat = APIRouter(prefix="/api")
+
 for module_name, routers in MODULE_MAP.items():
     if settings.is_module_enabled(module_name):
         for router in routers:
-            app.include_router(router)
+            api_v1.include_router(router)
+            api_compat.include_router(router)
+
+app.include_router(api_v1)
+app.include_router(api_compat)
 
 # ── Health & Status Endpoints ─────────────────────────────────────────────────
 

@@ -8,7 +8,7 @@ from app.models import (
 )
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/executive", tags=["لوحة المعلومات التنفيذية"])
+router = APIRouter(prefix="/executive", tags=["لوحة المعلومات التنفيذية"])
 
 
 def _traffic_light(value, target):

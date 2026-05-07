@@ -31,7 +31,7 @@ from app.models import (
     WorkflowApproval,
 )
 
-router = APIRouter(prefix="/api/strategic-review", tags=["Strategic Review"])
+router = APIRouter(prefix="/strategic-review", tags=["Strategic Review"])
 
 
 def _count(db: Session, model) -> int:

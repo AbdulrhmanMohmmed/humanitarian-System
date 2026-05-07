@@ -6,7 +6,7 @@ from app.models import NeedsAssessment, User
 from app.schemas import NeedsAssessmentCreate, NeedsAssessmentOut
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/needs-assessment", tags=["تقييم الاحتياجات"])
+router = APIRouter(prefix="/needs-assessment", tags=["تقييم الاحتياجات"])
 
 SECTOR_TEMPLATES = {
     "WASH": {

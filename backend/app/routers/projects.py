@@ -6,7 +6,7 @@ from app.models import Project, Activity, User
 from app.schemas import ProjectCreate, ProjectUpdate, ProjectOut, ActivityCreate, ActivityOut
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/projects", tags=["المشاريع"])
+router = APIRouter(prefix="/projects", tags=["المشاريع"])
 
 
 @router.get("/", response_model=List[ProjectOut])

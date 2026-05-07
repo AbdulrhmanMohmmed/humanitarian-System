@@ -3,7 +3,7 @@ from typing import Optional
 from app.models import User
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/assessment-tools", tags=["أدوات التقييم"])
+router = APIRouter(prefix="/assessment-tools", tags=["أدوات التقييم"])
 
 
 ASSESSMENT_TEMPLATES = {

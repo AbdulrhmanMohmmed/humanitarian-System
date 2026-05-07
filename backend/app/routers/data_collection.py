@@ -12,7 +12,7 @@ from app.schemas import (
 from app.auth import get_current_user
 from datetime import datetime
 
-router = APIRouter(prefix="/api/data-collection", tags=["جمع البيانات"])
+router = APIRouter(prefix="/data-collection", tags=["جمع البيانات"])
 
 
 @router.get("/forms", response_model=List[DataCollectionFormOut])

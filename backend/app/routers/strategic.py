@@ -5,7 +5,7 @@ from app.models.project import Project
 from app.models.finance import Grant
 from sqlalchemy import func
 
-router = APIRouter(prefix="/api/strategic", tags=["Strategic Dashboards"])
+router = APIRouter(prefix="/strategic", tags=["Strategic Dashboards"])
 
 @router.get("/global-metrics")
 def get_global_metrics(db: Session = Depends(get_db)):

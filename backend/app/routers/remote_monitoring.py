@@ -6,7 +6,7 @@ from app.database import get_db
 from app.models import User
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/remote-monitoring", tags=["Remote Monitoring"])
+router = APIRouter(prefix="/remote-monitoring", tags=["Remote Monitoring"])
 
 PHONE_SURVEYS = []
 REMOTE_CHECKS = []

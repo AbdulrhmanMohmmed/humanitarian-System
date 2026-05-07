@@ -8,7 +8,7 @@ from app.models import Notification, User, Complaint, Risk, Project, Notificatio
 from app.schemas import NotificationOut
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/notifications", tags=["الإشعارات"])
+router = APIRouter(prefix="/notifications", tags=["الإشعارات"])
 
 
 @router.get("/", response_model=List[NotificationOut])

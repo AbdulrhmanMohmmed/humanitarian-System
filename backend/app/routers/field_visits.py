@@ -7,7 +7,7 @@ from app.database import get_db
 from app.models import FieldVisit, FieldVisitStatus, User
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/field-visits", tags=["الزيارات الميدانية"])
+router = APIRouter(prefix="/field-visits", tags=["الزيارات الميدانية"])
 
 
 @router.get("/")

@@ -11,7 +11,7 @@ from app.schemas.logistics import (
 )
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/logistics", tags=["Logistics & Fleet"])
+router = APIRouter(prefix="/logistics", tags=["Logistics & Fleet"])
 
 # ── Assets ───────────────────────────────────────────────────────────────────
 

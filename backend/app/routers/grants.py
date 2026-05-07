@@ -8,7 +8,7 @@ from app.models.enums import GrantStatus, TransactionType
 from app.schemas.grants import DonorCreate, DonorOut, GrantCreate, GrantUpdate, GrantOut
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/grants", tags=["Grant Management"])
+router = APIRouter(prefix="/grants", tags=["Grant Management"])
 
 # ── Donors ───────────────────────────────────────────────────────────────────
 

@@ -14,7 +14,7 @@ from app.schemas.procurement import (
 from app.auth import get_current_user
 import uuid
 
-router = APIRouter(prefix="/api/procurement", tags=["Procurement & Supply Chain"])
+router = APIRouter(prefix="/procurement", tags=["Procurement & Supply Chain"])
 
 # ── Vendors ──────────────────────────────────────────────────────────────────
 

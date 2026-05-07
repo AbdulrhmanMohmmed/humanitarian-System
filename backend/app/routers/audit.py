@@ -6,7 +6,7 @@ from app.database import get_db
 from app.models import AuditLog, AuditAction, User
 from app.permissions import Permission, require_permission
 
-router = APIRouter(prefix="/api/audit", tags=["سجل التدقيق"])
+router = APIRouter(prefix="/audit", tags=["سجل التدقيق"])
 
 
 def log_audit(db: Session, user_id: int, action: AuditAction, entity_type: str,

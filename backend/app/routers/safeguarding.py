@@ -13,7 +13,7 @@ from app.schemas import (
 )
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/safeguarding", tags=["الحماية والامتثال"])
+router = APIRouter(prefix="/safeguarding", tags=["الحماية والامتثال"])
 
 CHS_LABELS = {
     "chs1": "الاستجابة المناسبة وذات الصلة",

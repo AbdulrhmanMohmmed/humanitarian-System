@@ -7,7 +7,7 @@ from app.models import Grant, Transaction, User
 from app.schemas import GrantCreate, GrantOut, GrantUpdate, TransactionCreate, TransactionOut, TransactionUpdate
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/finance", tags=["الإدارة المالية"])
+router = APIRouter(prefix="/finance", tags=["الإدارة المالية"])
 
 
 # Grants

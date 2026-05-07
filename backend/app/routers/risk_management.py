@@ -6,7 +6,7 @@ from app.models.risk_management import IncidentReport, RiskMatrix
 from app.auth import get_current_user
 from app.models.user import User
 
-router = APIRouter(prefix="/api/risk", tags=["Risk Management"])
+router = APIRouter(prefix="/risk", tags=["Risk Management"])
 
 @router.get("/incidents")
 def list_incidents(db: Session = Depends(get_db)):

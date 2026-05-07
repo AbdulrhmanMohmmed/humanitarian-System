@@ -4,7 +4,7 @@ from typing import List
 from app.database import get_db
 from app.models.partners import Partner, SubGrant
 
-router = APIRouter(prefix="/api/partners", tags=["Partnerships"])
+router = APIRouter(prefix="/partners", tags=["Partnerships"])
 
 @router.get("/")
 def list_partners(db: Session = Depends(get_db)):

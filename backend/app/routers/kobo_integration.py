@@ -5,7 +5,7 @@ from app.database import get_db
 from app.models import User, DataCollectionForm as Form, FormField, FormStatus, FieldType
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/kobo", tags=["KoBoToolbox Integration"])
+router = APIRouter(prefix="/kobo", tags=["KoBoToolbox Integration"])
 
 FIELD_TYPE_MAP = {
     FieldType.TEXT: "text",

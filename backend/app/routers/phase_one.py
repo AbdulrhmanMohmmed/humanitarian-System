@@ -25,7 +25,7 @@ from app.models import (
     WorkflowApproval,
 )
 
-router = APIRouter(prefix="/api/phase-one", tags=["Phase One Operating Core"])
+router = APIRouter(prefix="/phase-one", tags=["Phase One Operating Core"])
 
 
 class SmartIPTTEntry(BaseModel):
