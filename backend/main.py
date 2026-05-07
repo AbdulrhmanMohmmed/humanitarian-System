@@ -31,7 +31,7 @@ from app.routers import (
     system_architecture, customization, procurement, grants, logistics,
     hr_payroll, ai_hub, strategic,
     financial_engine, risk_management, partners,
-    communications, approvals, organizations,
+    communications, approvals, organizations, iati, chs,
 )
 from app.seed import seed_database
 
@@ -117,7 +117,8 @@ MODULE_MAP = {
         activities.router, needs_assessment.router, executive.router, iptt.router,
         field_visits.router, recommendations.router, compliance.router, audit.router,
         sector_indicators.router, assessment_tools.router, remote_monitoring.router,
-        feedback_loop.router, ai_assistant.router, scheduled_reports.router, reports.router
+        feedback_loop.router, ai_assistant.router, scheduled_reports.router, reports.router,
+        chs.router,
     ],
     "projects": [
         projects.router, phase_one.router, strategic_review.router, operating.router
@@ -139,7 +140,7 @@ MODULE_MAP = {
     "data_collection": [data_collection.router, kobo_integration.router, offline_sync.router],
     "beneficiaries": [beneficiaries.router],
     "documents": [documents.router],
-    "integrations": [integrations.router],
+    "integrations": [integrations.router, iati.router],
 }
 
 # ── Versioned API mounting ─────────────────────────────────────────────────────
