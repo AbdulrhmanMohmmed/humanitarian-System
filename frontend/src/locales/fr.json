@@ -1,0 +1,88 @@
+{
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "export": "Exporter",
+    "import": "Importer",
+    "loading": "Chargement...",
+    "noData": "Aucune donnée disponible",
+    "confirm": "Confirmer",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "page": "Page",
+    "of": "de",
+    "total": "Total",
+    "status": "Statut",
+    "actions": "Actions",
+    "yes": "Oui",
+    "no": "Non"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "beneficiaries": "Bénéficiaires",
+    "projects": "Projets",
+    "finance": "Finance",
+    "hr": "Ressources humaines",
+    "inventory": "Inventaire",
+    "monitoring": "Suivi et évaluation",
+    "reports": "Rapports",
+    "settings": "Paramètres",
+    "logout": "Déconnexion",
+    "ai_hub": "Centre IA",
+    "compliance": "Conformité",
+    "procurement": "Approvisionnement",
+    "gis": "SIG"
+  },
+  "auth": {
+    "login": "Connexion",
+    "register": "Inscription",
+    "email": "Courriel",
+    "password": "Mot de passe",
+    "forgotPassword": "Mot de passe oublié ?",
+    "rememberMe": "Se souvenir de moi",
+    "accountLocked": "Compte verrouillé. Réessayez dans {{minutes}} minutes"
+  },
+  "beneficiaries": {
+    "title": "Gestion des bénéficiaires",
+    "addNew": "Ajouter un bénéficiaire",
+    "name": "Nom",
+    "nationalId": "Identifiant national",
+    "governorate": "Gouvernorat",
+    "district": "District",
+    "phone": "Téléphone",
+    "gender": "Genre",
+    "status": "Statut",
+    "vulnerability": "Score de vulnérabilité"
+  },
+  "projects": {
+    "title": "Gestion des projets",
+    "addNew": "Ajouter un projet",
+    "name": "Nom du projet",
+    "sector": "Secteur",
+    "budget": "Budget",
+    "progress": "Progression",
+    "startDate": "Date de début",
+    "endDate": "Date de fin"
+  },
+  "finance": {
+    "title": "Gestion financière",
+    "grants": "Subventions",
+    "transactions": "Transactions",
+    "totalBudget": "Budget total",
+    "spent": "Dépensé",
+    "remaining": "Restant",
+    "approvalRequired": "Approbation requise"
+  },
+  "chs": {
+    "title": "Suivi de conformité CHS",
+    "commitment": "Engagement",
+    "score": "Score",
+    "compliance": "Taux de conformité"
+  }
+}

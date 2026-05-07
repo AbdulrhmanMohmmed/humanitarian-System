@@ -1,0 +1,88 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "loading": "Loading...",
+    "noData": "No data available",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "page": "Page",
+    "of": "of",
+    "total": "Total",
+    "status": "Status",
+    "actions": "Actions",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "beneficiaries": "Beneficiaries",
+    "projects": "Projects",
+    "finance": "Finance",
+    "hr": "Human Resources",
+    "inventory": "Inventory",
+    "monitoring": "Monitoring & Evaluation",
+    "reports": "Reports",
+    "settings": "Settings",
+    "logout": "Logout",
+    "ai_hub": "AI Hub",
+    "compliance": "Compliance",
+    "procurement": "Procurement",
+    "gis": "GIS"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "rememberMe": "Remember me",
+    "accountLocked": "Account locked. Try again in {{minutes}} minutes"
+  },
+  "beneficiaries": {
+    "title": "Beneficiary Management",
+    "addNew": "Add New Beneficiary",
+    "name": "Name",
+    "nationalId": "National ID",
+    "governorate": "Governorate",
+    "district": "District",
+    "phone": "Phone",
+    "gender": "Gender",
+    "status": "Status",
+    "vulnerability": "Vulnerability Score"
+  },
+  "projects": {
+    "title": "Project Management",
+    "addNew": "Add New Project",
+    "name": "Project Name",
+    "sector": "Sector",
+    "budget": "Budget",
+    "progress": "Progress",
+    "startDate": "Start Date",
+    "endDate": "End Date"
+  },
+  "finance": {
+    "title": "Financial Management",
+    "grants": "Grants",
+    "transactions": "Transactions",
+    "totalBudget": "Total Budget",
+    "spent": "Spent",
+    "remaining": "Remaining",
+    "approvalRequired": "Approval Required"
+  },
+  "chs": {
+    "title": "CHS Compliance Tracker",
+    "commitment": "Commitment",
+    "score": "Score",
+    "compliance": "Compliance Rate"
+  }
+}

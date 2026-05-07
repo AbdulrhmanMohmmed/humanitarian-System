@@ -6,6 +6,7 @@ import App from './App.jsx'
 import { ThemeProvider } from './contexts/ThemeContext'
 import AppErrorBoundary from './components/AppErrorBoundary.jsx'
 import { queryClient } from './lib/queryClient'
+import './lib/i18n'
 
 if (new URLSearchParams(window.location.search).has('reset')) {
   localStorage.removeItem('token')

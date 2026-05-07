@@ -1,0 +1,88 @@
+{
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "create": "إنشاء",
+    "search": "بحث",
+    "filter": "تصفية",
+    "export": "تصدير",
+    "import": "استيراد",
+    "loading": "جاري التحميل...",
+    "noData": "لا توجد بيانات",
+    "confirm": "تأكيد",
+    "back": "رجوع",
+    "next": "التالي",
+    "previous": "السابق",
+    "page": "صفحة",
+    "of": "من",
+    "total": "الإجمالي",
+    "status": "الحالة",
+    "actions": "الإجراءات",
+    "yes": "نعم",
+    "no": "لا"
+  },
+  "nav": {
+    "dashboard": "لوحة القيادة",
+    "beneficiaries": "المستفيدين",
+    "projects": "المشاريع",
+    "finance": "الإدارة المالية",
+    "hr": "الموارد البشرية",
+    "inventory": "المخازن",
+    "monitoring": "المتابعة والتقييم",
+    "reports": "التقارير",
+    "settings": "الإعدادات",
+    "logout": "تسجيل الخروج",
+    "ai_hub": "مركز الذكاء الاصطناعي",
+    "compliance": "الامتثال",
+    "procurement": "المشتريات",
+    "gis": "نظام المعلومات الجغرافية"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "register": "إنشاء حساب",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "rememberMe": "تذكرني",
+    "accountLocked": "تم قفل الحساب. حاول مجدداً بعد {{minutes}} دقيقة"
+  },
+  "beneficiaries": {
+    "title": "إدارة المستفيدين",
+    "addNew": "إضافة مستفيد جديد",
+    "name": "الاسم",
+    "nationalId": "الرقم الوطني",
+    "governorate": "المحافظة",
+    "district": "المديرية",
+    "phone": "رقم الهاتف",
+    "gender": "الجنس",
+    "status": "الحالة",
+    "vulnerability": "درجة الضعف"
+  },
+  "projects": {
+    "title": "إدارة المشاريع",
+    "addNew": "إضافة مشروع جديد",
+    "name": "اسم المشروع",
+    "sector": "القطاع",
+    "budget": "الميزانية",
+    "progress": "التقدم",
+    "startDate": "تاريخ البداية",
+    "endDate": "تاريخ النهاية"
+  },
+  "finance": {
+    "title": "الإدارة المالية",
+    "grants": "المنح",
+    "transactions": "المعاملات",
+    "totalBudget": "إجمالي الميزانية",
+    "spent": "المصروف",
+    "remaining": "المتبقي",
+    "approvalRequired": "يتطلب موافقة"
+  },
+  "chs": {
+    "title": "متتبع الامتثال CHS",
+    "commitment": "الالتزام",
+    "score": "الدرجة",
+    "compliance": "نسبة الامتثال"
+  }
+}
