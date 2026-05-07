@@ -31,7 +31,7 @@ from app.routers import (
     system_architecture, customization, procurement, grants, logistics,
     hr_payroll, ai_hub, strategic,
     financial_engine, risk_management, partners,
-    communications, approvals,
+    communications, approvals, organizations,
 )
 from app.seed import seed_database
 
@@ -109,7 +109,7 @@ if settings.ENABLE_WEBSOCKETS:
 MODULE_MAP = {
     "core": [
         auth.router, dashboard.router, notifications.router, yemen_locations.router,
-        customization.router, system_architecture.router
+        customization.router, system_architecture.router, organizations.router,
     ],
     "meal": [
         monitoring.router, accountability.router, learning.router, logframe.router,
