@@ -32,7 +32,7 @@ from app.schemas import (
     WorkflowApprovalOut,
 )
 
-router = APIRouter(prefix="/api/operating", tags=["Humanitarian Operating System"])
+router = APIRouter(prefix="/operating", tags=["Humanitarian Operating System"])
 
 
 def _status_from_score(score: float) -> str:

@@ -6,7 +6,7 @@ from app.models import LogFrame, User
 from app.schemas import LogFrameCreate, LogFrameOut
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/logframe", tags=["الإطار المنطقي"])
+router = APIRouter(prefix="/logframe", tags=["الإطار المنطقي"])
 
 
 @router.get("/project/{project_id}", response_model=List[LogFrameOut])

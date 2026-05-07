@@ -63,7 +63,7 @@ async function refreshAccessToken() {
 
 api.interceptors.request.use(
   (config) => {
-    // Automatically prepend /api if missing, except for health/metrics endpoints
+    // Automatically prepend /api/v1 if missing, except for health/metrics endpoints
     if (
       config.url &&
       !config.url.startsWith('/api') &&
@@ -71,7 +71,7 @@ api.interceptors.request.use(
       !config.url.startsWith('/metrics') &&
       !config.url.startsWith('http')
     ) {
-      config.url = `/api${config.url.startsWith('/') ? '' : '/'}${config.url}`;
+      config.url = `/api/v1${config.url.startsWith('/') ? '' : '/'}${config.url}`;
     }
 
     const token = getToken();

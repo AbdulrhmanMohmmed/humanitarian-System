@@ -10,7 +10,7 @@ from app.schemas import (
 )
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/monitoring", tags=["المتابعة والتقييم"])
+router = APIRouter(prefix="/monitoring", tags=["المتابعة والتقييم"])
 
 
 # Indicators

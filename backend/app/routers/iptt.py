@@ -6,7 +6,7 @@ from app.database import get_db
 from app.models import IPTTEntry, Indicator, Project, User
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/iptt", tags=["IPTT"])
+router = APIRouter(prefix="/iptt", tags=["IPTT"])
 
 
 @router.get("/")

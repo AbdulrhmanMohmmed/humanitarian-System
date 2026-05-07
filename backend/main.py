@@ -2,7 +2,7 @@ import os
 import time
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import APIRouter, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
@@ -14,6 +14,7 @@ from slowapi.middleware import SlowAPIMiddleware
 from app.database import engine, Base
 from app.config import settings
 from app.middleware.logging import RequestLoggingMiddleware
+from app.middleware.error_handler import register_error_handlers
 from app.websocket import router as ws_router
 
 # ── Import all routers ────────────────────────────────────────────────────────
@@ -65,6 +66,9 @@ app = FastAPI(
 )
 
 # ── Middleware Stack ──────────────────────────────────────────────────────────
+
+# 0. Unified error handlers (validation, DB errors, unhandled exceptions)
+register_error_handlers(app)
 
 # 1. Rate limiting
 app.state.limiter = limiter
@@ -126,19 +130,29 @@ MODULE_MAP = {
     "financial_engine": [financial_engine.router],
     "risk": [risk_management.router],
     "partners": [partners.router],
-    "documents": [communications.router],
-    "gis": [projects.router], # GIS currently uses project data
+    "communications": [communications.router],
+    "gis": [projects.router],  # GIS currently uses project data
     "data_collection": [data_collection.router, kobo_integration.router, offline_sync.router],
     "beneficiaries": [beneficiaries.router],
     "documents": [documents.router],
     "integrations": [integrations.router],
 }
 
-# Include routers for enabled modules
+# ── Versioned API mounting ─────────────────────────────────────────────────────
+# All module routers are mounted under /api/v1/ (canonical)
+# and also under /api/ for backward compatibility.
+
+api_v1 = APIRouter(prefix="/api/v1")
+api_compat = APIRouter(prefix="/api")
+
 for module_name, routers in MODULE_MAP.items():
     if settings.is_module_enabled(module_name):
         for router in routers:
-            app.include_router(router)
+            api_v1.include_router(router)
+            api_compat.include_router(router)
+
+app.include_router(api_v1)
+app.include_router(api_compat)
 
 # ── Health & Status Endpoints ─────────────────────────────────────────────────
 

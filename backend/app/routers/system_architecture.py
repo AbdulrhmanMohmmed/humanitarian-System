@@ -4,7 +4,7 @@ from app.auth import get_current_user
 from app.config import settings
 from app.models import User
 
-router = APIRouter(prefix="/api/system", tags=["System Architecture"])
+router = APIRouter(prefix="/system", tags=["System Architecture"])
 
 
 @router.get("/architecture")

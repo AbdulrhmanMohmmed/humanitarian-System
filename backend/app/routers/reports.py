@@ -29,7 +29,7 @@ from app.auth import get_current_user
 from app.routers.audit import log_audit
 from app.models import AuditAction
 
-router = APIRouter(prefix="/api/reports", tags=["التقارير"])
+router = APIRouter(prefix="/reports", tags=["التقارير"])
 
 
 @router.get("/templates", response_model=List[ReportTemplateOut])

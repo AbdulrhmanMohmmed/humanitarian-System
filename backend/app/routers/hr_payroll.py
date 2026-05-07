@@ -7,7 +7,7 @@ from app.models.hr import Employee, Payroll, Payslip
 from app.models.user import User
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/hr/payroll", tags=["Payroll"])
+router = APIRouter(prefix="/hr/payroll", tags=["Payroll"])
 
 @router.get("/payrolls")
 def list_payrolls(db: Session = Depends(get_db)):

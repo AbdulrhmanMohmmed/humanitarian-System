@@ -10,7 +10,7 @@ from app.models import Document, User, DocumentCategory
 from app.schemas import DocumentOut, DocumentUpdate
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/documents", tags=["أرشيف الوثائق"])
+router = APIRouter(prefix="/documents", tags=["أرشيف الوثائق"])
 
 UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads", "documents")
 os.makedirs(UPLOAD_DIR, exist_ok=True)

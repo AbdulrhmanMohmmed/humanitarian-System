@@ -6,7 +6,7 @@ from app.models import MEALPlan, User, MEALPlanStatus
 from app.schemas import MEALPlanCreate, MEALPlanOut
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/meal-plan", tags=["خطة MEAL"])
+router = APIRouter(prefix="/meal-plan", tags=["خطة MEAL"])
 
 
 @router.get("/", response_model=List[MEALPlanOut])

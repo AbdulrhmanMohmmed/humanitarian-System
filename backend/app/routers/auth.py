@@ -14,7 +14,7 @@ from typing import List
 from datetime import datetime
 from app.config import settings
 
-router = APIRouter(prefix="/api/auth", tags=["المصادقة"])
+router = APIRouter(prefix="/auth", tags=["المصادقة"])
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────

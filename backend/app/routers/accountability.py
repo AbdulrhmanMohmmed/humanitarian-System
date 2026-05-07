@@ -16,7 +16,7 @@ from app.schemas import (
 )
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/accountability", tags=["المساءلة"])
+router = APIRouter(prefix="/accountability", tags=["المساءلة"])
 
 
 def _generate_ref():

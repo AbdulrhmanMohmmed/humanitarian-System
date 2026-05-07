@@ -28,7 +28,7 @@ from app.schemas import (
     SystemSettingOut,
 )
 
-router = APIRouter(prefix="/api/customization", tags=["System Customization"])
+router = APIRouter(prefix="/customization", tags=["System Customization"])
 
 
 def _loads(value: str, fallback):

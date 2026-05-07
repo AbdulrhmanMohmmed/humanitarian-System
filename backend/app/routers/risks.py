@@ -6,7 +6,7 @@ from app.models import Risk, User, RiskLikelihood, RiskImpact
 from app.schemas import RiskCreate, RiskUpdate, RiskOut
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/risks", tags=["إدارة المخاطر"])
+router = APIRouter(prefix="/risks", tags=["إدارة المخاطر"])
 
 LIKELIHOOD_SCORES = {"very_low": 1, "low": 2, "medium": 3, "high": 4, "very_high": 5}
 IMPACT_SCORES = {"negligible": 1, "minor": 2, "moderate": 3, "major": 4, "severe": 5}

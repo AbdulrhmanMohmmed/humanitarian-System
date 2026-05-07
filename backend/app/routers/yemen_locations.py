@@ -3,7 +3,7 @@ from typing import Optional
 from app.models import User
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/locations", tags=["Yemen Locations (Cascading)"])
+router = APIRouter(prefix="/locations", tags=["Yemen Locations (Cascading)"])
 
 YEMEN_LOCATIONS = {
     "صنعاء": {

@@ -14,7 +14,7 @@ from app.models import (
 from app.schemas import DQACreate, DQAOut
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/analytics", tags=["التحليلات"])
+router = APIRouter(prefix="/analytics", tags=["التحليلات"])
 
 
 @router.get("/overview")

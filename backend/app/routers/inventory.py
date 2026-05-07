@@ -12,7 +12,7 @@ from app.schemas import (
 from app.auth import get_current_user
 from datetime import datetime
 
-router = APIRouter(prefix="/api/inventory", tags=["المخازن وسلسلة الإمداد"])
+router = APIRouter(prefix="/inventory", tags=["المخازن وسلسلة الإمداد"])
 
 
 # Warehouses

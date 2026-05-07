@@ -7,7 +7,7 @@ from app.database import get_db
 from app.models import User, Complaint, ComplaintStatus, Project
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/feedback-loop", tags=["Beneficiary Feedback Loop"])
+router = APIRouter(prefix="/feedback-loop", tags=["Beneficiary Feedback Loop"])
 
 FEEDBACK_ACTIONS = []
 COMMUNITY_SESSIONS = []

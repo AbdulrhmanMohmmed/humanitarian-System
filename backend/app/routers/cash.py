@@ -9,7 +9,7 @@ from app.models import CashTransfer, User
 from app.schemas import CashTransferCreate, CashTransferUpdate, CashTransferOut
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/cash", tags=["التحويلات النقدية"])
+router = APIRouter(prefix="/cash", tags=["التحويلات النقدية"])
 
 
 @router.get("/transfers", response_model=List[CashTransferOut])

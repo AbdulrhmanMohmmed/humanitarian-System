@@ -8,7 +8,7 @@ from app.models.financial_engine import ExchangeRate, BudgetAllocation
 from app.models.project import Project
 from app.models.procurement import PurchaseRequest
 
-router = APIRouter(prefix="/api/finance/engine", tags=["Financial Engine"])
+router = APIRouter(prefix="/finance/engine", tags=["Financial Engine"])
 
 @router.get("/rates")
 def get_current_rates(region: str = "Global", db: Session = Depends(get_db)):

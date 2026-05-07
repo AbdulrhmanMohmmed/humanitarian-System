@@ -107,7 +107,6 @@ def seed_database():
             target_beneficiaries=random.randint(500, 5000),
             actual_beneficiaries=random.randint(200, 3000) if status != "planned" else 0,
             governorate=random.choice(GOVERNORATES),
-            donor=random.choice(DONORS),
             manager_id=1,
         )
         db.add(p)
@@ -130,14 +129,24 @@ def seed_database():
             db.add(a)
     db.commit()
 
+    # Donors
+    from app.models.finance import Donor
+    donor_objs = []
+    for d_name in DONORS:
+        donor = Donor(name=d_name, short_name=d_name[:10])
+        db.add(donor)
+        donor_objs.append(donor)
+    db.commit()
+    for d in donor_objs:
+        db.refresh(d)
+
     # Grants
     for i in range(6):
-        donor = random.choice(DONORS)
+        donor = random.choice(donor_objs)
         amount = random.randint(200000, 3000000)
         g = Grant(
-            code=f"GRN-{2024}-{i+1:03d}",
-            name=f"منحة {donor} - {i+1}",
-            donor=donor,
+            name=f"منحة {donor.name} - {i+1}",
+            donor_id=donor.id,
             amount=amount,
             spent=int(amount * random.uniform(0.1, 0.6)),
             currency="USD",
@@ -145,7 +154,7 @@ def seed_database():
             start_date=date(2024, random.randint(1, 6), 1),
             end_date=date(2025, random.randint(6, 12), 28),
             project_id=random.randint(1, 5),
-            conditions=f"شروط المنحة من {donor}",
+            conditions=f"شروط المنحة من {donor.name}",
         )
         db.add(g)
     db.commit()

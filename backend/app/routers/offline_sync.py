@@ -6,7 +6,7 @@ from app.database import get_db
 from app.models import User, FormSubmission, SubmissionStatus
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/offline", tags=["Offline Sync"])
+router = APIRouter(prefix="/offline", tags=["Offline Sync"])
 
 
 @router.post("/sync")

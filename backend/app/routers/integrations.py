@@ -5,7 +5,7 @@ from app.models import User, Project, Indicator, Beneficiary, Distribution, Dist
 from app.auth import get_current_user
 from sqlalchemy import func
 
-router = APIRouter(prefix="/api/integrations", tags=["External Integrations"])
+router = APIRouter(prefix="/integrations", tags=["External Integrations"])
 
 
 @router.get("/power-bi/dataset/{project_id}")

@@ -81,7 +81,7 @@ class Settings(BaseSettings):
     # Available: meal, projects, finance, hr, inventory, data_collection, beneficiaries, documents, integrations
     ENABLED_MODULES: str = os.getenv(
         "ENABLED_MODULES",
-        "core,meal,projects,finance,hr,inventory,data_collection,beneficiaries,documents,integrations,procurement,grants,gis,logistics,payroll,ai_hub,strategic,risk,partners,financial_engine"
+        "core,meal,projects,finance,hr,inventory,data_collection,beneficiaries,documents,integrations,procurement,grants,gis,logistics,payroll,ai_hub,strategic,risk,partners,financial_engine,communications"
     )
 
     @property

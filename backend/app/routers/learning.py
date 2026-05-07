@@ -10,7 +10,7 @@ from app.schemas import (
 )
 from app.auth import get_current_user
 
-router = APIRouter(prefix="/api/learning", tags=["التعلم"])
+router = APIRouter(prefix="/learning", tags=["التعلم"])
 
 
 # ---- Lessons Learned ----
