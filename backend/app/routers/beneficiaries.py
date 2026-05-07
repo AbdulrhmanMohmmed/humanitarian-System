@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from typing import List, Optional
 from app.database import get_db
 from app.models import Beneficiary, User
 from app.schemas import BeneficiaryCreate, BeneficiaryUpdate, BeneficiaryOut
 from app.permissions import Permission, require_permission
+from app.pagination import PaginationParams, paginate
 from app.services import beneficiary_service as svc
 import csv
 import io
@@ -12,20 +14,31 @@ import io
 router = APIRouter(prefix="/beneficiaries", tags=["المستفيدين"])
 
 
-@router.get("/", response_model=List[BeneficiaryOut])
+@router.get("/")
 def list_beneficiaries(
-    skip: int = 0,
-    limit: int = 50,
+    params: PaginationParams = Depends(),
     search: Optional[str] = None,
     governorate: Optional[str] = None,
     status: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission(Permission.BENEFICIARIES_READ)),
 ):
-    return svc.list_beneficiaries(
-        db, skip=skip, limit=limit, search=search,
-        governorate=governorate, status=status,
-    )
+    query = db.query(Beneficiary)
+    if search:
+        query = query.filter(
+            or_(
+                Beneficiary.first_name.contains(search),
+                Beneficiary.last_name.contains(search),
+                Beneficiary.national_id.contains(search),
+                Beneficiary.phone.contains(search),
+            )
+        )
+    if governorate:
+        query = query.filter(Beneficiary.governorate == governorate)
+    if status:
+        query = query.filter(Beneficiary.status == status)
+    query = query.order_by(Beneficiary.created_at.desc())
+    return paginate(query, params)
 
 
 @router.get("/count")
