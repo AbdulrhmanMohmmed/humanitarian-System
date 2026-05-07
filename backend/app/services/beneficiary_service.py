@@ -7,6 +7,7 @@ from difflib import SequenceMatcher
 from sqlalchemy import or_, func
 from sqlalchemy.orm import Session
 
+from app.events import Events, event_bus
 from app.middleware.error_handler import ConflictError, NotFoundError
 from app.models import AuditAction, Beneficiary
 from app.models.enums import Gender
@@ -102,6 +103,7 @@ def create_beneficiary(
         db, user_id, AuditAction.CREATE, "beneficiary", b.id,
         details="Beneficiary created",
     )
+    event_bus.emit(Events.BENEFICIARY_CREATED, {"id": b.id, "user_id": user_id})
     return b
 
 
@@ -129,6 +131,7 @@ def delete_beneficiary(db: Session, beneficiary_id: int, user_id: int) -> None:
         db, user_id, AuditAction.DELETE, "beneficiary", b.id,
         details="Beneficiary deleted",
     )
+    event_bus.emit(Events.BENEFICIARY_DELETED, {"id": beneficiary_id, "user_id": user_id})
 
 
 def check_duplicate(
