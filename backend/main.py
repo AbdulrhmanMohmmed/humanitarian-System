@@ -126,8 +126,8 @@ MODULE_MAP = {
     "financial_engine": [financial_engine.router],
     "risk": [risk_management.router],
     "partners": [partners.router],
-    "documents": [communications.router],
-    "gis": [projects.router], # GIS currently uses project data
+    "communications": [communications.router],
+    "gis": [projects.router],  # GIS currently uses project data
     "data_collection": [data_collection.router, kobo_integration.router, offline_sync.router],
     "beneficiaries": [beneficiaries.router],
     "documents": [documents.router],
