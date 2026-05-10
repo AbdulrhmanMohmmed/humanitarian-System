@@ -23,7 +23,7 @@ def list_grants(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    query = db.query(Grant)
+    query = db.query(Grant).filter(Grant.deleted_at.is_(None))
     if status:
         query = query.filter(Grant.status == status)
     query = query.order_by(Grant.created_at.desc())
@@ -70,7 +70,7 @@ def list_transactions(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    query = db.query(Transaction)
+    query = db.query(Transaction).filter(Transaction.deleted_at.is_(None))
     if type:
         query = query.filter(Transaction.type == type)
     if grant_id:

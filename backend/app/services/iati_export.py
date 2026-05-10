@@ -13,9 +13,10 @@ from sqlalchemy.orm import Session
 from app.models import Grant, Project, Transaction
 
 
-def _el(parent: Element, tag: str, text: str = "", **attribs) -> Element:
+def _el(parent: Element, tag: str, text: str = "", attrib: dict | None = None, **attribs) -> Element:
     """Helper to create a sub-element with text and attributes."""
-    e = SubElement(parent, tag, **attribs)
+    merged = {**(attrib or {}), **attribs}
+    e = SubElement(parent, tag, merged)
     if text:
         e.text = str(text)
     return e
@@ -33,7 +34,7 @@ def generate_activities_xml(
         "generated-datetime": date.today().isoformat(),
     })
 
-    projects = db.query(Project).filter(Project.status == "active").all()
+    projects = db.query(Project).filter(Project.status == "active", Project.deleted_at.is_(None)).all()
 
     for project in projects:
         activity = SubElement(root, "iati-activity", {
@@ -59,9 +60,9 @@ def generate_activities_xml(
             _el(activity, "sector", code=project.sector)
 
         if project.start_date:
-            _el(activity, "activity-date", iso_date=project.start_date.isoformat(), type="1")
+            _el(activity, "activity-date", attrib={"iso-date": project.start_date.isoformat(), "type": "1"})
         if project.end_date:
-            _el(activity, "activity-date", iso_date=project.end_date.isoformat(), type="3")
+            _el(activity, "activity-date", attrib={"iso-date": project.end_date.isoformat(), "type": "3"})
 
         status_map = {"active": "2", "completed": "3", "planned": "1"}
         _el(activity, "activity-status", code=status_map.get(project.status, "2"))
@@ -110,13 +111,13 @@ def generate_organization_xml(
     name_el = _el(org, "name")
     _el(name_el, "narrative", org_name)
 
-    grants = db.query(Grant).all()
+    grants = db.query(Grant).filter(Grant.deleted_at.is_(None)).all()
     for grant in grants:
         budget_el = _el(org, "total-budget")
         if grant.start_date:
-            _el(budget_el, "period-start", iso_date=grant.start_date.isoformat())
+            _el(budget_el, "period-start", attrib={"iso-date": grant.start_date.isoformat()})
         if grant.end_date:
-            _el(budget_el, "period-end", iso_date=grant.end_date.isoformat())
+            _el(budget_el, "period-end", attrib={"iso-date": grant.end_date.isoformat()})
         value_el = _el(budget_el, "value", str(grant.amount))
         value_el.set("currency", str(grant.currency.value) if hasattr(grant.currency, "value") else "USD")
         value_el.set("value-date", date.today().isoformat())
