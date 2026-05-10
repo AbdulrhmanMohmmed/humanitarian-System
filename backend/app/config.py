@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")  # development | production
 
     # ── Database ─────────────────────────────────────────────────────────────
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./humanitarian.db")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql+psycopg://hiaos:hiaos@localhost:5432/hiaos")
     DB_POOL_SIZE: int = int(os.getenv("DB_POOL_SIZE", "10"))
     DB_MAX_OVERFLOW: int = int(os.getenv("DB_MAX_OVERFLOW", "20"))
     DB_POOL_TIMEOUT: int = int(os.getenv("DB_POOL_TIMEOUT", "30"))
@@ -79,9 +79,16 @@ class Settings(BaseSettings):
     # ── Modules (Modular SaaS) ────────────────────────────────────────────────
     # List of modules to enable. If empty, only 'core' is enabled.
     # Available: meal, projects, finance, hr, inventory, data_collection, beneficiaries, documents, integrations
+    # ── Email / SMTP ─────────────────────────────────────────────────────────
+    SMTP_HOST: str = os.getenv("SMTP_HOST", "")
+    SMTP_PORT: int = int(os.getenv("SMTP_PORT", "587"))
+    SMTP_USER: str = os.getenv("SMTP_USER", "")
+    SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
+    SMTP_FROM: str = os.getenv("SMTP_FROM", "noreply@hiaos.org")
+
     ENABLED_MODULES: str = os.getenv(
         "ENABLED_MODULES",
-        "core,meal,projects,finance,hr,inventory,data_collection,beneficiaries,documents,integrations,procurement,grants,gis,logistics,payroll,ai_hub,strategic,risk,partners,financial_engine,communications"
+        "core,meal,projects,finance,hr,inventory,data_collection,beneficiaries,documents,integrations,procurement,grants,gis,logistics,payroll,ai_hub,strategic,risk,partners,financial_engine,communications,security,accounting,meal_advanced,hr_advanced,supply_chain,standards,protection,emergency,camps,nutrition,wash,education,livelihoods,early_warning,bulk,search"
     )
 
     @property

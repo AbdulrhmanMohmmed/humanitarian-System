@@ -28,3 +28,21 @@ from .organization import Organization, OrganizationMember
 from .chs import CHSCommitment, CHSAssessmentItem
 from .token_blacklist import TokenBlacklist, LoginAttempt
 from .webhook import Webhook, WebhookDelivery
+
+# Phase 5+: New models
+from .security import UserMFA, PasswordHistory, APIKey, UserSession, DataConsent, IPWhitelist, ErasureRequest
+from .accounting import Account, JournalEntry, JournalLine, BudgetLine, DonorReportTemplate
+from .meal import IndicatorDefinition, DisaggregatedValue, DataQualityRule, DataQualityIssue, BeneficiaryMatch, PDMTemplate
+from .hr_advanced import PayrollRecord, PerformanceReview, Training, TrainingParticipant, Timesheet, StaffSafetyCheckIn, EmployeeContract
+from .supply_chain import StockMovement, BatchLot, ExpiryAlert, BarcodeItem, LastMileDelivery, VehicleMaintenanceSchedule
+from .standards import SphereStandard, GrandBargainCommitment, DoNoHarmAnalysis, GenderMarker, DisabilityInclusionMarker
+from .new_modules import (
+    ProtectionCase, ProtectionReferral,
+    EmergencyResponse, RapidAssessment,
+    Camp, CampService,
+    NutritionScreening,
+    WaterPoint, WaterQualityTest,
+    School,
+    LivelihoodProgram,
+    EarlyWarningIndicator, EarlyWarningAlert,
+)
