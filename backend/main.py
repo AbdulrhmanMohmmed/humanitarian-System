@@ -32,6 +32,10 @@ from app.routers import (
     hr_payroll, ai_hub, strategic,
     financial_engine, risk_management, partners,
     communications, approvals, organizations, iati, chs, webhooks,
+    # Phase 5+ routers
+    mfa, security, accounting, meal_advanced, hr_advanced, supply_chain,
+    standards, protection, emergency, camp_management, nutrition, wash,
+    education, livelihoods, early_warning, bulk_ops, search,
 )
 from app.seed import seed_database
 
@@ -141,6 +145,23 @@ MODULE_MAP = {
     "beneficiaries": [beneficiaries.router],
     "documents": [documents.router],
     "integrations": [integrations.router, iati.router, webhooks.router],
+    # Phase 5+ modules
+    "security": [mfa.router, security.router],
+    "accounting": [accounting.router],
+    "meal_advanced": [meal_advanced.router],
+    "hr_advanced": [hr_advanced.router],
+    "supply_chain": [supply_chain.router],
+    "standards": [standards.router],
+    "protection": [protection.router],
+    "emergency": [emergency.router],
+    "camps": [camp_management.router],
+    "nutrition": [nutrition.router],
+    "wash": [wash.router],
+    "education": [education.router],
+    "livelihoods": [livelihoods.router],
+    "early_warning": [early_warning.router],
+    "bulk": [bulk_ops.router],
+    "search": [search.router],
 }
 
 # ── Versioned API mounting ─────────────────────────────────────────────────────

@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hiaos-db-backup
+spec:
+  schedule: "0 2 * * *"  # Daily at 2:00 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: backup
+              image: postgres:16-alpine
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: hiaos-secrets
+                      key: db-password
+                - name: PGHOST
+                  valueFrom:
+                    secretKeyRef:
+                      name: hiaos-secrets
+                      key: db-host
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                  BACKUP_FILE="/backups/hiaos_${TIMESTAMP}.sql.gz"
+                  pg_dump -U hiaos -h $PGHOST hiaos | gzip > $BACKUP_FILE
+                  echo "Backup completed: $BACKUP_FILE"
+                  # Cleanup backups older than 30 days
+                  find /backups -name "hiaos_*.sql.gz" -mtime +30 -delete
+              volumeMounts:
+                - name: backup-volume
+                  mountPath: /backups
+          restartPolicy: OnFailure
+          volumes:
+            - name: backup-volume
+              persistentVolumeClaim:
+                claimName: hiaos-backups-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hiaos-backups-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi

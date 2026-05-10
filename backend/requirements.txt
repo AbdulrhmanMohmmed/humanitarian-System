@@ -16,6 +16,8 @@ psycopg[binary]==3.2.3
 # Security & Rate Limiting
 slowapi==0.1.9
 cryptography==43.0.3
+pyotp==2.9.0
+qrcode==7.4.2
 
 # AI / OpenAI
 openai==1.54.0
