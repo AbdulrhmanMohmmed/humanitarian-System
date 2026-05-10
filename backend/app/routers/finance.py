@@ -2,12 +2,13 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.database import get_db
-from app.models import User
+from app.models import User, Grant, Transaction
 from app.schemas import (
     GrantCreate, GrantOut, GrantUpdate,
     TransactionCreate, TransactionOut, TransactionUpdate,
 )
 from app.auth import get_current_user
+from app.pagination import PaginationParams, paginate
 from app.services import finance_service as svc
 
 router = APIRouter(prefix="/finance", tags=["الإدارة المالية"])
@@ -15,14 +16,18 @@ router = APIRouter(prefix="/finance", tags=["الإدارة المالية"])
 
 # ── Grants ─────────────────────────────────────────────────────────────────────
 
-@router.get("/grants", response_model=List[GrantOut])
+@router.get("/grants")
 def list_grants(
-    skip: int = 0, limit: int = 50,
+    params: PaginationParams = Depends(),
     status: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return svc.list_grants(db, skip=skip, limit=limit, status=status)
+    query = db.query(Grant)
+    if status:
+        query = query.filter(Grant.status == status)
+    query = query.order_by(Grant.created_at.desc())
+    return paginate(query, params)
 
 
 @router.get("/grants/stats")
@@ -57,15 +62,21 @@ def delete_grant(grant_id: int, db: Session = Depends(get_db), current_user: Use
 
 # ── Transactions ───────────────────────────────────────────────────────────────
 
-@router.get("/transactions", response_model=List[TransactionOut])
+@router.get("/transactions")
 def list_transactions(
-    skip: int = 0, limit: int = 50,
+    params: PaginationParams = Depends(),
     type: Optional[str] = None,
     grant_id: Optional[int] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return svc.list_transactions(db, skip=skip, limit=limit, type=type, grant_id=grant_id)
+    query = db.query(Transaction)
+    if type:
+        query = query.filter(Transaction.type == type)
+    if grant_id:
+        query = query.filter(Transaction.grant_id == grant_id)
+    query = query.order_by(Transaction.created_at.desc())
+    return paginate(query, params)
 
 
 @router.get("/transactions/summary")

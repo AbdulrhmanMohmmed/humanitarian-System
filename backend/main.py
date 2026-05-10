@@ -15,6 +15,7 @@ from app.database import engine, Base
 from app.config import settings
 from app.middleware.logging import RequestLoggingMiddleware
 from app.middleware.error_handler import register_error_handlers
+from app.middleware.security_headers import SecurityHeadersMiddleware
 from app.websocket import router as ws_router
 
 # ── Import all routers ────────────────────────────────────────────────────────
@@ -30,7 +31,7 @@ from app.routers import (
     system_architecture, customization, procurement, grants, logistics,
     hr_payroll, ai_hub, strategic,
     financial_engine, risk_management, partners,
-    communications,
+    communications, approvals, organizations, iati, chs, webhooks,
 )
 from app.seed import seed_database
 
@@ -78,7 +79,10 @@ app.add_middleware(SlowAPIMiddleware)
 # 2. Structured request logging
 app.add_middleware(RequestLoggingMiddleware)
 
-# 3. CORS — explicit methods and headers (not wildcard)
+# 3. Security headers (CSP, X-Frame-Options, HSTS, etc.)
+app.add_middleware(SecurityHeadersMiddleware)
+
+# 4. CORS — explicit methods and headers (not wildcard)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
@@ -105,7 +109,7 @@ if settings.ENABLE_WEBSOCKETS:
 MODULE_MAP = {
     "core": [
         auth.router, dashboard.router, notifications.router, yemen_locations.router,
-        customization.router, system_architecture.router
+        customization.router, system_architecture.router, organizations.router,
     ],
     "meal": [
         monitoring.router, accountability.router, learning.router, logframe.router,
@@ -113,12 +117,13 @@ MODULE_MAP = {
         activities.router, needs_assessment.router, executive.router, iptt.router,
         field_visits.router, recommendations.router, compliance.router, audit.router,
         sector_indicators.router, assessment_tools.router, remote_monitoring.router,
-        feedback_loop.router, ai_assistant.router, scheduled_reports.router, reports.router
+        feedback_loop.router, ai_assistant.router, scheduled_reports.router, reports.router,
+        chs.router,
     ],
     "projects": [
         projects.router, phase_one.router, strategic_review.router, operating.router
     ],
-    "finance": [finance.router, cash.router, grants.router],
+    "finance": [finance.router, cash.router, grants.router, approvals.router],
     "hr": [hr.router],
     "inventory": [inventory.router],
     "procurement": [procurement.router],
@@ -135,7 +140,7 @@ MODULE_MAP = {
     "data_collection": [data_collection.router, kobo_integration.router, offline_sync.router],
     "beneficiaries": [beneficiaries.router],
     "documents": [documents.router],
-    "integrations": [integrations.router],
+    "integrations": [integrations.router, iati.router, webhooks.router],
 }
 
 # ── Versioned API mounting ─────────────────────────────────────────────────────

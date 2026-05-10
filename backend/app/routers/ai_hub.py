@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -6,6 +8,7 @@ from app.auth import get_current_user
 from app.config import settings
 from app.models.user import User
 from app.models.project import Project
+from app.services import ai_service
 
 router = APIRouter(prefix="/ai", tags=["AI Hub"])
 
@@ -131,4 +134,64 @@ def draft_report(
         "recommended_actions": [],
         "ai_powered": False,
         "note": "AI is not configured. Set OPENAI_API_KEY to enable real report generation.",
+    }
+
+
+class ComplaintClassifyRequest(BaseModel):
+    complaint_text: str
+    category_hint: str = ""
+
+
+class DataQualityRequest(BaseModel):
+    data_summary: str
+
+
+class NarrativeReportRequest(BaseModel):
+    project_name: str
+    indicators_summary: str
+    period: str = "Q1 2025"
+
+
+@router.post("/classify-complaint")
+def classify_complaint(
+    body: ComplaintClassifyRequest,
+    current_user: User = Depends(get_current_user),
+):
+    """AI-powered CFM complaint classification."""
+    return ai_service.classify_complaint(body.complaint_text, body.category_hint)
+
+
+@router.post("/data-quality-check")
+def data_quality_check(
+    body: DataQualityRequest,
+    current_user: User = Depends(get_current_user),
+):
+    """AI-powered data quality anomaly detection."""
+    return ai_service.check_data_quality(body.data_summary)
+
+
+@router.post("/narrative-report")
+def narrative_report(
+    body: NarrativeReportRequest,
+    current_user: User = Depends(get_current_user),
+):
+    """AI-powered narrative report generation from indicators."""
+    return ai_service.generate_narrative_report(
+        body.project_name, body.indicators_summary, body.period,
+    )
+
+
+@router.get("/status")
+def ai_status(current_user: User = Depends(get_current_user)):
+    """Check AI service availability."""
+    return {
+        "ai_enabled": settings.AI_ENABLED,
+        "model": settings.OPENAI_MODEL if settings.AI_ENABLED else None,
+        "features": [
+            "proposal_analysis",
+            "report_drafting",
+            "complaint_classification",
+            "data_quality_check",
+            "narrative_report",
+        ],
     }

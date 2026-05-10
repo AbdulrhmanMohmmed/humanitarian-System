@@ -2,23 +2,30 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from app.database import get_db
-from app.models import User
+from app.models import User, Project
 from app.schemas import ProjectCreate, ProjectUpdate, ProjectOut, ActivityCreate, ActivityOut
 from app.auth import get_current_user
+from app.pagination import PaginationParams, paginate
 from app.services import project_service as svc
 
 router = APIRouter(prefix="/projects", tags=["المشاريع"])
 
 
-@router.get("/", response_model=List[ProjectOut])
+@router.get("/")
 def list_projects(
-    skip: int = 0, limit: int = 50,
+    params: PaginationParams = Depends(),
     status: Optional[str] = None,
     sector: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return svc.list_projects(db, skip=skip, limit=limit, status=status, sector=sector)
+    query = db.query(Project).filter(Project.deleted_at.is_(None))
+    if status:
+        query = query.filter(Project.status == status)
+    if sector:
+        query = query.filter(Project.sector == sector)
+    query = query.order_by(Project.created_at.desc())
+    return paginate(query, params)
 
 
 @router.get("/stats")

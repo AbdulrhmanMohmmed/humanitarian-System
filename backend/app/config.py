@@ -85,6 +85,10 @@ class Settings(BaseSettings):
     )
 
     @property
+    def DEBUG(self) -> bool:
+        return not self.is_production
+
+    @property
     def enabled_modules_list(self) -> list[str]:
         mods = [m.strip().lower() for m in self.ENABLED_MODULES.split(",") if m.strip()]
         if "core" not in mods:

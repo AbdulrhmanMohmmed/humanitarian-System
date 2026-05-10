@@ -4,8 +4,9 @@ from datetime import datetime
 from app.database import Base
 from app.custom_values import CustomValuesMixin
 from .enums import ProjectStatus, Currency
+from .mixins import SoftDeleteMixin
 
-class Project(CustomValuesMixin, Base):
+class Project(SoftDeleteMixin, CustomValuesMixin, Base):
     __tablename__ = "projects"
 
     id = Column(Integer, primary_key=True, index=True)
