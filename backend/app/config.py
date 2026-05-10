@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")  # development | production
 
     # ── Database ─────────────────────────────────────────────────────────────
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./humanitarian.db")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql+psycopg://hiaos:hiaos@localhost:5432/hiaos")
     DB_POOL_SIZE: int = int(os.getenv("DB_POOL_SIZE", "10"))
     DB_MAX_OVERFLOW: int = int(os.getenv("DB_MAX_OVERFLOW", "20"))
     DB_POOL_TIMEOUT: int = int(os.getenv("DB_POOL_TIMEOUT", "30"))
