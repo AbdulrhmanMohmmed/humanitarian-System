@@ -5,7 +5,7 @@ Tracks compliance across all 9 CHS commitments with evidence and scoring.
 
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, Float, Integer, String, Text
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -29,7 +29,7 @@ class CHSAssessmentItem(Base):
     __tablename__ = "chs_assessment_items"
 
     id = Column(Integer, primary_key=True, index=True)
-    commitment_id = Column(Integer, nullable=False, index=True)
+    commitment_id = Column(Integer, ForeignKey("chs_commitments.id"), nullable=False, index=True)
     assessment_period = Column(String(50))
     score = Column(Float, default=0)
     max_score = Column(Float, default=5)

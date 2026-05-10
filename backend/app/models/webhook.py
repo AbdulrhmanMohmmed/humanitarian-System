@@ -3,7 +3,7 @@
 import enum
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, Integer, String, Text
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -37,7 +37,7 @@ class WebhookDelivery(Base):
     __tablename__ = "webhook_deliveries"
 
     id = Column(Integer, primary_key=True, index=True)
-    webhook_id = Column(Integer, nullable=False, index=True)
+    webhook_id = Column(Integer, ForeignKey("webhooks.id"), nullable=False, index=True)
     event = Column(String(100), nullable=False)
     payload = Column(Text)
     response_status = Column(Integer)
