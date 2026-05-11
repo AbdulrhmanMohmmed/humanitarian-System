@@ -84,12 +84,13 @@ def process_erasure(db: Session, request_id: int, approved_by: int, approve: boo
         from app.models import Beneficiary
         ben = db.query(Beneficiary).filter(Beneficiary.id == req.beneficiary_id).first()
         if ben:
-            ben.full_name = "[ERASED]"
+            ben.first_name = "[ERASED]"
+            ben.last_name = "[ERASED]"
             ben.national_id = None
             ben.phone = None
-            ben.email = None
-            if hasattr(ben, "soft_delete"):
-                ben.soft_delete(approved_by)
+            if hasattr(ben, "deleted_at"):
+                ben.deleted_at = datetime.utcnow()
+                ben.deleted_by = approved_by
     else:
         req.status = "rejected"
         req.approved_by = approved_by
