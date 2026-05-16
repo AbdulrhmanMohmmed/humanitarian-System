@@ -86,7 +86,6 @@ def wash_dashboard(db: Session = Depends(get_db), current_user: User = Depends(g
     total = db.query(WaterPoint).count()
     functional = db.query(WaterPoint).filter(WaterPoint.status == "functional").count()
     safe = db.query(WaterPoint).filter(WaterPoint.water_quality_status == "safe").count()
-    total_served = db.query(WaterPoint).with_entities(
-        db.query(WaterPoint).with_entities(WaterPoint.population_served).subquery()
-    ).count()
-    return {"total_water_points": total, "functional": functional, "safe_water": safe}
+    from sqlalchemy import func
+    total_served = db.query(func.coalesce(func.sum(WaterPoint.population_served), 0)).scalar()
+    return {"total_water_points": total, "functional": functional, "safe_water": safe, "total_served": int(total_served)}

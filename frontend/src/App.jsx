@@ -95,6 +95,22 @@ const PartnerPortal        = lazy(() => import('./pages/PartnerPortal'));
 const Documents            = lazy(() => import('./pages/Documents'));
 const DevConsole           = lazy(() => import('./pages/DevConsole'));
 
+// ── New Modules (Groups A-P) ────────────────────────────────────────────────
+const SecurityCenter       = lazy(() => import('./pages/SecurityCenter'));
+const AccountingPage       = lazy(() => import('./pages/AccountingPage'));
+const ProtectionPage       = lazy(() => import('./pages/ProtectionPage'));
+const EmergencyPage        = lazy(() => import('./pages/EmergencyPage'));
+const CampManagement       = lazy(() => import('./pages/CampManagement'));
+const NutritionPage        = lazy(() => import('./pages/NutritionPage'));
+const WashPage             = lazy(() => import('./pages/WashPage'));
+const EducationPage        = lazy(() => import('./pages/EducationPage'));
+const LivelihoodsPage      = lazy(() => import('./pages/LivelihoodsPage'));
+const EarlyWarningPage     = lazy(() => import('./pages/EarlyWarningPage'));
+const SupplyChainPage      = lazy(() => import('./pages/SupplyChainPage'));
+const HRAdvancedPage       = lazy(() => import('./pages/HRAdvancedPage'));
+const StandardsPage        = lazy(() => import('./pages/StandardsPage'));
+const BulkOperationsPage   = lazy(() => import('./pages/BulkOperationsPage'));
+
 // ── Loading Fallback ─────────────────────────────────────────────────────────
 
 function PageLoader() {
@@ -256,6 +272,22 @@ function AppRoutes() {
         <Route path="/integrations"           element={<P element={<Integrations />} />} />
         <Route path="/kanban"                 element={<P element={<KanbanPage />} />} />
         <Route path="/calendar"              element={<P element={<CalendarPage />} />} />
+
+        {/* New Humanitarian Modules (Groups A-P) */}
+        <Route path="/security-center"       element={<P element={<SecurityCenter />} />} />
+        <Route path="/accounting"            element={<P element={<AccountingPage />} />} />
+        <Route path="/protection"            element={<P element={<ProtectionPage />} />} />
+        <Route path="/emergency"             element={<P element={<EmergencyPage />} />} />
+        <Route path="/camps"                 element={<P element={<CampManagement />} />} />
+        <Route path="/nutrition"             element={<P element={<NutritionPage />} />} />
+        <Route path="/wash"                  element={<P element={<WashPage />} />} />
+        <Route path="/education"             element={<P element={<EducationPage />} />} />
+        <Route path="/livelihoods"           element={<P element={<LivelihoodsPage />} />} />
+        <Route path="/early-warning"         element={<P element={<EarlyWarningPage />} />} />
+        <Route path="/supply-chain"          element={<P element={<SupplyChainPage />} />} />
+        <Route path="/hr-advanced"           element={<P element={<HRAdvancedPage />} />} />
+        <Route path="/standards"             element={<P element={<StandardsPage />} />} />
+        <Route path="/bulk-operations"       element={<P element={<BulkOperationsPage />} />} />
 
         {/* 404 Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
