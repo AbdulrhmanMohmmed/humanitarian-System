@@ -67,7 +67,17 @@ import {
   Truck,
   Handshake,
   Terminal,
-  Palette
+  Palette,
+  Siren,
+  Apple,
+  Droplets,
+  GraduationCap,
+  Briefcase,
+  AlertTriangle,
+  Scale,
+  Database,
+  Home as HomeIcon,
+  Key,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -96,6 +106,12 @@ const SECTION_COLORS = {
   9:  { dot: 'bg-teal-600',    text: 'text-teal-600',    active: 'bg-teal-600/10 text-teal-600' },
   10: { dot: 'bg-indigo-500',  text: 'text-indigo-500',  active: 'bg-indigo-500/10 text-indigo-500' },
   11: { dot: 'bg-slate-500',   text: 'text-slate-500',   active: 'bg-slate-500/10 text-slate-500' },
+  12: { dot: 'bg-purple-600',  text: 'text-purple-600',  active: 'bg-purple-600/10 text-purple-600' },
+  13: { dot: 'bg-red-600',     text: 'text-red-600',     active: 'bg-red-600/10 text-red-600' },
+  14: { dot: 'bg-orange-500',  text: 'text-orange-500',  active: 'bg-orange-500/10 text-orange-500' },
+  15: { dot: 'bg-cyan-600',    text: 'text-cyan-600',    active: 'bg-cyan-600/10 text-cyan-600' },
+  16: { dot: 'bg-rose-500',    text: 'text-rose-500',    active: 'bg-rose-500/10 text-rose-500' },
+  17: { dot: 'bg-gray-600',    text: 'text-gray-600',    active: 'bg-gray-600/10 text-gray-600' },
 };
 
 const navSections = [
@@ -261,6 +277,62 @@ const navSections = [
       { path: '/branding-settings',   label: 'إعدادات الهوية البصرية',  icon: Palette, module: 'core' },
     ],
   },
+  {
+    id: 12,
+    title: '🔐 الأمان والمحاسبة المتقدمة',
+    collapsible: true,
+    items: [
+      { path: '/security-center',    label: 'مركز الأمان (MFA/API)',   icon: Key, module: 'core' },
+      { path: '/accounting',         label: 'المحاسبة والقيد المزدوج',  icon: Calculator, module: 'finance' },
+    ],
+  },
+  {
+    id: 13,
+    title: '🆘 الحماية والطوارئ',
+    collapsible: true,
+    items: [
+      { path: '/protection',         label: 'حالات الحماية',           icon: Shield, module: 'core' },
+      { path: '/emergency',          label: 'الاستجابة للطوارئ',        icon: Siren, module: 'core' },
+      { path: '/camps',              label: 'إدارة المخيمات',           icon: HomeIcon, module: 'core' },
+    ],
+  },
+  {
+    id: 14,
+    title: '🍎 التغذية والمياه والتعليم',
+    collapsible: true,
+    items: [
+      { path: '/nutrition',          label: 'إدارة التغذية',            icon: Apple, module: 'core' },
+      { path: '/wash',               label: 'المياه والصرف (WASH)',     icon: Droplets, module: 'core' },
+      { path: '/education',          label: 'التعليم في الطوارئ',       icon: GraduationCap, module: 'core' },
+      { path: '/livelihoods',        label: 'سبل العيش والتمكين',       icon: Briefcase, module: 'core' },
+    ],
+  },
+  {
+    id: 15,
+    title: '⚠️ الإنذار المبكر وسلاسل الإمداد',
+    collapsible: true,
+    items: [
+      { path: '/early-warning',      label: 'نظام الإنذار المبكر',      icon: AlertTriangle, module: 'core' },
+      { path: '/supply-chain',       label: 'سلسلة الإمداد المتقدمة',   icon: Package, module: 'core' },
+      { path: '/hr-advanced',        label: 'الموارد البشرية المتقدمة', icon: Users, module: 'core' },
+    ],
+  },
+  {
+    id: 16,
+    title: '📏 المعايير الدولية',
+    collapsible: true,
+    items: [
+      { path: '/standards',          label: 'Sphere والمعايير الدولية', icon: Scale, module: 'core' },
+    ],
+  },
+  {
+    id: 17,
+    title: '📦 العمليات المجمّعة',
+    collapsible: true,
+    items: [
+      { path: '/bulk-operations',    label: 'الاستيراد والتصدير المجمّع', icon: Database, module: 'core' },
+    ],
+  },
 ];
 
 const pathPermissions = {
@@ -318,6 +390,20 @@ const pathPermissions = {
   '/integrations': ['settings.manage'],
   '/ai-insights': ['meal.read'],
   '/executive': ['audit.read', 'reports.read'],
+  '/security-center': ['settings.manage'],
+  '/accounting': ['finance.read'],
+  '/protection': ['cfm.read'],
+  '/emergency': ['cfm.read'],
+  '/camps': ['cfm.read'],
+  '/nutrition': ['meal.read'],
+  '/wash': ['meal.read'],
+  '/education': ['meal.read'],
+  '/livelihoods': ['meal.read'],
+  '/early-warning': ['meal.read'],
+  '/supply-chain': ['inventory.read'],
+  '/hr-advanced': ['hr.read'],
+  '/standards': ['audit.read'],
+  '/bulk-operations': ['settings.manage'],
 };
 
 export default function Layout({ children }) {

@@ -108,7 +108,7 @@ def get_trial_balance(db: Session) -> list[dict]:
             func.coalesce(func.sum(JournalLine.credit), 0),
         )
         .outerjoin(JournalLine, JournalLine.account_id == Account.id)
-        .outerjoin(JournalEntry, JournalEntry.id == JournalLine.journal_entry_id)
+        .outerjoin(JournalEntry, (JournalEntry.id == JournalLine.journal_entry_id) & (JournalEntry.is_posted == True))
         .group_by(Account.id)
         .order_by(Account.code)
         .all()
