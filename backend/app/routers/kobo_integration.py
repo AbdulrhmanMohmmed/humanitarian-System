@@ -128,8 +128,11 @@ def import_kobo_submissions(
 @router.get("/connection-test")
 def test_kobo_connection(current_user: User = Depends(get_current_user)):
     """Test KoBoToolbox API connectivity"""
+    from app.config import settings
+    has_token = bool(getattr(settings, "KOBO_API_TOKEN", ""))
     return {
-        "status": "ready",
+        "status": "connected" if has_token else "ready",
+        "configured": has_token,
         "supported_versions": ["KoBoToolbox v2", "ODK Central v1"],
         "export_formats": ["XLSForm JSON", "XLS", "XML"],
         "import_formats": ["KoBo API JSON", "CSV", "ODK Briefcase"],
@@ -139,3 +142,36 @@ def test_kobo_connection(current_user: User = Depends(get_current_user)):
             "odk_central": "https://your-server.odk.cloud/v1/",
         },
     }
+
+
+@router.get("/assets")
+async def list_kobo_assets(current_user: User = Depends(get_current_user)):
+    """List all forms/assets from connected KoBoToolbox account."""
+    from app.services.kobo_service import list_kobo_assets as _list
+    return await _list()
+
+
+@router.get("/assets/{asset_uid}/submissions")
+async def get_kobo_submissions(
+    asset_uid: str,
+    limit: int = 100,
+    current_user: User = Depends(get_current_user),
+):
+    """Fetch submissions for a KoBo asset and return them."""
+    from app.services.kobo_service import fetch_kobo_submissions
+    return await fetch_kobo_submissions(asset_uid, limit)
+
+
+@router.post("/push-form/{form_id}")
+async def push_form_to_kobo(
+    form_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Export form to KoBoToolbox by pushing XLSForm data."""
+    form = db.query(Form).filter(Form.id == form_id).first()
+    if not form:
+        raise HTTPException(status_code=404, detail="النموذج غير موجود")
+    xlsform = export_to_xlsform(form_id, db, current_user)
+    from app.services.kobo_service import push_form_to_kobo as _push
+    return await _push(xlsform)

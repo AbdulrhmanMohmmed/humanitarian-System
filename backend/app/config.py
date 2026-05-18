@@ -86,6 +86,10 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
     SMTP_FROM: str = os.getenv("SMTP_FROM", "noreply@hiaos.org")
 
+    # ── KoBoToolbox Integration ──────────────────────────────────────────────
+    KOBO_API_URL: str = os.getenv("KOBO_API_URL", "https://kf.kobotoolbox.org/api/v2")
+    KOBO_API_TOKEN: str = os.getenv("KOBO_API_TOKEN", "")
+
     ENABLED_MODULES: str = os.getenv(
         "ENABLED_MODULES",
         "core,meal,projects,finance,hr,inventory,data_collection,beneficiaries,documents,integrations,procurement,grants,gis,logistics,payroll,ai_hub,strategic,risk,partners,financial_engine,communications,security,accounting,meal_advanced,hr_advanced,supply_chain,standards,protection,emergency,camps,nutrition,wash,education,livelihoods,early_warning,bulk,search"

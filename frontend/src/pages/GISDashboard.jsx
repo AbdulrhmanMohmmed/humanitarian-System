@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   Map as MapIcon, Globe, MapPin, Navigation,
   Layers, Info, Search, Filter,
@@ -8,18 +8,57 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../lib/utils';
 import api from '../services/api';
 
+/* ── Leaflet (real interactive map) ─────────────────────────────────────── */
+import { MapContainer, TileLayer, Marker, Popup, useMap, CircleMarker, LayersControl } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Fix default Leaflet icon paths (bundler issue)
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
+
+const projectIcon = (selected) =>
+  L.divIcon({
+    className: '',
+    html: `<div style="width:${selected ? 20 : 12}px;height:${selected ? 20 : 12}px;border-radius:50%;background:${selected ? '#3b82f6' : '#2563eb'};border:2px solid #fff;box-shadow:0 0 8px rgba(37,99,235,.5)"></div>`,
+    iconSize: [selected ? 20 : 12, selected ? 20 : 12],
+    iconAnchor: [selected ? 10 : 6, selected ? 10 : 6],
+  });
+
+/* Fly to selected point */
+function FlyToPoint({ center }) {
+  const map = useMap();
+  useEffect(() => {
+    if (center) map.flyTo(center, 10, { duration: 1 });
+  }, [center, map]);
+  return null;
+}
+
+/* ── Main Component ─────────────────────────────────────────────────────── */
 const GISDashboard = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPoint, setSelectedPoint] = useState(null);
-  const [mapMode, setMapMode] = useState('projects'); // projects, beneficiaries, needs
+  const [mapMode, setMapMode] = useState('projects');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeLayers, setActiveLayers] = useState({
+    fieldSites: true,
+    idpClusters: false,
+    waterFuel: true,
+    healthFacilities: false,
+    ipcDensity: true,
+  });
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
         const { data } = await api.get('/api/projects/');
-        // Filter projects that have coordinates
-        setProjects(data.filter(p => p.latitude && p.longitude));
+        const items = Array.isArray(data) ? data : data.items || [];
+        setProjects(items.filter(p => p.latitude && p.longitude));
       } catch (err) {
         console.error('Failed to fetch GIS data', err);
       } finally {
@@ -29,54 +68,116 @@ const GISDashboard = () => {
     fetchProjects();
   }, []);
 
-  // Yemen bounding box (approximate for SVG scaling)
-  // Lat: 12.1 to 19.0, Lng: 42.5 to 54.5
-  const mapWidth = 800;
-  const mapHeight = 500;
-  
-  const getX = (lng) => ((lng - 42.5) / (54.5 - 42.5)) * mapWidth;
-  const getY = (lat) => mapHeight - ((lat - 12.1) / (19.0 - 12.1)) * mapHeight;
+  /* Yemen default center */
+  const yemenCenter = [15.5, 48.0];
+  const defaultZoom = 6;
+
+  const filteredProjects = projects.filter(p =>
+    !searchQuery || (p.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (p.governorate || '').toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const toggleLayer = (key) => setActiveLayers(prev => ({ ...prev, [key]: !prev[key] }));
 
   return (
     <div className="h-[calc(100vh-120px)] flex flex-col gap-6 animate-in fade-in duration-1000">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 flex items-center gap-3">
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-3">
             <div className="p-2 bg-blue-600 rounded-xl text-white shadow-lg">
               <MapIcon size={20} />
             </div>
             الرادار المكاني GIS
           </h1>
-          <p className="text-slate-500 font-bold text-sm mt-1">التحليل الجغرافي الموحد للمشاريع والاحتياجات الميدانية</p>
+          <p className="text-slate-500 dark:text-slate-400 font-bold text-sm mt-1">التحليل الجغرافي الموحد للمشاريع والاحتياجات الميدانية</p>
         </div>
-        <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-xl">
-          <button 
-            onClick={() => setMapMode('projects')}
-            className={cn('px-4 py-1.5 rounded-lg text-xs font-black transition-all', mapMode === 'projects' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500')}
-          >المشاريع</button>
-          <button 
-            onClick={() => setMapMode('beneficiaries')}
-            className={cn('px-4 py-1.5 rounded-lg text-xs font-black transition-all', mapMode === 'beneficiaries' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500')}
-          >المستفيدين</button>
-          <button 
-            onClick={() => setMapMode('needs')}
-            className={cn('px-4 py-1.5 rounded-lg text-xs font-black transition-all', mapMode === 'needs' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500')}
-          >الاحتياجات</button>
+        <div className="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+          {[
+            { key: 'projects', label: 'المشاريع' },
+            { key: 'beneficiaries', label: 'المستفيدين' },
+            { key: 'needs', label: 'الاحتياجات' },
+          ].map(m => (
+            <button
+              key={m.key}
+              onClick={() => setMapMode(m.key)}
+              className={cn('px-4 py-1.5 rounded-lg text-xs font-black transition-all', mapMode === m.key ? 'bg-white dark:bg-slate-700 text-blue-600 shadow-sm' : 'text-slate-500')}
+            >{m.label}</button>
+          ))}
         </div>
       </div>
 
       <div className="flex-1 flex gap-6 min-h-0">
-        {/* Map Container */}
-        <div className="flex-1 bg-slate-900 rounded-[2.5rem] relative overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800">
-          {/* Map Controls Overlay */}
-          <div className="absolute top-6 right-6 flex flex-col gap-2 z-10">
-            <button className="w-10 h-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl flex items-center justify-center text-white hover:bg-white/20 transition-all"><Maximize2 size={18} /></button>
-            <button className="w-10 h-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl flex items-center justify-center text-white hover:bg-white/20 transition-all"><Satellite size={18} /></button>
-            <button className="w-10 h-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl flex items-center justify-center text-white hover:bg-white/20 transition-all"><Layers size={18} /></button>
-          </div>
+        {/* Map Container — real Leaflet */}
+        <div className="flex-1 rounded-[2.5rem] relative overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800">
+          {loading ? (
+            <div className="absolute inset-0 bg-slate-900 flex items-center justify-center">
+              <div className="animate-spin w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full" />
+            </div>
+          ) : (
+            <MapContainer
+              center={yemenCenter}
+              zoom={defaultZoom}
+              style={{ width: '100%', height: '100%' }}
+              zoomControl={false}
+            >
+              <LayersControl position="topright">
+                <LayersControl.BaseLayer checked name="خريطة عادية">
+                  <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a>'
+                  />
+                </LayersControl.BaseLayer>
+                <LayersControl.BaseLayer name="قمر صناعي">
+                  <TileLayer
+                    url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                    attribution='&copy; Esri'
+                  />
+                </LayersControl.BaseLayer>
+                <LayersControl.BaseLayer name="تضاريس">
+                  <TileLayer
+                    url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; OpenTopoMap'
+                  />
+                </LayersControl.BaseLayer>
+              </LayersControl>
 
-          <div className="absolute bottom-6 left-6 z-10 p-4 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 max-w-xs">
+              {/* Fly to selected */}
+              <FlyToPoint center={selectedPoint ? [selectedPoint.latitude, selectedPoint.longitude] : null} />
+
+              {/* Project markers */}
+              {filteredProjects.map((p) => (
+                <Marker
+                  key={p.id}
+                  position={[p.latitude, p.longitude]}
+                  icon={projectIcon(selectedPoint?.id === p.id)}
+                  eventHandlers={{
+                    click: () => setSelectedPoint(p),
+                  }}
+                >
+                  <Popup>
+                    <div className="text-right" dir="rtl">
+                      <strong>{p.name}</strong>
+                      {p.governorate && <p className="text-xs text-gray-500">{p.governorate}</p>}
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
+
+              {/* IPC density heatmap circles (when enabled) */}
+              {activeLayers.ipcDensity && filteredProjects.map(p => (
+                <CircleMarker
+                  key={`heat-${p.id}`}
+                  center={[p.latitude, p.longitude]}
+                  radius={Math.min(20, (p.actual_beneficiaries || 100) / 100)}
+                  pathOptions={{ color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.2, weight: 0 }}
+                />
+              ))}
+            </MapContainer>
+          )}
+
+          {/* Stats overlay */}
+          <div className="absolute bottom-6 left-6 z-[1000] p-4 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 max-w-xs">
             <h4 className="text-white font-black text-xs flex items-center gap-2 mb-2">
                <Activity size={14} className="text-emerald-400" />
                إحصائيات النطاق الحالي
@@ -84,93 +185,55 @@ const GISDashboard = () => {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <p className="text-[10px] text-white/50 font-bold">مشاريع</p>
-                <p className="text-lg font-black text-white">{projects.length}</p>
+                <p className="text-lg font-black text-white">{filteredProjects.length}</p>
               </div>
               <div>
                 <p className="text-[10px] text-white/50 font-bold">تغطية</p>
-                <p className="text-lg font-black text-white">84%</p>
+                <p className="text-lg font-black text-white">{filteredProjects.length > 0 ? '84%' : '0%'}</p>
               </div>
             </div>
           </div>
 
-          {/* Symbolic Yemen SVG Map */}
-          <div className="absolute inset-0 flex items-center justify-center p-12">
-            <svg 
-              viewBox={`0 0 ${mapWidth} ${mapHeight}`} 
-              className="w-full h-full opacity-40 drop-shadow-[0_0_30px_rgba(59,130,246,0.3)]"
-              style={{ filter: 'grayscale(0.5)' }}
-            >
-              {/* This is a simplified Yemen shape for visualization */}
-              <path 
-                d="M150,300 L200,280 L250,290 L300,270 L350,285 L450,260 L550,275 L650,250 L750,230 L780,250 L750,320 L650,350 L550,380 L450,420 L350,450 L250,430 L150,410 L100,380 Z" 
-                fill="#1e293b" 
-                stroke="#334155" 
-                strokeWidth="2" 
-              />
-              
-              {/* Render Points */}
-              {projects.map((p) => (
-                <g key={p.id}>
-                  <motion.circle
-                    initial={{ r: 0 }}
-                    animate={{ r: selectedPoint?.id === p.id ? 12 : 6 }}
-                    cx={getX(p.longitude || 45)}
-                    cy={getY(p.latitude || 15)}
-                    className={cn(
-                      "cursor-pointer transition-all",
-                      selectedPoint?.id === p.id ? "fill-blue-400" : "fill-blue-600 hover:fill-blue-400"
-                    )}
-                    onClick={() => setSelectedPoint(p)}
-                  />
-                  {selectedPoint?.id === p.id && (
-                    <motion.circle
-                      initial={{ r: 6 }}
-                      animate={{ r: 30, opacity: 0 }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                      cx={getX(p.longitude || 45)}
-                      cy={getY(p.latitude || 15)}
-                      className="fill-blue-400/20"
-                    />
-                  )}
-                </g>
-              ))}
-            </svg>
-          </div>
-
+          {/* Selected Point Detail Panel */}
           <AnimatePresence>
             {selectedPoint && (
               <motion.div 
                 initial={{ x: 300, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: 300, opacity: 0 }}
-                className="absolute top-0 right-0 h-full w-80 bg-white/95 backdrop-blur-xl border-l border-slate-200 p-8 shadow-2xl overflow-y-auto"
+                className="absolute top-0 right-0 h-full w-80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-l border-slate-200 dark:border-slate-700 p-8 shadow-2xl overflow-y-auto z-[1000]"
               >
                 <button 
                   onClick={() => setSelectedPoint(null)}
-                  className="absolute top-6 left-6 text-slate-400 hover:text-slate-600"
+                  className="absolute top-6 left-6 text-slate-400 hover:text-slate-600 dark:hover:text-white"
                 >إغلاق</button>
 
                 <div className="mt-8">
-                  <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 mb-6">
+                  <div className="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 mb-6">
                     <MapPin size={32} />
                   </div>
-                  <h3 className="text-xl font-black text-slate-900">{selectedPoint.name}</h3>
-                  <p className="text-sm font-bold text-slate-500 mt-2">{selectedPoint.governorate} - {selectedPoint.district}</p>
+                  <h3 className="text-xl font-black text-slate-900 dark:text-white">{selectedPoint.name}</h3>
+                  <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-2">{selectedPoint.governorate} - {selectedPoint.district}</p>
+                  <p className="text-xs text-slate-400 mt-1">
+                    {selectedPoint.latitude?.toFixed(4)}, {selectedPoint.longitude?.toFixed(4)}
+                  </p>
                   
                   <div className="mt-8 space-y-6">
                     <div>
                       <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">الحالة الراهنة</p>
-                      <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-black rounded-full">نشط ميدانياً</span>
+                      <span className="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-black rounded-full">
+                        {selectedPoint.status || 'نشط ميدانياً'}
+                      </span>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="p-4 rounded-2xl bg-slate-50">
+                      <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800">
                         <p className="text-[10px] font-bold text-slate-400">المستفيدين</p>
-                        <p className="text-lg font-black text-slate-900">{selectedPoint.actual_beneficiaries}</p>
+                        <p className="text-lg font-black text-slate-900 dark:text-white">{selectedPoint.actual_beneficiaries || 0}</p>
                       </div>
-                      <div className="p-4 rounded-2xl bg-slate-50">
+                      <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800">
                         <p className="text-[10px] font-bold text-slate-400">الميزانية</p>
-                        <p className="text-lg font-black text-slate-900">${selectedPoint.budget / 1000}K</p>
+                        <p className="text-lg font-black text-slate-900 dark:text-white">${((selectedPoint.budget || 0) / 1000).toFixed(0)}K</p>
                       </div>
                     </div>
 
@@ -187,38 +250,44 @@ const GISDashboard = () => {
 
         {/* Sidebar: Map Filters & Layers */}
         <div className="w-80 flex flex-col gap-6">
-          <div className="p-6 rounded-[2rem] bg-white border border-slate-100 shadow-sm flex-1 overflow-y-auto custom-scrollbar">
-            <h4 className="font-black text-slate-900 mb-6 flex items-center gap-2">
+          <div className="p-6 rounded-[2rem] bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm flex-1 overflow-y-auto custom-scrollbar">
+            <h4 className="font-black text-slate-900 dark:text-white mb-6 flex items-center gap-2">
               <Filter className="text-blue-600" />
               طبقات البيانات
             </h4>
             
             <div className="space-y-4">
               {[
-                { label: 'المواقع الميدانية', active: true },
-                { label: 'تجمعات النازحين', active: false },
-                { label: 'توزيع المياه والوقود', active: true },
-                { label: 'المرافق الصحية', active: false },
-                { label: 'كثافة الاحتياج IPC', active: true },
+                { key: 'fieldSites', label: 'المواقع الميدانية' },
+                { key: 'idpClusters', label: 'تجمعات النازحين' },
+                { key: 'waterFuel', label: 'توزيع المياه والوقود' },
+                { key: 'healthFacilities', label: 'المرافق الصحية' },
+                { key: 'ipcDensity', label: 'كثافة الاحتياج IPC' },
               ].map((layer) => (
-                <div key={layer.label} className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 transition-all cursor-pointer group">
-                  <span className="text-xs font-bold text-slate-600 group-hover:text-blue-600">{layer.label}</span>
-                  <div className={cn('w-8 h-4 rounded-full relative transition-all', layer.active ? 'bg-blue-600' : 'bg-slate-200')}>
-                    <div className={cn('absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all', layer.active ? 'left-4.5' : 'left-0.5')} />
+                <div
+                  key={layer.key}
+                  onClick={() => toggleLayer(layer.key)}
+                  className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all cursor-pointer group"
+                >
+                  <span className="text-xs font-bold text-slate-600 dark:text-slate-300 group-hover:text-blue-600">{layer.label}</span>
+                  <div className={cn('w-8 h-4 rounded-full relative transition-all', activeLayers[layer.key] ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-700')}>
+                    <div className={cn('absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all', activeLayers[layer.key] ? 'left-4.5' : 'left-0.5')} />
                   </div>
                 </div>
               ))}
             </div>
 
-            <hr className="my-6 border-slate-100" />
+            <hr className="my-6 border-slate-100 dark:border-slate-800" />
 
-            <h4 className="font-black text-slate-900 mb-4 text-xs">البحث الجغرافي</h4>
+            <h4 className="font-black text-slate-900 dark:text-white mb-4 text-xs">البحث الجغرافي</h4>
             <div className="relative">
               <Search className="absolute right-4 top-3.5 text-slate-400" size={16} />
               <input 
-                type="text" 
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
                 placeholder="ابحث عن مديرية أو قرية..."
-                className="w-full h-11 bg-slate-50 border-none rounded-xl pr-11 text-xs font-bold focus:ring-2 ring-blue-500/20"
+                className="w-full h-11 bg-slate-50 dark:bg-slate-800 border-none rounded-xl pr-11 text-xs font-bold focus:ring-2 ring-blue-500/20"
               />
             </div>
           </div>
