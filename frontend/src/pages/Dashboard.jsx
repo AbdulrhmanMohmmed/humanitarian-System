@@ -56,10 +56,10 @@ export default function Dashboard() {
       api.get('/cash/transfers/stats').then((r) => setCash(r.data)).catch(() => {}),
       api.get('/inventory/items/stats').then((r) => setInventory(r.data)).catch(() => {}),
       api.get('/analytics/risk-overview').then((r) => setRisk(r.data)).catch(() => {}),
-      api.get('/projects/').then((r) => setProjects(r.data)).catch(() => {}),
-      api.get('/activities/').then((r) => setActivities(r.data)).catch(() => {}),
-      api.get('/field-visits/').then((r) => setVisits(r.data)).catch(() => {}),
-      api.get('/monitoring/indicators').then((r) => setIndicators(r.data)).catch(() => {}),
+      api.get('/projects/').then((r) => setProjects(Array.isArray(r.data) ? r.data : r.data.items || [])).catch(() => {}),
+      api.get('/activities/').then((r) => setActivities(Array.isArray(r.data) ? r.data : r.data.items || [])).catch(() => {}),
+      api.get('/field-visits/').then((r) => setVisits(Array.isArray(r.data) ? r.data : r.data.items || [])).catch(() => {}),
+      api.get('/monitoring/indicators').then((r) => setIndicators(Array.isArray(r.data) ? r.data : r.data.items || [])).catch(() => {}),
       api.get('/analytics/geographic').then((r) => setGeo(r.data)).catch(() => {}),
     ];
     Promise.allSettled(calls).finally(() => setLoading(false));
