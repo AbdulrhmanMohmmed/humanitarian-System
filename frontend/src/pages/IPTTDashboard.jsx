@@ -19,8 +19,10 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../lib/utils';
 import StatusBadge from '../components/StatusBadge';
+import { useToast } from '../contexts/ToastContext';
 
 export default function IPTTDashboard() {
+  const toast = useToast();
   const [summary, setSummary] = useState(null);
   const [alerts, setAlerts] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -122,8 +124,8 @@ export default function IPTTDashboard() {
             </select>
          </div>
          <div className="flex bg-white dark:bg-slate-900 p-1.5 rounded-2xl border border-[var(--border)]">
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20">Monthly</button>
-            <button className="px-4 py-2 text-slate-400 hover:text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest">Cumulative</button>
+            <button onClick={() => { toast.show('تم التبديل إلى العرض الشهري', 'info'); }} className="px-4 py-2 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20">Monthly</button>
+            <button onClick={() => { toast.show('تم التبديل إلى العرض التراكمي', 'info'); }} className="px-4 py-2 text-slate-400 hover:text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest">Cumulative</button>
          </div>
          <button className="h-12 w-12 flex items-center justify-center bg-white dark:bg-slate-900 rounded-2xl border border-[var(--border)] text-slate-400 hover:text-blue-600 transition-all"><Download size={18} /></button>
       </div>

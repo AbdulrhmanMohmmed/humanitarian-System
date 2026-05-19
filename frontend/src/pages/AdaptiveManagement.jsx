@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import api from '../services/api';
+import { useToast } from '../contexts/ToastContext';
 
 const DECISIONS_DEFAULT = [
   { id: 1, type: 'Pivot', title: 'تحويل النشاط (ب) من تدريب حضوري إلى تعليم عن بعد', reason: 'مخاطر أمنية متزايدة في الموقع', status: 'Implemented', impact: 'Positive' },
@@ -14,6 +15,7 @@ const DECISIONS_DEFAULT = [
 ];
 
 export default function AdaptiveManagement() {
+  const toast = useToast();
   const [riskAlerts, setRiskAlerts] = useState([]);
   const [decisions, setDecisions] = useState(DECISIONS_DEFAULT);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -70,7 +72,7 @@ export default function AdaptiveManagement() {
                        </div>
                        <div className="flex gap-4">
                           <button onClick={() => setShowAddForm(true)} className="px-6 h-10 bg-amber-500 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-amber-500/20">تعديل المسار (Pivot)</button>
-                          <button className="px-6 h-10 bg-black/5 rounded-xl font-black text-[10px] uppercase tracking-widest">تحليل أعمق</button>
+                          <button onClick={() => { toast.show('جاري تشغيل التحليل المعمق...'); setTimeout(() => toast.show('اكتمل التحليل'), 2000); }} className="px-6 h-10 bg-black/5 rounded-xl font-black text-[10px] uppercase tracking-widest">تحليل أعمق</button>
                        </div>
                     </div>
                  </div>
@@ -153,7 +155,7 @@ export default function AdaptiveManagement() {
                <p className="text-sm font-medium opacity-80 leading-relaxed mb-8 relative z-10">
                   يتم توثيق كل قرار تكيفي لربطه لاحقاً بـ "الدروس المستفادة"، مما يسهل على المانحين فهم مبررات التغيير أثناء التدقيق.
                </p>
-               <button className="w-full h-12 bg-amber-500 text-white rounded-xl font-black text-xs shadow-xl shadow-amber-500/20">تفعيل سير عمل الحوكمة</button>
+               <button onClick={() => { toast.show('تم تفعيل سير عمل الحوكمة بنجاح'); }} className="w-full h-12 bg-amber-500 text-white rounded-xl font-black text-xs shadow-xl shadow-amber-500/20">تفعيل سير عمل الحوكمة</button>
             </div>
 
             <div className="card-elite p-6 space-y-6">

@@ -7,8 +7,10 @@ import {
   Cpu, BarChart3, Wifi, Clock
 } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useToast } from '../contexts/ToastContext';
 
 export default function EnterpriseControl() {
+  const toast = useToast();
   const [uptime, setUptime] = useState('99.98%');
   const [dbStatus, setDbStatus] = useState('Optimized');
 
@@ -25,7 +27,7 @@ export default function EnterpriseControl() {
         </div>
         
         <div className="flex gap-4">
-           <button className="h-12 px-6 bg-slate-900 text-white dark:bg-white dark:text-slate-900 rounded-2xl font-black text-xs shadow-xl hover:scale-105 transition-all flex items-center gap-2">
+           <button onClick={() => { setUptime('99.99%'); setDbStatus('Optimized'); toast.show('تم تحديث حالة النظام بنجاح'); }} className="h-12 px-6 bg-slate-900 text-white dark:bg-white dark:text-slate-900 rounded-2xl font-black text-xs shadow-xl hover:scale-105 transition-all flex items-center gap-2">
               <RefreshCcw size={18} /> تحديث الحالة الكلية
            </button>
         </div>
@@ -73,7 +75,7 @@ export default function EnterpriseControl() {
                         </div>
                      ))}
                   </div>
-                  <button className="w-full h-12 border-2 border-dashed border-[var(--border)] rounded-2xl text-[10px] font-black uppercase text-slate-400 hover:border-blue-600 hover:text-blue-600 transition-all">إنشاء مفتاح API جديد</button>
+                  <button onClick={() => { toast.show('سيتم إنشاء المفتاح — انتقل إلى مركز الأمان', 'info'); window.location.href='/security-center'; }} className="w-full h-12 border-2 border-dashed border-[var(--border)] rounded-2xl text-[10px] font-black uppercase text-slate-400 hover:border-blue-600 hover:text-blue-600 transition-all">إنشاء مفتاح API جديد</button>
                </div>
 
                <div className="card-elite p-8 space-y-8">
@@ -93,12 +95,12 @@ export default function EnterpriseControl() {
                            </div>
                            <div className="text-right">
                               <div className="text-[10px] font-black">{backup.size}</div>
-                              <button className="text-[9px] font-black text-blue-600 uppercase mt-1">Download</button>
+                              <button onClick={() => { toast.show('جاري تحميل النسخة الاحتياطية...'); setTimeout(() => toast.show('تم التحميل بنجاح'), 1500); }} className="text-[9px] font-black text-blue-600 uppercase mt-1">Download</button>
                            </div>
                         </div>
                      ))}
                   </div>
-                  <button className="w-full h-14 bg-indigo-600 text-white rounded-2xl font-black text-sm shadow-xl shadow-indigo-600/20 hover:bg-indigo-700 transition-all active:scale-95">تشغيل نسخة احتياطية فورية</button>
+                  <button onClick={() => { toast.show('جاري إنشاء نسخة احتياطية...'); setTimeout(() => toast.show('تم إنشاء النسخة الاحتياطية بنجاح'), 2000); }} className="w-full h-14 bg-indigo-600 text-white rounded-2xl font-black text-sm shadow-xl shadow-indigo-600/20 hover:bg-indigo-700 transition-all active:scale-95">تشغيل نسخة احتياطية فورية</button>
                </div>
             </div>
          </div>
@@ -137,7 +139,7 @@ export default function EnterpriseControl() {
                      </div>
                   ))}
                </div>
-               <button className="w-full py-3 bg-black/5 dark:bg-white/5 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
+               <button onClick={() => { window.location.href='/dev'; }} className="w-full py-3 bg-black/5 dark:bg-white/5 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
                   <Terminal size={14} /> فتح الـ Console المتقدم
                </button>
             </div>

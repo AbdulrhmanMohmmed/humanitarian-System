@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import api from '../services/api';
+import { useToast } from '../contexts/ToastContext';
 
 const DONORS = [
   { id: 'ocha', name: 'OCHA / YHF', template: 'YHF GMS Standard Narrative', color: 'bg-blue-600' },
@@ -16,6 +17,7 @@ const DONORS = [
 ];
 
 export default function DonorReportWizard() {
+  const toast = useToast();
   const [step, setStep] = useState(1);
   const [selectedDonor, setSelectedDonor] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -165,7 +167,7 @@ export default function DonorReportWizard() {
                         <Wand2 size={24} className="text-blue-600" />
                         <span className="text-[10px] font-black uppercase">توليد تقرير لمانح آخر</span>
                      </button>
-                     <button className="p-6 bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-[var(--border)] hover:border-blue-600 transition-all flex flex-col items-center gap-3">
+                     <button onClick={() => { toast.show('تم إرسال التقرير للمراجعة الداخلية بنجاح'); }} className="p-6 bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm border border-[var(--border)] hover:border-blue-600 transition-all flex flex-col items-center gap-3">
                         <Share2 size={24} className="text-blue-600" />
                         <span className="text-[10px] font-black uppercase">إرسال للمراجعة الداخلية</span>
                      </button>

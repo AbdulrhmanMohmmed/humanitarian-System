@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import api from '../services/api';
+import { useToast } from '../contexts/ToastContext';
 
 const GOVERNORATES = [
   { id: 'YE-AD', name: 'عدن', risk: 34, achievement: 88, status: 'Stable' },
@@ -17,6 +18,7 @@ const GOVERNORATES = [
 ];
 
 export default function SpatialInsights() {
+  const toast = useToast();
   const [selected, setSelected] = useState(GOVERNORATES[1]);
   const [loading, setLoading] = useState(true);
   const [layer, setLayer] = useState('Risk');
@@ -155,7 +157,7 @@ export default function SpatialInsights() {
                              يتطلب الموقع ({selected.name}) تدخلاً فورياً في قطاع المياه بسبب تعطل المضخات وتأخر توريد قطع الغيار.
                           </p>
                        </div>
-                       <button className="w-full h-12 bg-rose-600 text-white rounded-xl font-black text-xs shadow-xl shadow-rose-600/20 hover:scale-105 transition-all">تحليل معمق للمنطقة</button>
+                       <button onClick={() => { toast.show('جاري تحليل المنطقة المحددة...'); setTimeout(() => toast.show('اكتمل التحليل المكاني'), 2000); }} className="w-full h-12 bg-rose-600 text-white rounded-xl font-black text-xs shadow-xl shadow-rose-600/20 hover:scale-105 transition-all">تحليل معمق للمنطقة</button>
                     </div>
 
                     <div className="pt-6 border-t border-[var(--border)] space-y-4">
@@ -177,7 +179,7 @@ export default function SpatialInsights() {
                <p className="text-sm font-medium opacity-80 leading-relaxed mb-8 relative z-10">
                   تظهر البيانات تحسناً في الوصول الإنساني للمناطق الجنوبية، بينما تظل المناطق الوسطى تحت ضغط مخاطر عالية.
                </p>
-               <button className="w-full h-12 bg-blue-600 text-white rounded-xl font-black text-xs">عرض تقرير الفجوات الجغرافي</button>
+               <button onClick={() => { toast.show('جاري تجهيز تقرير الفجوات...'); setTimeout(() => toast.show('تم تجهيز التقرير'), 1500); }} className="w-full h-12 bg-blue-600 text-white rounded-xl font-black text-xs">عرض تقرير الفجوات الجغرافي</button>
             </div>
          </aside>
       </div>

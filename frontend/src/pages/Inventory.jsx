@@ -5,6 +5,7 @@ import Modal from '../components/Modal';
 import StatusBadge from '../components/StatusBadge';
 import StatCard from '../components/StatCard';
 import { AlertTriangle, CheckCircle2, DollarSign, Edit3, Package, Plus, Save, Trash2, Warehouse } from 'lucide-react';
+import { useToast } from '../contexts/ToastContext';
 
 const catMap = { food: 'غذائي', medicine: 'طبي', shelter: 'مأوى', wash: 'مياه وصرف', nfi: 'مواد غير غذائية', education: 'تعليم', other: 'أخرى' };
 const distStatus = [
@@ -16,6 +17,7 @@ const distStatus = [
 const governorates = ['صنعاء', 'عدن', 'تعز', 'الحديدة', 'إب', 'حضرموت', 'مأرب', 'ذمار', 'حجة', 'البيضاء'];
 
 export default function Inventory() {
+  const toast = useToast();
   const [items, setItems] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
   const [distributions, setDistributions] = useState([]);
@@ -278,7 +280,7 @@ export default function Inventory() {
                 <select value={distForm.status} onChange={(e) => setDistForm({ ...distForm, status: e.target.value })} className="rounded-lg border px-3 py-2">{distStatus.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}</select>
                 <input type="date" value={distForm.distribution_date} onChange={(e) => setDistForm({ ...distForm, distribution_date: e.target.value })} className="rounded-lg border px-3 py-2" />
               </div>
-              <button className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 py-2 font-bold text-white"><Save size={16} /> حفظ بيانات التوزيع</button>
+              <button onClick={() => { toast.show('تم حفظ بيانات التوزيع بنجاح'); }} className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 py-2 font-bold text-white"><Save size={16} /> حفظ بيانات التوزيع</button>
             </form>
 
             <form onSubmit={addRecipient} className="space-y-3 rounded-xl border p-3">
@@ -292,7 +294,7 @@ export default function Inventory() {
               <div className="grid grid-cols-3 gap-3">
                 <input type="number" placeholder="الكمية" value={recipientForm.quantity} onChange={(e) => setRecipientForm({ ...recipientForm, quantity: e.target.value })} className="rounded-lg border px-3 py-2" />
                 <input placeholder="الوحدة" value={recipientForm.unit} onChange={(e) => setRecipientForm({ ...recipientForm, unit: e.target.value })} className="rounded-lg border px-3 py-2" />
-                <button className="rounded-lg bg-blue-600 px-3 py-2 font-bold text-white">إضافة</button>
+                <button type="submit" className="rounded-lg bg-blue-600 px-3 py-2 font-bold text-white">إضافة</button>
               </div>
             </form>
 

@@ -24,6 +24,7 @@ function TrafficLight({ color }) {
 export default function ExecutiveDashboard() {
   const [data, setData] = useState(null);
   const [notifications, setNotifications] = useState([]);
+  const [spendView, setSpendView] = useState('Monthly');
 
   const loadData = () => {
     api.get('/executive/dashboard')
@@ -202,7 +203,7 @@ export default function ExecutiveDashboard() {
               </h3>
               <div className="flex gap-2">
                  {['Weekly', 'Monthly', 'Annual'].map(p => (
-                    <button key={p} className={cn("px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all", p === 'Monthly' ? "bg-emerald-600 text-white" : "bg-black/5 dark:bg-white/5 text-slate-500 hover:bg-black/10")}>
+                    <button key={p} onClick={() => setSpendView(p)} className={cn("px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all", p === spendView ? "bg-emerald-600 text-white" : "bg-black/5 dark:bg-white/5 text-slate-500 hover:bg-black/10")}>
                        {p}
                     </button>
                  ))}

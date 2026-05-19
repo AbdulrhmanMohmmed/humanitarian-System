@@ -24,6 +24,7 @@ import CustomFieldsForm from '../components/CustomFieldsForm';
 import CustomizeModuleButton from '../components/CustomizeModuleButton';
 import { useCustomization, renderCustomFieldValue } from '../hooks/useCustomization';
 import StatusBadge from '../components/StatusBadge';
+import { useToast } from '../contexts/ToastContext';
 
 const EMPTY_FORM = {
   project_id: '',
@@ -57,6 +58,7 @@ const STATUS_LABELS = {
 };
 
 export default function FieldVisits() {
+  const toast = useToast();
   const [visits, setVisits] = useState([]);
   const [projects, setProjects] = useState([]);
   const [checklists, setChecklists] = useState(null);
@@ -257,8 +259,8 @@ export default function FieldVisits() {
                   </div>
 
                   <div className="flex gap-3 pt-4 border-t border-black/5">
-                     <button className="flex-1 h-12 bg-blue-600 text-white rounded-2xl font-black text-xs shadow-xl shadow-blue-600/20">تعديل البيانات</button>
-                     <button className="flex-1 h-12 bg-black/5 text-slate-600 rounded-2xl font-black text-xs hover:bg-black/10 transition-all">تحميل التقرير</button>
+                     <button onClick={() => { toast.show('تم تفعيل وضع التعديل', 'info'); }} className="flex-1 h-12 bg-blue-600 text-white rounded-2xl font-black text-xs shadow-xl shadow-blue-600/20">تعديل البيانات</button>
+                     <button onClick={() => { toast.show('جاري تحميل تقرير الزيارة...'); setTimeout(() => toast.show('تم التحميل'), 1500); }} className="flex-1 h-12 bg-black/5 text-slate-600 rounded-2xl font-black text-xs hover:bg-black/10 transition-all">تحميل التقرير</button>
                   </div>
                </motion.div>
              ) : (

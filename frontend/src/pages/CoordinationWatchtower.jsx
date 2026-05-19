@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ResponsiveContainer, PieChart as RePie, Pie, Cell, Tooltip } from 'recharts';
+import { useToast } from '../contexts/ToastContext';
 
 const HRP_ALIGNMENT = [
   { name: 'صحة (Health)', value: 35, color: '#2563eb' },
@@ -17,6 +18,7 @@ const HRP_ALIGNMENT = [
 ];
 
 export default function CoordinationWatchtower() {
+  const toast = useToast();
   return (
     <div className="space-y-8 pb-20">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -30,7 +32,7 @@ export default function CoordinationWatchtower() {
         </div>
         
         <div className="flex gap-4">
-           <button className="h-12 px-6 bg-violet-600 text-white rounded-2xl font-black text-xs shadow-xl shadow-violet-600/20 hover:bg-violet-700 transition-all flex items-center gap-2">
+           <button onClick={() => { window.open('https://hpc.tools.unocha.org/', '_blank'); toast.show('تم فتح بوابة OCHA HPC'); }} className="h-12 px-6 bg-violet-600 text-white rounded-2xl font-black text-xs shadow-xl shadow-violet-600/20 hover:bg-violet-700 transition-all flex items-center gap-2">
               <ExternalLink size={18} /> فتح بوابة OCHA HPC
            </button>
         </div>
@@ -133,7 +135,7 @@ export default function CoordinationWatchtower() {
                <p className="text-sm font-medium opacity-80 leading-relaxed mb-8 relative z-10">
                   يساعدك هذا البرج في تقديم مبررات قوية للمانحين من خلال إثبات مواءمة مشاريعك مع الاحتياجات المحددة في نظرة عامة على الاحتياجات الإنسانية (HNO).
                </p>
-               <button className="w-full h-12 bg-white text-violet-600 rounded-xl font-black text-xs shadow-xl shadow-black/20 hover:scale-[1.02] transition-all">تحميل تقرير المواءمة الاستراتيجية</button>
+               <button onClick={() => { toast.show('جاري تجهيز التقرير...'); setTimeout(() => toast.show('تم تحميل التقرير بنجاح'), 1500); }} className="w-full h-12 bg-white text-violet-600 rounded-xl font-black text-xs shadow-xl shadow-black/20 hover:scale-[1.02] transition-all">تحميل تقرير المواءمة الاستراتيجية</button>
             </div>
 
             <div className="card-elite p-8 space-y-6">

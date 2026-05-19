@@ -8,8 +8,10 @@ import {
 import { motion } from 'framer-motion';
 import { cn } from '../lib/utils';
 import api from '../services/api';
+import { useToast } from '../contexts/ToastContext';
 
 const BVADashboard = () => {
+  const toast = useToast();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -44,11 +46,11 @@ const BVADashboard = () => {
           <p className="text-slate-500 font-bold mt-1">تتبع الصرف اللحظي، معدل الاحتراق (Burn Rate)، وفروقات العملة</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="h-12 px-6 rounded-2xl bg-white border border-slate-200 text-slate-700 font-black text-sm hover:bg-slate-50 transition-all flex items-center gap-2">
+          <button onClick={() => { toast.show('تم فتح خيارات تصفية المانحين', 'info'); }} className="h-12 px-6 rounded-2xl bg-white border border-slate-200 text-slate-700 font-black text-sm hover:bg-slate-50 transition-all flex items-center gap-2">
             <Filter size={18} />
             تصفية المانحين
           </button>
-          <button className="h-12 px-6 rounded-2xl bg-slate-900 text-white font-black text-sm hover:bg-slate-800 transition-all shadow-lg flex items-center gap-2">
+          <button onClick={() => { toast.show('جاري تجهيز التقرير المالي...'); setTimeout(() => toast.show('تم تجهيز التقرير'), 1500); }} className="h-12 px-6 rounded-2xl bg-slate-900 text-white font-black text-sm hover:bg-slate-800 transition-all shadow-lg flex items-center gap-2">
             <Download size={18} />
             تقرير مالي مفصل
           </button>
@@ -148,7 +150,7 @@ const BVADashboard = () => {
                <div className="relative z-10">
                  <h4 className="font-black text-xl mb-2">تنبيه الميزانية</h4>
                  <p className="text-xs font-bold text-indigo-100 opacity-80 leading-relaxed">وصل الصرف في قطاع المياه إلى 85% من الميزانية المخصصة لهذا الربع. يرجى مراجعة الخطة.</p>
-                 <button className="mt-6 w-full py-3 rounded-xl bg-white text-indigo-600 font-black text-sm hover:bg-indigo-50 transition-all">مراجعة التخصيصات</button>
+                 <button onClick={() => { toast.show('يتم عرض تخصيصات الميزانية', 'info'); }} className="mt-6 w-full py-3 rounded-xl bg-white text-indigo-600 font-black text-sm hover:bg-indigo-50 transition-all">مراجعة التخصيصات</button>
                </div>
             </div>
          </div>

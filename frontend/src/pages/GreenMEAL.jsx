@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useToast } from '../contexts/ToastContext';
+import { downloadJSON, downloadCSV, printReport } from '../lib/exportUtils';
 
 const GREEN_DATA = [
   { month: 'Jan', footprint: 45, water: 20 },
@@ -16,6 +18,7 @@ const GREEN_DATA = [
 ];
 
 export default function GreenMEAL() {
+  const toast = useToast();
   return (
     <div className="space-y-8 pb-20">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -95,7 +98,7 @@ export default function GreenMEAL() {
                         <div className="text-lg font-black">2.4 Ton CO2e</div>
                      </div>
                   </div>
-                  <button className="w-full h-12 bg-emerald-600 rounded-xl font-black text-xs shadow-xl shadow-black/20">تنزيل تقرير الاستدامة</button>
+                  <button onClick={() => { downloadJSON({type: 'sustainability', date: new Date().toISOString()}, 'sustainability-report.json'); toast.show('تم تنزيل تقرير الاستدامة'); }} className="w-full h-12 bg-emerald-600 rounded-xl font-black text-xs shadow-xl shadow-black/20">تنزيل تقرير الاستدامة</button>
                </div>
             </div>
          </div>

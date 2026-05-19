@@ -6,8 +6,10 @@ import {
   AlertTriangle, Key, BellRing, FileText
 } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useToast } from '../contexts/ToastContext';
 
 export default function SecurityPrivacySettings() {
+  const toast = useToast();
   const [maskPII, setMaskPII] = useState(true);
   const [mfaEnabled, setMfaEnabled] = useState(false);
 
@@ -76,7 +78,7 @@ export default function SecurityPrivacySettings() {
                   <h3 className="font-black text-sm flex items-center gap-3 italic">
                     <History size={18} className="text-blue-600" /> سجل العمليات الأمنية (Audit Trail)
                   </h3>
-                  <button className="text-[10px] font-black uppercase text-blue-600">عرض الكل</button>
+                  <button onClick={() => { toast.show('يتم عرض جميع السجلات', 'info'); }} className="text-[10px] font-black uppercase text-blue-600">عرض الكل</button>
                </div>
                <div className="space-y-px">
                   {[
@@ -108,7 +110,7 @@ export default function SecurityPrivacySettings() {
                <p className="text-sm font-medium opacity-80 leading-relaxed mb-8">
                   يمكن للمستفيدين طلب حذف بياناتهم التعريفية بالكامل من النظام. هذا الإجراء نهائي ولا يمكن التراجع عنه.
                </p>
-               <button className="w-full h-12 bg-white text-rose-600 rounded-xl font-black text-xs shadow-xl shadow-black/20 hover:scale-105 transition-all">إدارة طلبات الحذف</button>
+               <button onClick={() => { toast.show('لا توجد طلبات حذف معلقة حالياً', 'info'); }} className="w-full h-12 bg-white text-rose-600 rounded-xl font-black text-xs shadow-xl shadow-black/20 hover:scale-105 transition-all">إدارة طلبات الحذف</button>
             </div>
 
             <div className="card-elite p-6 space-y-6">
@@ -121,7 +123,7 @@ export default function SecurityPrivacySettings() {
                      </div>
                   ))}
                </div>
-               <button className="w-full py-4 text-[10px] font-black uppercase text-blue-600 border-2 border-dashed border-blue-600/20 rounded-2xl hover:bg-blue-600/5 transition-all">رفع اتفاقية جديدة</button>
+               <button onClick={() => { toast.show('سيتم فتح نافذة رفع الملفات', 'info'); }} className="w-full py-4 text-[10px] font-black uppercase text-blue-600 border-2 border-dashed border-blue-600/20 rounded-2xl hover:bg-blue-600/5 transition-all">رفع اتفاقية جديدة</button>
             </div>
          </aside>
       </div>

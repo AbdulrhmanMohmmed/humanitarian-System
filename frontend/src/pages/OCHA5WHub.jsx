@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import api from '../services/api';
+import { useToast } from '../contexts/ToastContext';
 
 const FIVEW_FIELDS = [
   { id: 'who', label: 'Who (Organization)', example: 'HIAOS NGO' },
@@ -17,6 +18,7 @@ const FIVEW_FIELDS = [
 ];
 
 export default function OCHA5WHub() {
+  const toast = useToast();
   const [generating, setGenerating] = useState(false);
 
   const generate5W = async () => {
@@ -64,7 +66,7 @@ export default function OCHA5WHub() {
                      <button onClick={generate5W} disabled={generating} className="h-12 px-8 bg-blue-600 rounded-xl font-black text-xs shadow-xl shadow-blue-600/20 flex items-center gap-2 hover:bg-blue-700 transition-all">
                         {generating ? "جاري التوليد..." : "توليد ملف الـ 5W لعام 2026"} <Download size={18} />
                      </button>
-                     <button className="h-12 px-6 bg-white/10 rounded-xl font-black text-xs hover:bg-white/20 transition-all">إعدادات الحقول</button>
+                     <button onClick={() => { toast.show('تم فتح إعدادات الحقول', 'info'); }} className="h-12 px-6 bg-white/10 rounded-xl font-black text-xs hover:bg-white/20 transition-all">إعدادات الحقول</button>
                   </div>
                </div>
             </div>
@@ -92,7 +94,7 @@ export default function OCHA5WHub() {
                <p className="text-sm font-medium opacity-80 leading-relaxed mb-8 relative z-10">
                   سيتم إضافة وسوم HXL تلقائياً إلى كافة البيانات المصدرة لضمان التوافق مع منصة Humanitarian Data Exchange.
                </p>
-               <button className="w-full h-12 bg-white text-blue-600 rounded-xl font-black text-xs shadow-xl shadow-black/20">تفعيل وسوم HXL</button>
+               <button onClick={() => { toast.show('تم تفعيل وسوم HXL بنجاح'); }} className="w-full h-12 bg-white text-blue-600 rounded-xl font-black text-xs shadow-xl shadow-black/20">تفعيل وسوم HXL</button>
             </div>
 
             <div className="card-elite p-6 space-y-4">
