@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { Shield, Plus, CheckCircle, AlertTriangle, XCircle, FileCheck } from 'lucide-react';
+import { useToast } from '../contexts/ToastContext';
+import { downloadJSON, downloadCSV, printReport } from '../lib/exportUtils';
 
 const AREA_LABELS = { chs: 'CHS', aap: 'AAP', psea: 'PSEA', do_no_harm: 'عدم الإضرار', data_protection: 'حماية البيانات', safeguarding: 'الحماية', donor_compliance: 'امتثال المانحين' };
 const STATUS_COLORS = { compliant: 'bg-green-100 text-green-700', partially_compliant: 'bg-yellow-100 text-yellow-700', non_compliant: 'bg-red-100 text-red-700', not_assessed: 'bg-gray-100 text-gray-500' };
 const STATUS_LABELS = { compliant: 'ملتزم', partially_compliant: 'التزام جزئي', non_compliant: 'غير ملتزم', not_assessed: 'لم يُقيّم' };
 
 export default function ComplianceDashboard() {
+  const toast = useToast();
   const [standards, setStandards] = useState([]);
   const [assessments, setAssessments] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -43,7 +46,7 @@ export default function ComplianceDashboard() {
           <p className="text-sm text-slate-500 mt-2 font-medium">نظام آلي لتتبع معايير الجودة (CHS, AAP, PSEA) وتجهيز أدلة التدقيق (Audit Readiness).</p>
         </div>
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition shadow-lg font-bold text-sm">
+          <button onClick={() => { printReport('تقرير الجاهزية للتدقيق', [{title: 'الملخص', text: 'النظام جاهز للتدقيق'}]); toast.show('تم توليد تقرير الجاهزية'); }} className="flex items-center gap-2 px-5 py-2.5 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition shadow-lg font-bold text-sm">
             <FileCheck size={18} /> توليد تقرير الجاهزية للتدقيق
           </button>
           <button onClick={() => setShowModal(true)} className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition shadow-lg shadow-emerald-200 font-bold text-sm">

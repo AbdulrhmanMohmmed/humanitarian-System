@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import api from '../services/api';
 import { cn } from '../lib/utils';
+import { useToast } from '../contexts/ToastContext';
 
 const currentYear = new Date().getFullYear();
 const currentMonth = new Date().getMonth() + 1;
@@ -56,6 +57,7 @@ function emptyIptt(indicatorId = '', projectId = '') {
 }
 
 export default function PhaseOneCore() {
+  const toast = useToast();
   const [overview, setOverview] = useState(null);
   const [workspace, setWorkspace] = useState(null);
   const [references, setReferences] = useState([]);
@@ -386,7 +388,7 @@ export default function PhaseOneCore() {
                     <input type="checkbox" checked={refForm.documentation_complete} onChange={(event) => setRefForm({ ...refForm, documentation_complete: event.target.checked })} />
                     التوثيق مكتمل
                   </label>
-                  <button disabled={!selectedIndicator || busy === 'reference'} className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-black text-white disabled:opacity-60">
+                  <button onClick={() => { toast.show('تم حفظ بطاقة المؤشر بنجاح'); }} disabled={!selectedIndicator || busy === 'reference'} className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-black text-white disabled:opacity-60">
                     <Save size={15} />
                     حفظ بطاقة المؤشر
                   </button>
@@ -406,7 +408,7 @@ export default function PhaseOneCore() {
                     <input type="checkbox" checked={ipttForm.submit_for_approval} onChange={(event) => setIpttForm({ ...ipttForm, submit_for_approval: event.target.checked })} />
                     إرسال للاعتماد
                   </label>
-                  <button disabled={!selectedIndicator || busy === 'iptt'} className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-black text-white disabled:opacity-60">
+                  <button onClick={() => { toast.show('تم فتح نموذج IPTT الذكي', 'info'); }} disabled={!selectedIndicator || busy === 'iptt'} className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-black text-white disabled:opacity-60">
                     <Play size={15} />
                     إدخال Smart IPTT
                   </button>

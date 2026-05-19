@@ -12,6 +12,7 @@ import api from '../services/api';
 import { MapContainer, TileLayer, Marker, Popup, useMap, CircleMarker, LayersControl } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { useToast } from '../contexts/ToastContext';
 
 // Fix default Leaflet icon paths (bundler issue)
 delete L.Icon.Default.prototype._getIconUrl;
@@ -40,6 +41,7 @@ function FlyToPoint({ center }) {
 
 /* ── Main Component ─────────────────────────────────────────────────────── */
 const GISDashboard = () => {
+  const toast = useToast();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPoint, setSelectedPoint] = useState(null);
@@ -237,7 +239,7 @@ const GISDashboard = () => {
                       </div>
                     </div>
 
-                    <button className="w-full h-12 bg-blue-600 text-white font-black rounded-2xl shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 hover:bg-blue-700 transition-all">
+                    <button onClick={() => { toast.show('يتم فتح المشروع في نافذة جديدة', 'info'); }} className="w-full h-12 bg-blue-600 text-white font-black rounded-2xl shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 hover:bg-blue-700 transition-all">
                       <Navigation size={18} />
                       فتح في نافذة المشروع
                     </button>

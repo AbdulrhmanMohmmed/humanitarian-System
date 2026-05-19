@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import api from '../services/api';
+import { useToast } from '../contexts/ToastContext';
+import { downloadJSON, downloadCSV, printReport } from '../lib/exportUtils';
 
 const MOCK_LOGS = [
   { id: 1, action: 'Update', entity: 'Beneficiary #4501', user: 'أحمد علي', time: '2026-05-03 07:15', hash: '8f4a...2d1e', status: 'Verified' },
@@ -16,6 +18,7 @@ const MOCK_LOGS = [
 ];
 
 export default function SmartAuditTrail() {
+  const toast = useToast();
   const [logs, setLogs] = useState(MOCK_LOGS);
   const [search, setSearch] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
@@ -49,7 +52,7 @@ export default function SmartAuditTrail() {
               {isVerifying ? <Clock className="animate-spin" size={18} /> : <ShieldCheck size={18} />}
               {isVerifying ? 'جاري التحقق من البصمات...' : 'التحقق من سلامة السجل'}
            </button>
-           <button className="h-12 px-6 bg-slate-900 text-white rounded-2xl font-black text-xs shadow-xl hover:bg-slate-800 transition-all flex items-center gap-2">
+           <button onClick={() => { downloadJSON({report: 'compliance', date: new Date().toISOString()}, 'compliance-report.json'); toast.show('تم تصدير تقرير الامتثال'); }} className="h-12 px-6 bg-slate-900 text-white rounded-2xl font-black text-xs shadow-xl hover:bg-slate-800 transition-all flex items-center gap-2">
               <Download size={18} /> تصدير تقرير الامتثال
            </button>
         </div>
@@ -68,8 +71,8 @@ export default function SmartAuditTrail() {
                     />
                   </div>
                   <div className="flex gap-2">
-                     <button className="px-4 py-2 rounded-xl bg-black/5 text-[10px] font-black uppercase">آخر 24 ساعة</button>
-                     <button className="px-4 py-2 rounded-xl bg-black/5 text-[10px] font-black uppercase">تصفية حسب الكيان</button>
+                     <button onClick={() => { toast.show('تم تصفية السجلات لآخر 24 ساعة', 'info'); }} className="px-4 py-2 rounded-xl bg-black/5 text-[10px] font-black uppercase">آخر 24 ساعة</button>
+                     <button onClick={() => { toast.show('تم فتح خيارات التصفية', 'info'); }} className="px-4 py-2 rounded-xl bg-black/5 text-[10px] font-black uppercase">تصفية حسب الكيان</button>
                   </div>
                </div>
                

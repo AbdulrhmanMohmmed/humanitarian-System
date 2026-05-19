@@ -8,8 +8,10 @@ import {
 import { motion } from 'framer-motion';
 import { cn } from '../lib/utils';
 import api from '../services/api';
+import { useToast } from '../contexts/ToastContext';
 
 const Documents = () => {
+  const toast = useToast();
   const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -50,7 +52,7 @@ const Documents = () => {
           <p className="text-slate-500 font-bold mt-1">نظام إدارة المحتوى البرامجي، الصور الميدانية، والعقود الموقعة</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="h-12 px-6 rounded-2xl bg-blue-600 text-white font-black text-sm hover:bg-blue-700 transition-all shadow-lg flex items-center gap-2">
+          <button onClick={() => { toast.show('يرجى اختيار الملف للرفع', 'info'); }} className="h-12 px-6 rounded-2xl bg-blue-600 text-white font-black text-sm hover:bg-blue-700 transition-all shadow-lg flex items-center gap-2">
             <Upload size={20} />
             رفع وثيقة جديدة
           </button>

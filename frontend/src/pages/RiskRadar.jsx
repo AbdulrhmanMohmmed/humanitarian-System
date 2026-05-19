@@ -8,6 +8,7 @@ import {
 import { cn } from '../lib/utils';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
 import api from '../services/api';
+import { useToast } from '../contexts/ToastContext';
 
 const RISK_ALERTS = [
   { id: 1, type: 'Performance', level: 'Critical', msg: 'تأخر ملموس في مخرجات الأمن الغذائي (مديرية مأرب).', score: 85, trend: 'up' },
@@ -24,6 +25,7 @@ const RADAR_DATA = [
 ];
 
 export default function RiskRadar() {
+  const toast = useToast();
   const [riskData, setRiskData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('Monthly');
@@ -59,7 +61,7 @@ export default function RiskRadar() {
         
         <div className="flex bg-white dark:bg-slate-900 p-1.5 rounded-2xl border border-[var(--border)]">
            {['Weekly', 'Monthly', 'Quarterly'].map(t => (
-             <button key={t} className="px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-black/5 transition-all">{t}</button>
+             <button key={t} onClick={() => setPeriod(t)} className={cn("px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all", t === period ? "bg-rose-600 text-white" : "hover:bg-black/5")}>{t}</button>
            ))}
         </div>
       </header>
@@ -144,7 +146,7 @@ export default function RiskRadar() {
                <p className="text-sm font-medium opacity-80 leading-relaxed mb-8 relative z-10">
                   يقترح النظام البدء بإجراء DQA مكثف في مديرية مأرب فوراً وتجميد الاعتمادات المالية للنشاط (ب) حتى التحقق.
                </p>
-               <button className="w-full h-12 bg-white text-rose-600 rounded-xl font-black text-xs shadow-xl shadow-black/20 hover:scale-105 transition-all">تفعيل خطة الاستجابة للمخاطر</button>
+               <button onClick={() => { toast.show('تم تفعيل خطة الاستجابة للمخاطر بنجاح'); }} className="w-full h-12 bg-white text-rose-600 rounded-xl font-black text-xs shadow-xl shadow-black/20 hover:scale-105 transition-all">تفعيل خطة الاستجابة للمخاطر</button>
             </div>
 
             <div className="card-elite p-6 space-y-6">

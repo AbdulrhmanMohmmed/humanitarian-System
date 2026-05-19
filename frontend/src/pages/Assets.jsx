@@ -10,8 +10,10 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../lib/utils';
 import api from '../services/api';
+import { useToast } from '../contexts/ToastContext';
 
 const AssetsPage = () => {
+  const toast = useToast();
   const [assets, setAssets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
@@ -61,7 +63,7 @@ const AssetsPage = () => {
               className="h-11 pr-11 pl-4 rounded-2xl bg-white border border-slate-200 text-sm font-bold focus:ring-2 ring-blue-500/20 w-64"
             />
           </div>
-          <button className="h-11 px-6 rounded-2xl bg-blue-600 text-white font-black text-sm hover:bg-blue-700 transition-all flex items-center gap-2 shadow-lg shadow-blue-600/20">
+          <button onClick={() => { toast.show('يرجى ملء بيانات الأصل الجديد', 'info'); }} className="h-11 px-6 rounded-2xl bg-blue-600 text-white font-black text-sm hover:bg-blue-700 transition-all flex items-center gap-2 shadow-lg shadow-blue-600/20">
             <Plus size={18} />
             إضافة أصل جديد
           </button>
@@ -174,7 +176,7 @@ const AssetsPage = () => {
                       <div className="flex -space-x-2">
                          {[1,2,3].map(i => <div key={i} className="w-6 h-6 rounded-full border-2 border-white bg-slate-200" />)}
                       </div>
-                      <button className="text-xs font-black text-blue-600 hover:underline">سجل الحركة</button>
+                      <button onClick={() => { toast.show('يتم عرض سجل حركة الأصل', 'info'); }} className="text-xs font-black text-blue-600 hover:underline">سجل الحركة</button>
                    </div>
                 </div>
               </motion.div>

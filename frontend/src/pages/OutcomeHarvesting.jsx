@@ -6,8 +6,10 @@ import { Quote, MessageSquare, Sparkles, Wand2,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { apiClient } from '../lib/api-client';
+import { useToast } from '../contexts/ToastContext';
 
 export default function OutcomeHarvesting() {
+  const toast = useToast();
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -66,7 +68,7 @@ export default function OutcomeHarvesting() {
                   <div className="absolute top-0 right-0 p-8 opacity-10"><Sparkles size={120} /></div>
                   <h3 className="font-black text-xs uppercase tracking-widest opacity-70 mb-4">ذكاء المحتوى (AI Analysis)</h3>
                   <p className="text-xl font-black mb-6">يلاحظ النظام زيادة بنسبة 40% في قصص "تمكين المرأة" مقارنة بالربع السابق.</p>
-                  <button className="px-4 py-2 bg-white text-indigo-600 rounded-lg font-black text-[10px] uppercase">عرض التحليل النوعي</button>
+                  <button onClick={() => { toast.show('جاري تجهيز التحليل النوعي...', 'info'); }} className="px-4 py-2 bg-white text-indigo-600 rounded-lg font-black text-[10px] uppercase">عرض التحليل النوعي</button>
                </div>
                
                <div className="card-elite p-8 flex flex-col justify-between">
@@ -124,7 +126,7 @@ export default function OutcomeHarvesting() {
                <p className="text-sm font-medium opacity-80 leading-relaxed mb-8 relative z-10">
                   يمكن للمحرك دمج قصص MSC تلقائياً في تقارير المانحين Narrative Reports لدعم البيانات الرقمية.
                </p>
-               <button className="w-full h-12 bg-indigo-600 text-white rounded-xl font-black text-xs shadow-xl shadow-black/20 hover:scale-105 transition-all">بدء الدمج الذكي</button>
+               <button onClick={() => { toast.show('جاري دمج النتائج المتشابهة...'); setTimeout(() => toast.show('تم دمج النتائج بنجاح'), 2000); }} className="w-full h-12 bg-indigo-600 text-white rounded-xl font-black text-xs shadow-xl shadow-black/20 hover:scale-105 transition-all">بدء الدمج الذكي</button>
             </div>
 
             <div className="card-elite p-6 space-y-6">

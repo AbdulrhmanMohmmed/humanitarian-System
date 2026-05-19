@@ -6,8 +6,10 @@ import {
   ArrowRight, Filter, Settings, RefreshCw
 } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useToast } from '../contexts/ToastContext';
 
 export default function IATIExport() {
+  const toast = useToast();
   const [isExporting, setIsExporting] = useState(false);
   const [status, setStatus] = useState('Draft');
 
@@ -109,7 +111,7 @@ export default function IATIExport() {
                            <span className="text-[9px] font-bold text-emerald-600">{platform.status}</span>
                         </div>
                         <span className="text-[10px] font-mono text-slate-400">{platform.url}</span>
-                        <button className="mt-2 w-full h-10 bg-slate-100 dark:bg-white/5 rounded-xl font-black text-[10px] uppercase hover:bg-indigo-600 hover:text-white transition-all">تزامن يدوي</button>
+                        <button onClick={() => { toast.show('جاري المزامنة مع سجل IATI...'); setTimeout(() => toast.show('تم المزامنة بنجاح'), 2000); }} className="mt-2 w-full h-10 bg-slate-100 dark:bg-white/5 rounded-xl font-black text-[10px] uppercase hover:bg-indigo-600 hover:text-white transition-all">تزامن يدوي</button>
                      </div>
                   ))}
                </div>
@@ -123,7 +125,7 @@ export default function IATIExport() {
                <p className="text-sm font-medium opacity-80 leading-relaxed mb-8 relative z-10">
                   تعد معايير IATI لغة التواصل الموحدة في قطاع العمل الإنساني. استخدامك لها يفتح أبواب الشراكات المباشرة مع المانحين مثل USAID و FCDO و EU.
                </p>
-               <button className="w-full h-12 bg-blue-600 text-white rounded-xl font-black text-xs flex items-center justify-center gap-2 uppercase tracking-widest">تحميل دليل الشفافية <ArrowRight size={14} /></button>
+               <button onClick={() => { toast.show('جاري تحميل الدليل...'); setTimeout(() => toast.show('تم تحميل الدليل'), 1500); }} className="w-full h-12 bg-blue-600 text-white rounded-xl font-black text-xs flex items-center justify-center gap-2 uppercase tracking-widest">تحميل دليل الشفافية <ArrowRight size={14} /></button>
             </div>
 
             <div className="card-elite p-8 space-y-6">

@@ -13,8 +13,10 @@ import CustomFieldsForm from '../components/CustomFieldsForm';
 import CustomizeModuleButton from '../components/CustomizeModuleButton';
 import { renderCustomFieldValue, useCustomization } from '../hooks/useCustomization';
 import CollaborationThread from '../components/CollaborationThread';
+import { useToast } from '../contexts/ToastContext';
 
 export default function Projects() {
+  const toast = useToast();
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [stats, setStats] = useState(null);
@@ -121,7 +123,7 @@ export default function Projects() {
         {activeTab === 'list' && (
           <div className="flex flex-wrap gap-4">
             <div className="flex bg-white dark:bg-slate-900 p-1.5 rounded-2xl border border-[var(--border)]">
-               <button className="px-4 py-2 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20">List View</button>
+               <button onClick={() => { toast.show('تم التبديل إلى عرض القائمة', 'info'); }} className="px-4 py-2 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-600/20">List View</button>
                <button onClick={() => navigate('/kanban')} className="px-4 py-2 text-slate-400 hover:text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest">Kanban</button>
             </div>
             <CustomizeModuleButton entity="project" className="h-12 rounded-2xl border-[var(--border)]" />
@@ -263,7 +265,7 @@ export default function Projects() {
                   <p className="text-sm font-medium opacity-80 leading-relaxed mb-8 relative z-10">
                      هذا المشروع سجل ثباتاً في معدلات الصرف ولكن لوحظ تأخر في توريد المدخلات الميدانية.
                   </p>
-                  <button className="w-full h-14 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-black text-xs transition-all relative z-10 border border-white/10 backdrop-blur-md">
+                  <button onClick={() => { window.location.href='/risk'; toast.show('جاري فتح سجل المخاطر...'); }} className="w-full h-14 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-black text-xs transition-all relative z-10 border border-white/10 backdrop-blur-md">
                      فتح سجل المخاطر
                   </button>
                </div>

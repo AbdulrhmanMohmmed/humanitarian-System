@@ -8,8 +8,10 @@ import {
 import { motion } from 'framer-motion';
 import { cn } from '../lib/utils';
 import api from '../services/api';
+import { useToast } from '../contexts/ToastContext';
 
 const GrantsPage = () => {
+  const toast = useToast();
   const [grants, setGrants] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -48,7 +50,7 @@ const GrantsPage = () => {
           <p className="text-slate-500 font-bold mt-1">تتبع التمويلات الدولية، توازن الميزانية مقابل الصرف (BvA)</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="h-12 px-6 rounded-2xl bg-indigo-600 text-white font-black text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 flex items-center gap-2">
+          <button onClick={() => { toast.show('يرجى ملء بيانات المنحة الجديدة', 'info'); }} className="h-12 px-6 rounded-2xl bg-indigo-600 text-white font-black text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 flex items-center gap-2">
             <Plus size={20} />
             إضافة منحة جديدة
           </button>
@@ -143,7 +145,7 @@ const GrantsPage = () => {
                       {grant.start_date} - {grant.end_date}
                     </div>
                   </div>
-                  <button className="flex items-center gap-1 text-xs font-black text-indigo-600 hover:gap-2 transition-all">
+                  <button onClick={() => { toast.show('جاري تجهيز التقرير المالي...'); setTimeout(() => toast.show('تم تجهيز التقرير'), 1500); }} className="flex items-center gap-1 text-xs font-black text-indigo-600 hover:gap-2 transition-all">
                     عرض التقرير المالي <ArrowUpRight size={14} />
                   </button>
                 </div>

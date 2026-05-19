@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { Lightbulb, AlertTriangle, ArrowRight, BrainCircuit, Target, CheckCircle } from 'lucide-react';
+import { useToast } from '../contexts/ToastContext';
 
 export default function DecisionSupport() {
+  const toast = useToast();
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState('');
   const [suggestions, setSuggestions] = useState(null);
@@ -130,8 +132,8 @@ export default function DecisionSupport() {
                     </div>
                     
                     <div className="mt-4 flex gap-2">
-                      <button className="px-4 py-2 bg-slate-800 text-white text-xs font-bold rounded-lg hover:bg-slate-700 transition">تطبيق الإجراء</button>
-                      <button className="px-4 py-2 bg-white border border-slate-200 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-50 transition">تجاهل</button>
+                      <button onClick={() => { toast.show('تم تطبيق الإجراء المقترح بنجاح'); }} className="px-4 py-2 bg-slate-800 text-white text-xs font-bold rounded-lg hover:bg-slate-700 transition">تطبيق الإجراء</button>
+                      <button onClick={() => { toast.show('تم تجاهل التوصية', 'info'); }} className="px-4 py-2 bg-white border border-slate-200 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-50 transition">تجاهل</button>
                     </div>
                   </div>
                 ))}

@@ -6,6 +6,7 @@ import {
   TrendingUp, Zap, CheckCircle
 } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useToast } from '../contexts/ToastContext';
 
 const DEFAULT_LESSONS = [
   { id: 1, sector: 'WASH', title: 'تحسين كفاءة المضخات في المناطق الجبلية', text: 'بناءً على 4 مشاريع سابقة، تبين أن استخدام الصمامات الثنائية يقلل الصيانة بنسبة 30%.', tags: ['تقني', 'مياه'], impact: 'High' },
@@ -16,6 +17,7 @@ const DEFAULT_LESSONS = [
 ];
 
 export default function KnowledgeHub() {
+  const toast = useToast();
   const [activeSector, setActiveSector] = useState('All');
   const [lessons, setLessons] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -107,7 +109,7 @@ export default function KnowledgeHub() {
                          <div className="flex gap-2 flex-wrap">
                             {(lesson.tags || []).map(t => <span key={t} className="text-[9px] font-black text-slate-400">#{t}</span>)}
                          </div>
-                         <button className="text-[10px] font-black text-amber-500 flex items-center gap-1">عرض التفاصيل <ArrowRight size={14} /></button>
+                         <button onClick={() => { toast.show('يتم عرض التفاصيل', 'info'); }} className="text-[10px] font-black text-amber-500 flex items-center gap-1">عرض التفاصيل <ArrowRight size={14} /></button>
                       </div>
                    </motion.div>
                  ))}
@@ -122,7 +124,7 @@ export default function KnowledgeHub() {
                <p className="text-sm font-medium opacity-80 leading-relaxed mb-8 relative z-10">
                   يقوم المحرك الذكي بربط الدروس الموثقة آلياً مع "مصمم المشاريع" لتقديم توصيات أثناء التخطيط.
                </p>
-               <button className="w-full h-12 bg-white text-amber-500 rounded-xl font-black text-xs">تحليل اتجاهات المعرفة</button>
+               <button onClick={() => { toast.show('جاري تحليل الاتجاهات...'); setTimeout(() => toast.show('اكتمل التحليل'), 2000); }} className="w-full h-12 bg-white text-amber-500 rounded-xl font-black text-xs">تحليل اتجاهات المعرفة</button>
             </div>
 
             <div className="card-elite p-6 space-y-6">

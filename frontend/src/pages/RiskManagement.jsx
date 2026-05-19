@@ -8,8 +8,10 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../lib/utils';
 import api from '../services/api';
+import { useToast } from '../contexts/ToastContext';
 
 const RiskManagement = () => {
+  const toast = useToast();
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -49,7 +51,7 @@ const RiskManagement = () => {
           <p className="text-slate-500 font-bold mt-1">تتبع الحوادث الميدانية، مصفوفة المخاطر، وخطط التخفيف</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="h-12 px-6 rounded-2xl bg-rose-600 text-white font-black text-sm hover:bg-rose-700 transition-all shadow-lg flex items-center gap-2">
+          <button onClick={() => { toast.show('يرجى ملء بيانات البلاغ الأمني', 'info'); }} className="h-12 px-6 rounded-2xl bg-rose-600 text-white font-black text-sm hover:bg-rose-700 transition-all shadow-lg flex items-center gap-2">
             <Plus size={20} />
             بلاغ عن حادث أمني
           </button>
@@ -183,7 +185,7 @@ const RiskManagement = () => {
                        </li>
                      ))}
                   </ul>
-                  <button className="w-full mt-8 py-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-white font-black text-sm transition-all">
+                  <button onClick={() => { toast.show('جاري تجهيز تقرير المخاطر...'); setTimeout(() => toast.show('تم تجهيز التقرير'), 1500); }} className="w-full mt-8 py-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-white font-black text-sm transition-all">
                      عرض تقرير المخاطر
                   </button>
                </div>
