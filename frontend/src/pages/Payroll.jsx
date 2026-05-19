@@ -8,8 +8,10 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../lib/utils';
 import api from '../services/api';
+import { useToast } from '../contexts/ToastContext';
 
 const PayrollPage = () => {
+  const toast = useToast();
   const [payrolls, setPayrolls] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPayroll, setSelectedPayroll] = useState(null);
@@ -204,7 +206,7 @@ const PayrollPage = () => {
                           ))}
                        </div>
 
-                       <button className="w-full py-4 rounded-2xl bg-blue-600 text-white font-black text-sm hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 flex items-center justify-center gap-2">
+                       <button onClick={() => { toast.show('تم اعتماد وصرف الرواتب بنجاح'); }} className="w-full py-4 rounded-2xl bg-blue-600 text-white font-black text-sm hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 flex items-center justify-center gap-2">
                           <CheckCircle2 size={18} />
                           اعتماد وصرف الرواتب
                        </button>

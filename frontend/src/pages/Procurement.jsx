@@ -8,8 +8,10 @@ import {
 import { motion } from 'framer-motion';
 import { cn } from '../lib/utils';
 import api from '../services/api';
+import { useToast } from '../contexts/ToastContext';
 
 const ProcurementPage = () => {
+  const toast = useToast();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('requests');
@@ -47,11 +49,11 @@ const ProcurementPage = () => {
           <p className="text-slate-500 font-bold mt-1 text-sm">تتبع طلبات الشراء، المناقصات، وأوامر التوريد</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="h-11 px-6 rounded-2xl bg-white border border-slate-200 text-slate-700 font-bold text-sm hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm">
+          <button onClick={() => { toast.show('تم فتح خيارات التصفية', 'info'); }} className="h-11 px-6 rounded-2xl bg-white border border-slate-200 text-slate-700 font-bold text-sm hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm">
             <Filter size={18} />
             تصفية
           </button>
-          <button className="h-11 px-6 rounded-2xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-all flex items-center gap-2 shadow-lg shadow-blue-600/20">
+          <button onClick={() => { toast.show('يرجى ملء بيانات طلب الشراء', 'info'); }} className="h-11 px-6 rounded-2xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-all flex items-center gap-2 shadow-lg shadow-blue-600/20">
             <Plus size={18} />
             طلب شراء جديد
           </button>
@@ -149,7 +151,7 @@ const ProcurementPage = () => {
             <div className="p-12 text-center bg-white rounded-3xl border border-dashed border-slate-200">
               <Package className="mx-auto w-12 h-12 text-slate-300 mb-4" />
               <p className="text-slate-500 font-bold">لا يوجد طلبات شراء حالياً</p>
-              <button className="mt-4 text-blue-600 font-black text-sm hover:underline">أنشئ أول طلب شراء</button>
+              <button onClick={() => { toast.show('يرجى ملء بيانات طلب الشراء الأول', 'info'); }} className="mt-4 text-blue-600 font-black text-sm hover:underline">أنشئ أول طلب شراء</button>
             </div>
           )}
         </div>

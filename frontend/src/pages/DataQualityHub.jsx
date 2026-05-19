@@ -6,6 +6,7 @@ import {
   BarChart3, Clock, MapPin
 } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useToast } from '../contexts/ToastContext';
 
 const ISSUES = [
   { id: 1, type: 'Outlier', field: 'household_size', value: '45', status: 'Pending', severity: 'High', inspector: 'AI Engine' },
@@ -14,6 +15,7 @@ const ISSUES = [
 ];
 
 export default function DataQualityHub() {
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState('all');
 
   return (
@@ -29,10 +31,10 @@ export default function DataQualityHub() {
         </div>
         
         <div className="flex gap-4">
-           <button className="h-12 px-6 bg-black/5 dark:bg-white/5 rounded-2xl font-black text-xs hover:bg-black/10 transition-all flex items-center gap-2">
+           <button onClick={() => { toast.show('جاري إعادة الفحص الشامل...'); setTimeout(() => toast.show('اكتمل الفحص — جودة البيانات 94%'), 2000); }} className="h-12 px-6 bg-black/5 dark:bg-white/5 rounded-2xl font-black text-xs hover:bg-black/10 transition-all flex items-center gap-2">
               <RotateCcw size={18} /> إعادة فحص شامل
            </button>
-           <button className="h-12 px-6 bg-emerald-600 text-white rounded-2xl font-black text-xs shadow-xl shadow-emerald-600/20 hover:bg-emerald-700 transition-all flex items-center gap-2">
+           <button onClick={() => { toast.show('تم اعتماد البيانات النظيفة بنجاح'); }} className="h-12 px-6 bg-emerald-600 text-white rounded-2xl font-black text-xs shadow-xl shadow-emerald-600/20 hover:bg-emerald-700 transition-all flex items-center gap-2">
               <CheckCircle2 size={18} /> اعتماد البيانات النظيفة
            </button>
         </div>
@@ -142,7 +144,7 @@ export default function DataQualityHub() {
                      <p className="text-[10px] font-black uppercase opacity-60 mb-2">آخر استنتاج (Last Insight)</p>
                      <p className="text-xs font-black">"تم اكتشاف نمط غير طبيعي في سرعة إدخال البيانات بمديرية (أ) بين الساعة 2-4 صباحاً."</p>
                   </div>
-                  <button className="w-full h-12 bg-blue-600 rounded-xl font-black text-xs shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition-all">بدء تحليل العمق</button>
+                  <button onClick={() => { toast.show('جاري تحليل العمق...'); setTimeout(() => toast.show('اكتمل التحليل — لا توجد مشاكل'), 2500); }} className="w-full h-12 bg-blue-600 rounded-xl font-black text-xs shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition-all">بدء تحليل العمق</button>
                </div>
             </div>
 

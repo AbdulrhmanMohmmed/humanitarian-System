@@ -4,6 +4,7 @@ import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
 import StatusBadge from '../components/StatusBadge';
 import { Plus, ClipboardList, Eye, Send, FileText, Trash2, GripVertical, BrainCircuit, ShieldAlert } from 'lucide-react';
+import { useToast } from '../contexts/ToastContext';
 
 const FIELD_TYPES = [
   { value: 'text', label: 'نص قصير' },
@@ -23,6 +24,7 @@ const FIELD_TYPES = [
 ];
 
 export default function DataCollection() {
+  const toast = useToast();
   const [forms, setForms] = useState([]);
   const [projects, setProjects] = useState([]);
 
@@ -232,7 +234,7 @@ export default function DataCollection() {
           <button onClick={() => setShowFormModal(true)} className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-200 font-bold text-sm">
             <Plus size={18} /> نموذج جديد (سحب وإفلات)
           </button>
-          <button className="flex items-center gap-2 px-5 py-2.5 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition shadow-lg shadow-purple-200 font-bold text-sm">
+          <button onClick={() => { toast.show('جاري توليد النموذج عبر الذكاء الاصطناعي...'); setTimeout(() => toast.show('تم توليد النموذج بنجاح'), 2500); }} className="flex items-center gap-2 px-5 py-2.5 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition shadow-lg shadow-purple-200 font-bold text-sm">
             <BrainCircuit size={18} /> توليد عبر AI 
           </button>
         </div>

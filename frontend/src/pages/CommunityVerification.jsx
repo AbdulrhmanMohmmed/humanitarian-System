@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import api from '../services/api';
+import { useToast } from '../contexts/ToastContext';
 
 const VERIFICATIONS_DEFAULT = [
   { id: 1, committee: 'لجنة الإغاثة - حي الروضة', project: 'توزيع القسائم الغذائية', status: 'Verified', rating: 4.8, date: '2026-04-20' },
@@ -14,6 +15,7 @@ const VERIFICATIONS_DEFAULT = [
 ];
 
 export default function CommunityVerification() {
+  const toast = useToast();
   const [verifications, setVerifications] = useState(VERIFICATIONS_DEFAULT);
   const [stats, setStats] = useState({ committees: 14, completed: 128, alerts: 3 });
   const [loading, setLoading] = useState(false);
@@ -112,7 +114,7 @@ export default function CommunityVerification() {
                <p className="text-sm font-medium opacity-80 leading-relaxed mb-8 relative z-10">
                   لا يعتبر النشاط مكتملاً في النظام إلا بعد "مصادقة" اللجنة المجتمعية المستقلة، مما يرفع مستوى الشفافية أمام المانحين.
                </p>
-               <button className="w-full h-12 bg-white text-emerald-600 rounded-xl font-black text-xs shadow-xl shadow-black/20 hover:scale-105 transition-all">دعوة لجنة للمصادقة</button>
+               <button onClick={() => { toast.show('تم إرسال دعوة للجنة المصادقة بنجاح'); }} className="w-full h-12 bg-white text-emerald-600 rounded-xl font-black text-xs shadow-xl shadow-black/20 hover:scale-105 transition-all">دعوة لجنة للمصادقة</button>
             </div>
 
             <div className="card-elite p-6 space-y-4">

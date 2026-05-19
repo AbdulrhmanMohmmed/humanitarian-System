@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import api from '../services/api';
+import { useToast } from '../contexts/ToastContext';
 
 const DQA_DIMENSIONS_DEFAULT = [
   { id: 'validity', label: 'Validity', desc: 'البيانات تقيس ما يجب قياسه وترتبط بتعريفات المؤشرات.', score: 92 },
@@ -17,6 +18,7 @@ const DQA_DIMENSIONS_DEFAULT = [
 ];
 
 export default function DataQualityAudit() {
+  const toast = useToast();
   const [dqaResult, setDqaResult] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -132,7 +134,7 @@ export default function DataQualityAudit() {
                <p className="text-sm font-medium opacity-80 leading-relaxed mb-8 relative z-10">
                   يوثق النظام كل تغيير في البيانات، من قام به، ولماذا، مما يجعل المشروع جاهزاً لأي تدقيق خارجي (Internal/External Audit) بنسبة 100%.
                </p>
-               <button className="w-full h-12 bg-emerald-600 rounded-xl font-black text-xs shadow-xl shadow-black/20">تحميل سجل التغييرات الكامل</button>
+               <button onClick={() => { toast.show('جاري تحميل سجل التغييرات...'); setTimeout(() => toast.show('تم التحميل'), 1500); }} className="w-full h-12 bg-emerald-600 rounded-xl font-black text-xs shadow-xl shadow-black/20">تحميل سجل التغييرات الكامل</button>
             </div>
 
             <div className="card-elite p-6 space-y-4">

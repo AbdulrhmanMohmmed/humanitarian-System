@@ -6,6 +6,7 @@ import {
   FileJson, FileSpreadsheet, ClipboardCheck, Users 
 } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useToast } from '../contexts/ToastContext';
 
 const TEMPLATES = [
   { id: 1, name: 'استمارة PDM المتكاملة', category: 'Monitoring', sector: 'MPCA', installs: '1.2k', rating: 4.8, icon: FileSpreadsheet },
@@ -15,6 +16,7 @@ const TEMPLATES = [
 ];
 
 export default function TemplateMarketplace() {
+  const toast = useToast();
   const [activeCategory, setActiveCategory] = useState('All');
 
   return (
@@ -80,7 +82,7 @@ export default function TemplateMarketplace() {
                     <div className="flex items-center gap-1"><Download size={12} /> {item.installs} تثبيت</div>
                  </div>
                  
-                 <button className="w-full h-12 bg-black/5 dark:bg-white/5 group-hover:bg-indigo-600 group-hover:text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2">
+                 <button onClick={() => { toast.show('تم تثبيت النموذج بنجاح'); }} className="w-full h-12 bg-black/5 dark:bg-white/5 group-hover:bg-indigo-600 group-hover:text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2">
                     تثبيت النموذج <Download size={16} />
                  </button>
               </div>
@@ -93,7 +95,7 @@ export default function TemplateMarketplace() {
             <div className="relative z-10 max-w-2xl text-center md:text-right">
                <h2 className="text-4xl font-black mb-4">هل لديك نموذج ناجح؟</h2>
                <p className="text-lg font-medium opacity-80 leading-relaxed mb-8">شارك خبراتك مع المجتمع الإنساني وارفع نماذجك المخصصة على السوق ليتمكن الآخرون من الاستفادة منها.</p>
-               <button className="h-14 px-10 bg-white text-indigo-600 rounded-2xl font-black text-sm shadow-xl shadow-black/20 hover:scale-105 transition-all">ابدأ برفع نموذجك الآن</button>
+               <button onClick={() => { toast.show('سيتم فتح نافذة رفع النماذج', 'info'); }} className="h-14 px-10 bg-white text-indigo-600 rounded-2xl font-black text-sm shadow-xl shadow-black/20 hover:scale-105 transition-all">ابدأ برفع نموذجك الآن</button>
             </div>
             <div className="relative z-10 grid grid-cols-2 gap-4">
                {[

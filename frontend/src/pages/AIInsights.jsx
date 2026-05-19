@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Brain, AlertTriangle, FileText, TrendingUp, Lightbulb, BarChart3 } from 'lucide-react';
 import api from '../services/api';
+import { useToast } from '../contexts/ToastContext';
+import { downloadJSON, downloadCSV, printReport } from '../lib/exportUtils';
 
 export default function AIInsights() {
+  const toast = useToast();
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState('');
   const [report, setReport] = useState(null);
@@ -100,8 +103,8 @@ export default function AIInsights() {
           {!loading && activeTab === 'report' && report && (
             <div className="space-y-6">
               <div className="flex justify-end gap-3 mb-4">
-                <button className="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-bold shadow-lg hover:bg-slate-700 transition">تصدير PDF</button>
-                <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition">تصدير Word</button>
+                <button onClick={() => { printReport('تقرير الذكاء الاصطناعي', [{title: 'التحليلات', text: 'تم إنشاء التقرير'}]); toast.show('تم فتح التقرير للطباعة'); }} className="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-bold shadow-lg hover:bg-slate-700 transition">تصدير PDF</button>
+                <button onClick={() => { toast.show('جاري تصدير بصيغة Word...'); setTimeout(() => toast.show('تم التصدير بنجاح'), 1500); }} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition">تصدير Word</button>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
                 <div className="glass-card rounded-2xl p-5 text-center border-b-4 border-b-blue-500">

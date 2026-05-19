@@ -9,8 +9,10 @@ import {
 import { motion } from 'framer-motion';
 import { cn } from '../lib/utils';
 import api from '../services/api';
+import { useToast } from '../contexts/ToastContext';
 
 const FleetPage = () => {
+  const toast = useToast();
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('vehicles');
@@ -50,11 +52,11 @@ const FleetPage = () => {
           <p className="text-slate-500 font-bold mt-1">تتبع المركبات، الوقود، والصيانة الدورية للمهام الميدانية</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="h-12 px-6 rounded-2xl bg-white border border-slate-200 text-slate-700 font-black text-sm hover:bg-slate-50 transition-all flex items-center gap-2">
+          <button onClick={() => { toast.show('يتم عرض سجل المهام', 'info'); }} className="h-12 px-6 rounded-2xl bg-white border border-slate-200 text-slate-700 font-black text-sm hover:bg-slate-50 transition-all flex items-center gap-2">
             <Calendar size={20} />
             سجل المهام
           </button>
-          <button className="h-12 px-6 rounded-2xl bg-blue-600 text-white font-black text-sm hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 flex items-center gap-2">
+          <button onClick={() => { toast.show('يرجى ملء بيانات المركبة الجديدة', 'info'); }} className="h-12 px-6 rounded-2xl bg-blue-600 text-white font-black text-sm hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 flex items-center gap-2">
             <Plus size={20} />
             إضافة مركبة
           </button>

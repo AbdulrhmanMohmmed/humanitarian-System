@@ -83,7 +83,8 @@ const AIHub = () => {
                    { label: 'تقييم مخاطر المشروع', icon: AlertTriangle }
                  ].map((tool, i) => (
                    <button 
-                    key={i} 
+                    key={i}
+                    onClick={() => { setInput(tool.label); setActiveTask(tool.label); }}
                     className="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-black flex items-center gap-2 hover:bg-blue-50 hover:text-blue-600 transition-all"
                    >
                      <tool.icon size={14} />

@@ -9,10 +9,14 @@ import {
 import { motion } from 'framer-motion';
 import { cn } from '../lib/utils';
 import api from '../services/api';
+import { useToast } from '../contexts/ToastContext';
+import { downloadJSON, printReport } from '../lib/exportUtils';
 
 const StrategicDashboard = () => {
+  const toast = useToast();
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState('monthly');
 
   useEffect(() => {
     const fetchMetrics = async () => {
@@ -49,11 +53,11 @@ const StrategicDashboard = () => {
           <p className="text-slate-500 font-bold mt-1">المؤشرات العالمية، الشفافية (IATI)، وتقارير الـ 3W للمانحين</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="h-12 px-6 rounded-2xl bg-white border border-slate-200 text-slate-700 font-black text-sm hover:bg-slate-50 transition-all flex items-center gap-2">
+          <button onClick={() => { downloadJSON(metrics || {}, 'ocha-3w-report.json'); toast.show('تم تصدير تقرير OCHA 3W بنجاح'); }} className="h-12 px-6 rounded-2xl bg-white border border-slate-200 text-slate-700 font-black text-sm hover:bg-slate-50 transition-all flex items-center gap-2">
             <FileSpreadsheet size={20} />
             تصدير OCHA 3W
           </button>
-          <button className="h-12 px-6 rounded-2xl bg-indigo-600 text-white font-black text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 flex items-center gap-2">
+          <button onClick={() => { printReport('التقرير الاستراتيجي العام', [{ title: 'المؤشرات', stats: { 'إجمالي الوصول': metrics?.reach || 0, 'فجوة التمويل': metrics?.funding_gap || 0, 'الامتثال IATI': metrics?.iati_compliance_score || 0 }}]); toast.show('تم فتح التقرير للطباعة/المشاركة'); }} className="h-12 px-6 rounded-2xl bg-indigo-600 text-white font-black text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 flex items-center gap-2">
             <Share2 size={20} />
             مشاركة التقرير العام
           </button>
@@ -146,8 +150,8 @@ const StrategicDashboard = () => {
                     <p className="text-xs font-bold text-slate-400">توقعات الوصول للأشهر الستة القادمة</p>
                   </div>
                   <div className="flex items-center gap-1 p-1 bg-white/5 rounded-xl border border-white/10">
-                     <button className="px-3 py-1 rounded-lg bg-indigo-600 text-[10px] font-black">Monthly</button>
-                     <button className="px-3 py-1 rounded-lg text-[10px] font-black hover:bg-white/10">Quarterly</button>
+                     <button onClick={() => setViewMode('monthly')} className={cn('px-3 py-1 rounded-lg text-[10px] font-black', viewMode === 'monthly' ? 'bg-indigo-600' : 'hover:bg-white/10')}>Monthly</button>
+                     <button onClick={() => setViewMode('quarterly')} className={cn('px-3 py-1 rounded-lg text-[10px] font-black', viewMode === 'quarterly' ? 'bg-indigo-600' : 'hover:bg-white/10')}>Quarterly</button>
                   </div>
                </div>
 
@@ -188,7 +192,7 @@ const StrategicDashboard = () => {
                <p className="text-sm font-bold text-slate-400 mt-1 leading-relaxed">
                   البيانات المالية والبرامجية منسقة تماماً مع المعايير الدولية للشفافية. جاهز للتزامن التلقائي.
                </p>
-               <button className="mt-4 text-xs font-black text-indigo-600 flex items-center gap-1 hover:underline">
+               <button onClick={() => { window.open('/integrations', '_self'); }} className="mt-4 text-xs font-black text-indigo-600 flex items-center gap-1 hover:underline">
                   إعدادات المزامنة <ExternalLink size={14} />
                </button>
             </div>
@@ -203,7 +207,7 @@ const StrategicDashboard = () => {
                <p className="text-sm font-bold text-slate-400 mt-1 leading-relaxed">
                   توليد تقارير "Who, What, Where" بضغطة زر لمشاركتها مع الكتل القطاعية (Clusters).
                </p>
-               <button className="mt-4 text-xs font-black text-blue-600 flex items-center gap-1 hover:underline">
+               <button onClick={() => { downloadJSON(metrics || {}, 'ocha-3w-latest.json'); toast.show('تم تحميل آخر نسخة من التقرير'); }} className="mt-4 text-xs font-black text-blue-600 flex items-center gap-1 hover:underline">
                   تحميل آخر نسخة <Download size={14} />
                </button>
             </div>

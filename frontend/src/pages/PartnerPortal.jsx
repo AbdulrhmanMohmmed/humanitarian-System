@@ -9,8 +9,10 @@ import {
 import { motion } from 'framer-motion';
 import { cn } from '../lib/utils';
 import api from '../services/api';
+import { useToast } from '../contexts/ToastContext';
 
 const PartnerPortal = () => {
+  const toast = useToast();
   const [partners, setPartners] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -42,11 +44,11 @@ const PartnerPortal = () => {
           <p className="text-slate-500 font-bold mt-1">تقييم قدرات المنظمات المحلية، إدارة المنح الفرعية، والرقابة الميدانية</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="h-12 px-6 rounded-2xl bg-white border border-slate-200 text-slate-700 font-black text-sm hover:bg-slate-50 transition-all flex items-center gap-2">
+          <button onClick={() => { toast.show('جاري فتح أداة تقييم القدرات...', 'info'); }} className="h-12 px-6 rounded-2xl bg-white border border-slate-200 text-slate-700 font-black text-sm hover:bg-slate-50 transition-all flex items-center gap-2">
             <ShieldCheck size={18} />
             أداة تقييم القدرات
           </button>
-          <button className="h-12 px-6 rounded-2xl bg-indigo-600 text-white font-black text-sm hover:bg-indigo-700 transition-all shadow-lg flex items-center gap-2">
+          <button onClick={() => { toast.show('يرجى ملء بيانات الشريك الجديد', 'info'); }} className="h-12 px-6 rounded-2xl bg-indigo-600 text-white font-black text-sm hover:bg-indigo-700 transition-all shadow-lg flex items-center gap-2">
             <Plus size={20} />
             إضافة شريك جديد
           </button>
@@ -93,7 +95,7 @@ const PartnerPortal = () => {
                </div>
 
                <div className="pt-6 border-t border-slate-50 flex items-center justify-between">
-                  <button className="text-xs font-black text-indigo-600 hover:underline flex items-center gap-1">
+                  <button onClick={() => { toast.show('يتم عرض ملف الشريك', 'info'); }} className="text-xs font-black text-indigo-600 hover:underline flex items-center gap-1">
                     ملف الشريك <ExternalLink size={12} />
                   </button>
                   <span className="px-3 py-1 bg-emerald-100 text-emerald-600 text-[10px] font-black rounded-full uppercase">

@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useBranding } from '../contexts/BrandingContext';
 import { Palette, Upload, Check, RotateCcw, ShieldCheck, Globe } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useToast } from '../contexts/ToastContext';
 
 export default function BrandingSettings() {
+  const toast = useToast();
   const { branding, updateBranding } = useBranding();
   const [tempColor, setTempColor] = useState(branding.primaryColor);
   const [tempName, setTempName] = useState(branding.orgName);
@@ -85,7 +87,7 @@ export default function BrandingSettings() {
                        <div className="text-[9px] font-bold opacity-60">Corporate Humanitarian Instance</div>
                     </div>
                  </div>
-                 <button className="w-full h-10 rounded-xl font-black text-[10px] uppercase tracking-widest" style={{ backgroundColor: tempColor }}>زر تجريبي (Action Button)</button>
+                 <button onClick={() => { toast.show('تم تنفيذ الإجراء التجريبي'); }} className="w-full h-10 rounded-xl font-black text-[10px] uppercase tracking-widest" style={{ backgroundColor: tempColor }}>زر تجريبي (Action Button)</button>
               </div>
            </div>
 

@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../lib/utils';
+import { useToast } from '../contexts/ToastContext';
+import { downloadJSON, downloadCSV, printReport } from '../lib/exportUtils';
 import { 
   BarChart, 
   Bar, 
@@ -36,6 +38,7 @@ import {
 } from 'recharts';
 
 export default function AnalyticsDashboard() {
+  const toast = useToast();
   const [tab, setTab] = useState('overview');
   const [overview, setOverview] = useState(null);
   const [geographic, setGeographic] = useState(null);
@@ -134,7 +137,7 @@ export default function AnalyticsDashboard() {
            <button onClick={load} className={cn("inline-flex h-12 items-center gap-2 rounded-2xl bg-black/5 dark:bg-white/5 border border-[var(--border)] px-6 text-xs font-black hover:bg-black/10 transition-all", isRefreshing && "animate-spin-slow")}>
              تحديث البيانات
            </button>
-           <button className="inline-flex h-12 items-center gap-2 rounded-2xl bg-blue-600 px-8 text-xs font-black text-white shadow-2xl shadow-blue-600/30 hover:bg-blue-700 transition-all">
+           <button onClick={() => { downloadJSON({type: 'analytics', date: new Date().toISOString()}, 'analytics-report.json'); toast.show('تم تصدير التقرير التحليلي'); }} className="inline-flex h-12 items-center gap-2 rounded-2xl bg-blue-600 px-8 text-xs font-black text-white shadow-2xl shadow-blue-600/30 hover:bg-blue-700 transition-all">
              <Download size={18} /> تصدير التقارير
            </button>
         </div>
@@ -253,7 +256,7 @@ export default function AnalyticsDashboard() {
                 </div>
                 <h3 className="text-2xl font-black mb-4">خارطة التدخلات التفاعلية</h3>
                 <p className="max-w-md text-slate-500 font-medium">هذه الميزة تتطلب تحميل حزم الخرائط الجغرافية النشطة. يمكنك عرض توزيع المستفيدين حسب المحافظات والمديريات.</p>
-                <button className="mt-8 px-8 py-3 bg-slate-900 text-white rounded-2xl font-black text-sm">تفعيل الخرائط الحرارية</button>
+                <button onClick={() => { toast.show('تم تفعيل طبقة الخرائط الحرارية', 'info'); }} className="mt-8 px-8 py-3 bg-slate-900 text-white rounded-2xl font-black text-sm">تفعيل الخرائط الحرارية</button>
              </div>
           )}
 

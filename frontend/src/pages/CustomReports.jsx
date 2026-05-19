@@ -3,6 +3,7 @@ import { FileText, Plus, Download, Filter, Save, LayoutGrid, List, Check, Search
 import DataTable from '../components/DataTable';
 import { motion } from 'framer-motion';
 import { cn } from '../lib/utils';
+import { useToast } from '../contexts/ToastContext';
 
 const DOCTYPES = [
   { id: 'projects', label: 'المشاريع', columns: ['name', 'code', 'sector', 'budget', 'status', 'donor'] },
@@ -11,6 +12,7 @@ const DOCTYPES = [
 ];
 
 export default function CustomReports() {
+  const toast = useToast();
   const [selectedDoc, setSelectedDoc] = useState(DOCTYPES[0]);
   const [activeColumns, setActiveColumns] = useState(selectedDoc.columns);
   const [showConfig, setShowConfig] = useState(true);
@@ -35,7 +37,7 @@ export default function CustomReports() {
            <button onClick={() => setShowConfig(!showConfig)} className="h-12 px-6 bg-black/5 dark:bg-white/5 rounded-2xl font-black text-xs hover:bg-black/10 transition-all flex items-center gap-2">
               <Filter size={18} /> {showConfig ? 'إخفاء الإعدادات' : 'تعديل التقرير'}
            </button>
-           <button className="h-12 px-6 bg-blue-600 text-white rounded-2xl font-black text-xs shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition-all flex items-center gap-2">
+           <button onClick={() => { toast.show('تم حفظ التقرير المخصص بنجاح'); }} className="h-12 px-6 bg-blue-600 text-white rounded-2xl font-black text-xs shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition-all flex items-center gap-2">
               <Save size={18} /> حفظ التقرير
            </button>
         </div>

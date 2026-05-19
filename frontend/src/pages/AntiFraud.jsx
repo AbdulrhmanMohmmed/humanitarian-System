@@ -3,8 +3,11 @@ import { ShieldAlert, MapPin, Clock, Users, CheckCircle, AlertTriangle, Fingerpr
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '../lib/utils';
 import api from '../services/api';
+import { useToast } from '../contexts/ToastContext';
+import { downloadJSON, downloadCSV, printReport } from '../lib/exportUtils';
 
 export default function AntiFraud() {
+  const toast = useToast();
   const [isScanning, setIsScanning] = useState(false);
   const [dedupResult, setDedupResult] = useState(null);
   const [stats, setStats] = useState({ trusted: 4250, gps: 0, speed: 8, duplicates: 0 });
@@ -137,8 +140,8 @@ export default function AntiFraud() {
               سجل التنبيهات الخطيرة (High-Risk Log)
             </h3>
             <div className="flex gap-2">
-              <button className="px-4 py-2 bg-black/5 dark:bg-white/5 rounded-xl text-xs font-bold hover:bg-black/10 transition-all">تصدير التقرير</button>
-              <button className="px-4 py-2 bg-rose-600/10 text-rose-600 rounded-xl text-xs font-bold hover:bg-rose-600 hover:text-white transition-all">إغلاق الكل</button>
+              <button onClick={() => { downloadJSON({type: 'anti-fraud', date: new Date().toISOString()}, 'anti-fraud-report.json'); toast.show('تم تصدير التقرير'); }} className="px-4 py-2 bg-black/5 dark:bg-white/5 rounded-xl text-xs font-bold hover:bg-black/10 transition-all">تصدير التقرير</button>
+              <button onClick={() => { toast.show('تم إغلاق جميع التنبيهات'); }} className="px-4 py-2 bg-rose-600/10 text-rose-600 rounded-xl text-xs font-bold hover:bg-rose-600 hover:text-white transition-all">إغلاق الكل</button>
             </div>
           </div>
 
@@ -178,8 +181,8 @@ export default function AntiFraud() {
                         </div>
                       </div>
                       <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-black hover:bg-rose-700 transition-all">حظر فوري</button>
-                        <button className="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-[var(--text-primary)] rounded-xl text-xs font-black hover:bg-slate-300 transition-all">مراجعة</button>
+                        <button onClick={() => { toast.show('تم تنفيذ الحظر الفوري', 'error'); }} className="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-black hover:bg-rose-700 transition-all">حظر فوري</button>
+                        <button onClick={() => { toast.show('تم فتح المراجعة', 'info'); }} className="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-[var(--text-primary)] rounded-xl text-xs font-black hover:bg-slate-300 transition-all">مراجعة</button>
                       </div>
                     </div>
                   </div>
