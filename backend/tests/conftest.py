@@ -34,3 +34,23 @@ def client(db):
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as c:
         yield c
+
+@pytest.fixture(scope="module")
+def auth_header(client, db):
+    """Get auth token — seed admin if needed."""
+    from app.models.user import User
+    from app.auth import get_password_hash
+    existing = db.query(User).filter(User.username == "admin").first()
+    if not existing:
+        user = User(
+            username="admin",
+            full_name="مدير النظام",
+            hashed_password=get_password_hash("admin123"),
+            role="admin",
+            is_active=True,
+        )
+        db.add(user)
+        db.commit()
+    resp = client.post("/api/v1/auth/login", json={"username": "admin", "password": "admin123"})
+    token = resp.json().get("access_token", "")
+    return {"Authorization": f"Bearer {token}"}

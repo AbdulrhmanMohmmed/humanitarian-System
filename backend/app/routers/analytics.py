@@ -121,7 +121,7 @@ def five_w_report(
         activities = p.activities if hasattr(p, 'activities') else []
         for act in activities:
             report_data.append({
-                "who": p.donor or "غير محدد",
+                "who": getattr(p, 'donor', None) or "غير محدد",
                 "what": act.name,
                 "where": p.governorate or "غير محدد",
                 "when": act.start_date.isoformat() if act.start_date else "غير محدد",
@@ -134,7 +134,7 @@ def five_w_report(
     if not report_data:
         for p in projects:
             report_data.append({
-                "who": p.donor or "غير محدد",
+                "who": getattr(p, 'donor', None) or "غير محدد",
                 "what": p.name,
                 "where": p.governorate or "غير محدد",
                 "when": p.start_date.isoformat() if p.start_date else "غير محدد",

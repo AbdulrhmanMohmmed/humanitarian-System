@@ -36,6 +36,7 @@ from app.routers import (
     mfa, security, accounting, meal_advanced, hr_advanced, supply_chain,
     standards, protection, emergency, camp_management, nutrition, wash,
     education, livelihoods, early_warning, bulk_ops, search,
+    geographic,
 )
 from app.seed import seed_database
 
@@ -162,6 +163,7 @@ MODULE_MAP = {
     "early_warning": [early_warning.router],
     "bulk": [bulk_ops.router],
     "search": [search.router],
+    "geographic": [geographic.router],
 }
 
 # ── Versioned API mounting ─────────────────────────────────────────────────────

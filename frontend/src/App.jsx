@@ -6,6 +6,7 @@ import { ToastProvider } from './contexts/ToastContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { BrandingProvider } from './contexts/BrandingContext';
 import Layout from './components/Layout';
+import ModuleErrorBoundary from './components/ModuleErrorBoundary';
 import { AnimatePresence, motion } from 'framer-motion';
 
 // ── Lazy-loaded pages (code splitting — one chunk per page) ───────────────────
@@ -151,10 +152,12 @@ function AppRoutes() {
   const { user } = useAuth();
   const location = useLocation();
 
-  const P = ({ element }) => (
+  const P = ({ element, moduleName }) => (
     <ProtectedRoute>
       <PageWrapper>
-        <Suspense fallback={<PageLoader />}>{element}</Suspense>
+        <ModuleErrorBoundary moduleName={moduleName}>
+          <Suspense fallback={<PageLoader />}>{element}</Suspense>
+        </ModuleErrorBoundary>
       </PageWrapper>
     </ProtectedRoute>
   );

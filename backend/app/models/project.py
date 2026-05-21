@@ -24,6 +24,7 @@ class Project(SoftDeleteMixin, CustomValuesMixin, Base):
     actual_beneficiaries = Column(Integer, default=0)
     governorate = Column(String(100))
     district = Column(String(100))
+    donor = Column(String(255), nullable=True)
     latitude = Column(Float)
     longitude = Column(Float)
     custom_values_json = Column(Text, default="{}")
