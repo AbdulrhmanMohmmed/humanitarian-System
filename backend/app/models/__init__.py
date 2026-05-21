@@ -46,3 +46,4 @@ from .new_modules import (
     LivelihoodProgram,
     EarlyWarningIndicator, EarlyWarningAlert,
 )
+from .geographic import AdminBoundary, Location, SpatialQuery
