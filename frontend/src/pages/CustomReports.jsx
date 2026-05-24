@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileText, Plus, Download, Filter, Save, LayoutGrid, List, Check, Search } from 'lucide-react';
+import api from '../services/api';
 import DataTable from '../components/DataTable';
 import { motion } from 'framer-motion';
 import { cn } from '../lib/utils';
@@ -16,6 +17,15 @@ export default function CustomReports() {
   const [selectedDoc, setSelectedDoc] = useState(DOCTYPES[0]);
   const [activeColumns, setActiveColumns] = useState(selectedDoc.columns);
   const [showConfig, setShowConfig] = useState(true);
+  const [reportData, setReportData] = useState([]);
+
+  useEffect(() => {
+    const endpoint = `/${selectedDoc.id}/`;
+    api.get(endpoint).then(r => {
+      const items = Array.isArray(r.data) ? r.data : (r.data.items || []);
+      setReportData(items);
+    }).catch(() => setReportData([]));
+  }, [selectedDoc.id]);
 
   const toggleColumn = (col) => {
     setActiveColumns(prev => prev.includes(col) ? prev.filter(c => c !== col) : [...prev, col]);

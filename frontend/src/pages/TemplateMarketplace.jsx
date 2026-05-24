@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   ShoppingBag, Download, Star, Filter, 
@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useToast } from '../contexts/ToastContext';
+import api from '../services/api';
 
 const TEMPLATES = [
   { id: 1, name: 'استمارة PDM المتكاملة', category: 'Monitoring', sector: 'MPCA', installs: '1.2k', rating: 4.8, icon: FileSpreadsheet },
@@ -17,6 +18,14 @@ const TEMPLATES = [
 
 export default function TemplateMarketplace() {
   const toast = useToast();
+  const [marketTemplates, setMarketTemplates] = useState(null);
+
+  useEffect(() => {
+    api.get('/reports/templates').then(r => {
+      const items = Array.isArray(r.data) ? r.data : (r.data.items || []);
+      setMarketTemplates(items);
+    }).catch(() => {});
+  }, []);
   const [activeCategory, setActiveCategory] = useState('All');
 
   return (

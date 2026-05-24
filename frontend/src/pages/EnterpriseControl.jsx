@@ -8,11 +8,20 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useToast } from '../contexts/ToastContext';
+import api from '../services/api';
 
 export default function EnterpriseControl() {
   const toast = useToast();
   const [uptime, setUptime] = useState('99.98%');
   const [dbStatus, setDbStatus] = useState('Optimized');
+  const [systemStats, setSystemStats] = useState({});
+
+  useEffect(() => {
+    api.get('/organizations/').then(r => {
+      const items = Array.isArray(r.data) ? r.data : (r.data.items || []);
+      setSystemStats({ orgs: items.length });
+    }).catch(() => {});
+  }, []);
 
   return (
     <div className="space-y-8 pb-20">

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Radio, Target, BarChart3, PieChart, 
@@ -8,6 +8,7 @@ import {
 import { cn } from '../lib/utils';
 import { ResponsiveContainer, PieChart as RePie, Pie, Cell, Tooltip } from 'recharts';
 import { useToast } from '../contexts/ToastContext';
+import api from '../services/api';
 
 const HRP_ALIGNMENT = [
   { name: 'صحة (Health)', value: 35, color: '#2563eb' },
@@ -19,6 +20,14 @@ const HRP_ALIGNMENT = [
 
 export default function CoordinationWatchtower() {
   const toast = useToast();
+  const [coordData, setCoordData] = useState(null);
+
+  useEffect(() => {
+    api.get('/analytics/dashboard').then(r => {
+      const items = Array.isArray(r.data) ? r.data : (r.data.items || []);
+      setCoordData(items);
+    }).catch(() => {});
+  }, []);
   return (
     <div className="space-y-8 pb-20">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">

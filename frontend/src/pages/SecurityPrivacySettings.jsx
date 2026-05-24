@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   ShieldCheck, Lock, Fingerprint, EyeOff, 
@@ -7,9 +7,18 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useToast } from '../contexts/ToastContext';
+import api from '../services/api';
 
 export default function SecurityPrivacySettings() {
   const toast = useToast();
+  const [securitySessions, setSecuritySessions] = useState(null);
+
+  useEffect(() => {
+    api.get('/security/sessions').then(r => {
+      const items = Array.isArray(r.data) ? r.data : (r.data.items || []);
+      setSecuritySessions(items);
+    }).catch(() => {});
+  }, []);
   const [maskPII, setMaskPII] = useState(true);
   const [mfaEnabled, setMfaEnabled] = useState(false);
 

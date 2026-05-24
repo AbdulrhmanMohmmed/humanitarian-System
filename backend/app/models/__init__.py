@@ -47,3 +47,4 @@ from .new_modules import (
     EarlyWarningIndicator, EarlyWarningAlert,
 )
 from .geographic import AdminBoundary, Location, SpatialQuery
+from .donor_portal import Proposal, FundingOpportunity, DonorInstallment, DonorVisit, DonorCommunication

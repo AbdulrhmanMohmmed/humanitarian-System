@@ -11,6 +11,7 @@ const defaultPhases = [
   { id: 4, label: 'التحليل والتحقق DQA', status: 'pending', tasks: [{ id: 41, title: 'Statistical Analysis', done: false }, { id: 42, title: 'Data Quality Audit', done: false }, { id: 43, title: 'Triangulation', done: false }] },
   { id: 5, label: 'التعلم والإدارة التكيفية', status: 'pending', tasks: [{ id: 51, title: 'Learning Workshop', done: false }, { id: 52, title: 'Adaptive Decision', done: false }, { id: 53, title: 'Donor Reporting', done: false }] },
 ];
+import api from '../services/api';
 
 function loadState() {
   try {
@@ -26,7 +27,13 @@ export default function MEALLifecycle() {
   const [state, setState] = useState({ phases: defaultPhases, logs: [] });
   const [newTask, setNewTask] = useState('');
 
-  useEffect(() => setState(loadState()), []);
+  useEffect(() => {
+    api.get('/meal-plan/').then(r => {
+      const items = Array.isArray(r.data) ? r.data : (r.data.items || []);
+      if (items.length > 0) setState(prev => ({ ...prev, apiPlans: items }));
+    }).catch(() => {});
+    setState(loadState());
+  }, []);
 
   const persist = (next, message) => {
     const updated = message

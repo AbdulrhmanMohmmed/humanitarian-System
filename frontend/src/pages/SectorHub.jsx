@@ -11,6 +11,7 @@ const sectors = [
   { id: 'health', label: 'الصحة والتغذية', icon: Heart, color: 'bg-rose-600' },
   { id: 'education', label: 'التعليم', icon: GraduationCap, color: 'bg-amber-600' },
 ];
+import api from '../services/api';
 
 const defaultFcs = { cereal: 7, pulses: 4, veg: 7, fruit: 7, meat: 3, dairy: 3, sugar: 7, oil: 7 };
 const defaultRcsi = { lessPreferred: 0, borrowFood: 0, limitPortions: 0, restrictAdults: 0, reduceMeals: 0 };
@@ -44,7 +45,13 @@ export default function SectorHub() {
   const [protectionData, setProtectionData] = useState(defaultProtection);
   const [history, setHistory] = useState([]);
 
-  useEffect(() => setHistory(loadHistory()), []);
+  useEffect(() => {
+    setHistory(loadHistory());
+    api.get('/sector-indicators/').then(r => {
+      const items = Array.isArray(r.data) ? r.data : (r.data.items || r.data.indicators || []);
+      if (items.length > 0) setHistory(prev => [...prev, ...items.map(i => ({ ...i, source: 'api' }))]);
+    }).catch(() => {});
+  }, []);
 
   const fcs = scoreFcs(fcsData);
   const rcsi = (rcsiData.lessPreferred * 1) + (rcsiData.borrowFood * 2) + (rcsiData.limitPortions * 1) + (rcsiData.restrictAdults * 3) + (rcsiData.reduceMeals * 1);
