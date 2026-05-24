@@ -51,4 +51,6 @@ from .donor_portal import Proposal, FundingOpportunity, DonorInstallment, DonorV
 from .data_center import (
     OrgPolicy, ContactDirectory, OrgResource, LegalDocument,
     DonorProfile, CountryProfile, SectorReference, EmergencyContact, CurrencyRate,
+    PopulationRecord, CampSiteProfile, MarketStudy, CommodityPrice, MEBBasket,
+    NeedsAssessmentRecord, SectorFacility,
 )
