@@ -9,6 +9,11 @@ from app.models.data_center import (
     OrgPolicy, ContactDirectory, OrgResource, LegalDocument,
     DonorProfile, CountryProfile, SectorReference, EmergencyContact, CurrencyRate,
     PolicyCategory, ContactType, ResourceType, LegalDocType,
+    PopulationRecord, PopulationCategory, GenderGroup, AgeGroup,
+    CampSiteProfile, CampStatus,
+    MarketStudy, CommodityPrice, MEBBasket,
+    NeedsAssessmentRecord, SeverityLevel,
+    SectorFacility, FacilityType, FacilityStatus,
 )
 from pydantic import BaseModel, Field
 
@@ -135,6 +140,13 @@ def data_center_dashboard(db: Session = Depends(get_db), user=Depends(get_curren
         "sectors": db.query(func.count(SectorReference.id)).scalar(),
         "emergency_contacts": db.query(func.count(EmergencyContact.id)).scalar(),
         "currency_rates": db.query(func.count(CurrencyRate.id)).scalar(),
+        "population_records": db.query(func.count(PopulationRecord.id)).scalar(),
+        "camp_sites": db.query(func.count(CampSiteProfile.id)).scalar(),
+        "market_studies": db.query(func.count(MarketStudy.id)).scalar(),
+        "commodity_prices": db.query(func.count(CommodityPrice.id)).scalar(),
+        "meb_baskets": db.query(func.count(MEBBasket.id)).scalar(),
+        "needs_assessments": db.query(func.count(NeedsAssessmentRecord.id)).scalar(),
+        "sector_facilities": db.query(func.count(SectorFacility.id)).scalar(),
     }
 
 
@@ -564,4 +576,645 @@ def _rate_dict(r):
         "id": r.id, "from_currency": r.from_currency, "to_currency": r.to_currency,
         "rate": r.rate, "source": r.source,
         "effective_date": str(r.effective_date) if r.effective_date else None,
+    }
+
+
+# ── Schemas for new sections ─────────────────────────────────────────────────
+
+class PopulationCreate(BaseModel):
+    governorate: str
+    district: Optional[str] = None
+    sub_district: Optional[str] = None
+    category: str
+    gender: str = "total"
+    age_group: str = "total"
+    count: int = 0
+    year: int = 2026
+    quarter: Optional[int] = None
+    source: Optional[str] = None
+    methodology: Optional[str] = None
+    confidence_level: Optional[str] = None
+    notes: Optional[str] = None
+
+class CampSiteCreate(BaseModel):
+    name: str
+    site_id: Optional[str] = None
+    camp_type: Optional[str] = None
+    status: str = "active"
+    governorate: Optional[str] = None
+    district: Optional[str] = None
+    sub_district: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    capacity: int = 0
+    current_population: int = 0
+    households: int = 0
+    managed_by: Optional[str] = None
+    land_ownership: Optional[str] = None
+    shelter_types: list = []
+    available_services: list = []
+    water_source: Optional[str] = None
+    electricity_available: bool = False
+    health_facility_nearby: bool = False
+    school_nearby: bool = False
+    notes: Optional[str] = None
+
+class MarketStudyCreate(BaseModel):
+    title: str
+    study_type: Optional[str] = None
+    governorate: Optional[str] = None
+    district: Optional[str] = None
+    market_name: Optional[str] = None
+    market_functionality: Optional[str] = None
+    main_commodities: list = []
+    supply_chain_status: Optional[str] = None
+    price_trends: Optional[str] = None
+    recommendations: Optional[str] = None
+    methodology: Optional[str] = None
+    sample_size: int = 0
+    conducted_by: Optional[str] = None
+    notes: Optional[str] = None
+
+class CommodityPriceCreate(BaseModel):
+    commodity_name: str
+    commodity_category: Optional[str] = None
+    unit: str
+    price: float
+    currency: str = "YER"
+    governorate: Optional[str] = None
+    district: Optional[str] = None
+    market_name: Optional[str] = None
+    price_previous: Optional[float] = None
+    price_change_pct: Optional[float] = None
+    source: Optional[str] = None
+    is_meb_item: bool = False
+    notes: Optional[str] = None
+
+class MEBBasketCreate(BaseModel):
+    name: str
+    basket_type: Optional[str] = None
+    governorate: Optional[str] = None
+    district: Optional[str] = None
+    total_cost: float = 0
+    currency: str = "YER"
+    household_size: int = 7
+    items: list = []
+    previous_cost: Optional[float] = None
+    cost_change_pct: Optional[float] = None
+    methodology: Optional[str] = None
+    source: Optional[str] = None
+    notes: Optional[str] = None
+
+class NeedsAssessmentCreate(BaseModel):
+    title: str
+    assessment_type: Optional[str] = None
+    sector: Optional[str] = None
+    governorate: Optional[str] = None
+    district: Optional[str] = None
+    sub_district: Optional[str] = None
+    severity: Optional[str] = None
+    people_in_need: int = 0
+    people_targeted: int = 0
+    people_reached: int = 0
+    households_assessed: int = 0
+    key_findings: Optional[str] = None
+    priority_needs: list = []
+    gaps_identified: list = []
+    recommendations: Optional[str] = None
+    methodology: Optional[str] = None
+    conducted_by: Optional[str] = None
+    hno_year: Optional[int] = None
+    ipc_phase: Optional[str] = None
+    notes: Optional[str] = None
+
+class SectorFacilityCreate(BaseModel):
+    name: str
+    facility_type: str
+    status: str = "functional"
+    governorate: Optional[str] = None
+    district: Optional[str] = None
+    sub_district: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    capacity: int = 0
+    current_utilization: int = 0
+    managed_by: Optional[str] = None
+    supported_by: list = []
+    services_provided: list = []
+    staff_count: int = 0
+    operating_hours: Optional[str] = None
+    beneficiaries_served: int = 0
+    catchment_population: int = 0
+    challenges: list = []
+    needs: list = []
+    notes: Optional[str] = None
+
+
+# ── Population Demographics CRUD ─────────────────────────────────────────────
+
+@router.get("/population")
+def list_population(
+    governorate: Optional[str] = None,
+    district: Optional[str] = None,
+    category: Optional[str] = None,
+    year: Optional[int] = None,
+    search: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(25, ge=1, le=100),
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
+):
+    q = db.query(PopulationRecord)
+    if governorate:
+        q = q.filter(PopulationRecord.governorate.ilike(f"%{governorate}%"))
+    if district:
+        q = q.filter(PopulationRecord.district.ilike(f"%{district}%"))
+    if category:
+        q = q.filter(PopulationRecord.category == category)
+    if year:
+        q = q.filter(PopulationRecord.year == year)
+    if search:
+        q = q.filter(or_(
+            PopulationRecord.governorate.ilike(f"%{search}%"),
+            PopulationRecord.district.ilike(f"%{search}%"),
+            PopulationRecord.sub_district.ilike(f"%{search}%"),
+        ))
+    total = q.count()
+    items = q.order_by(PopulationRecord.governorate, PopulationRecord.district).offset((page - 1) * page_size).limit(page_size).all()
+    return {"items": [_population_dict(p) for p in items], "total": total, "page": page}
+
+
+@router.post("/population")
+def create_population(data: PopulationCreate, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    p = PopulationRecord(**data.model_dump())
+    db.add(p)
+    db.commit()
+    db.refresh(p)
+    return _population_dict(p)
+
+
+@router.get("/population/{pid}")
+def get_population(pid: int, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    p = db.query(PopulationRecord).filter(PopulationRecord.id == pid).first()
+    if not p:
+        raise HTTPException(404, "Population record not found")
+    return _population_dict(p)
+
+
+@router.put("/population/{pid}")
+def update_population(pid: int, data: PopulationCreate, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    p = db.query(PopulationRecord).filter(PopulationRecord.id == pid).first()
+    if not p:
+        raise HTTPException(404, "Population record not found")
+    for k, v in data.model_dump().items():
+        setattr(p, k, v)
+    p.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(p)
+    return _population_dict(p)
+
+
+@router.delete("/population/{pid}")
+def delete_population(pid: int, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    p = db.query(PopulationRecord).filter(PopulationRecord.id == pid).first()
+    if not p:
+        raise HTTPException(404, "Population record not found")
+    db.delete(p)
+    db.commit()
+    return {"ok": True}
+
+
+@router.get("/population/summary/by-governorate")
+def population_by_governorate(
+    year: Optional[int] = None,
+    category: Optional[str] = None,
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
+):
+    q = db.query(
+        PopulationRecord.governorate,
+        PopulationRecord.category,
+        func.sum(PopulationRecord.count).label("total"),
+    ).filter(PopulationRecord.age_group == "total", PopulationRecord.gender == "total")
+    if year:
+        q = q.filter(PopulationRecord.year == year)
+    if category:
+        q = q.filter(PopulationRecord.category == category)
+    rows = q.group_by(PopulationRecord.governorate, PopulationRecord.category).all()
+    result = {}
+    for gov, cat, total in rows:
+        if gov not in result:
+            result[gov] = {"governorate": gov, "categories": {}}
+        result[gov]["categories"][cat.value if hasattr(cat, 'value') else cat] = total
+    return list(result.values())
+
+
+def _population_dict(p):
+    return {
+        "id": p.id, "governorate": p.governorate, "district": p.district,
+        "sub_district": p.sub_district,
+        "category": p.category.value if p.category else None,
+        "gender": p.gender.value if p.gender else None,
+        "age_group": p.age_group.value if p.age_group else None,
+        "count": p.count, "year": p.year, "quarter": p.quarter,
+        "source": p.source, "methodology": p.methodology,
+        "confidence_level": p.confidence_level, "notes": p.notes,
+        "is_verified": p.is_verified,
+        "created_at": str(p.created_at) if p.created_at else None,
+    }
+
+
+# ── Camp / Site Management CRUD ──────────────────────────────────────────────
+
+@router.get("/camps")
+def list_camps(
+    governorate: Optional[str] = None,
+    status: Optional[str] = None,
+    search: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(25, ge=1, le=100),
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
+):
+    q = db.query(CampSiteProfile)
+    if governorate:
+        q = q.filter(CampSiteProfile.governorate.ilike(f"%{governorate}%"))
+    if status:
+        q = q.filter(CampSiteProfile.status == status)
+    if search:
+        q = q.filter(or_(
+            CampSiteProfile.name.ilike(f"%{search}%"),
+            CampSiteProfile.site_id.ilike(f"%{search}%"),
+            CampSiteProfile.managed_by.ilike(f"%{search}%"),
+        ))
+    total = q.count()
+    items = q.order_by(CampSiteProfile.name).offset((page - 1) * page_size).limit(page_size).all()
+    return {"items": [_camp_dict(c) for c in items], "total": total, "page": page}
+
+
+@router.post("/camps")
+def create_camp(data: CampSiteCreate, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    c = CampSiteProfile(**data.model_dump())
+    db.add(c)
+    db.commit()
+    db.refresh(c)
+    return _camp_dict(c)
+
+
+@router.get("/camps/{cid}")
+def get_camp(cid: int, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    c = db.query(CampSiteProfile).filter(CampSiteProfile.id == cid).first()
+    if not c:
+        raise HTTPException(404, "Camp not found")
+    return _camp_dict(c)
+
+
+@router.put("/camps/{cid}")
+def update_camp(cid: int, data: CampSiteCreate, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    c = db.query(CampSiteProfile).filter(CampSiteProfile.id == cid).first()
+    if not c:
+        raise HTTPException(404, "Camp not found")
+    for k, v in data.model_dump().items():
+        setattr(c, k, v)
+    c.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(c)
+    return _camp_dict(c)
+
+
+@router.delete("/camps/{cid}")
+def delete_camp(cid: int, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    c = db.query(CampSiteProfile).filter(CampSiteProfile.id == cid).first()
+    if not c:
+        raise HTTPException(404, "Camp not found")
+    db.delete(c)
+    db.commit()
+    return {"ok": True}
+
+
+def _camp_dict(c):
+    return {
+        "id": c.id, "name": c.name, "site_id": c.site_id, "camp_type": c.camp_type,
+        "status": c.status.value if c.status else None,
+        "governorate": c.governorate, "district": c.district, "sub_district": c.sub_district,
+        "latitude": c.latitude, "longitude": c.longitude,
+        "capacity": c.capacity, "current_population": c.current_population,
+        "households": c.households, "managed_by": c.managed_by,
+        "land_ownership": c.land_ownership,
+        "shelter_types": c.shelter_types or [], "available_services": c.available_services or [],
+        "water_source": c.water_source, "electricity_available": c.electricity_available,
+        "health_facility_nearby": c.health_facility_nearby, "school_nearby": c.school_nearby,
+        "protection_concerns": c.protection_concerns or [],
+        "notes": c.notes,
+        "created_at": str(c.created_at) if c.created_at else None,
+    }
+
+
+# ── Market Studies CRUD ──────────────────────────────────────────────────────
+
+@router.get("/market-studies")
+def list_market_studies(
+    governorate: Optional[str] = None,
+    search: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(25, ge=1, le=100),
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
+):
+    q = db.query(MarketStudy)
+    if governorate:
+        q = q.filter(MarketStudy.governorate.ilike(f"%{governorate}%"))
+    if search:
+        q = q.filter(or_(MarketStudy.title.ilike(f"%{search}%"), MarketStudy.market_name.ilike(f"%{search}%")))
+    total = q.count()
+    items = q.order_by(MarketStudy.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
+    return {"items": [_market_study_dict(m) for m in items], "total": total, "page": page}
+
+
+@router.post("/market-studies")
+def create_market_study(data: MarketStudyCreate, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    m = MarketStudy(**data.model_dump())
+    db.add(m)
+    db.commit()
+    db.refresh(m)
+    return _market_study_dict(m)
+
+
+@router.delete("/market-studies/{mid}")
+def delete_market_study(mid: int, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    m = db.query(MarketStudy).filter(MarketStudy.id == mid).first()
+    if not m:
+        raise HTTPException(404, "Market study not found")
+    db.delete(m)
+    db.commit()
+    return {"ok": True}
+
+
+def _market_study_dict(m):
+    return {
+        "id": m.id, "title": m.title, "study_type": m.study_type,
+        "governorate": m.governorate, "district": m.district,
+        "market_name": m.market_name, "market_functionality": m.market_functionality,
+        "main_commodities": m.main_commodities or [], "supply_chain_status": m.supply_chain_status,
+        "price_trends": m.price_trends, "recommendations": m.recommendations,
+        "methodology": m.methodology, "sample_size": m.sample_size,
+        "conducted_by": m.conducted_by, "notes": m.notes,
+        "created_at": str(m.created_at) if m.created_at else None,
+    }
+
+
+@router.get("/commodity-prices")
+def list_commodity_prices(
+    governorate: Optional[str] = None,
+    commodity_category: Optional[str] = None,
+    is_meb_item: Optional[bool] = None,
+    search: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(25, ge=1, le=100),
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
+):
+    q = db.query(CommodityPrice)
+    if governorate:
+        q = q.filter(CommodityPrice.governorate.ilike(f"%{governorate}%"))
+    if commodity_category:
+        q = q.filter(CommodityPrice.commodity_category == commodity_category)
+    if is_meb_item is not None:
+        q = q.filter(CommodityPrice.is_meb_item == is_meb_item)
+    if search:
+        q = q.filter(CommodityPrice.commodity_name.ilike(f"%{search}%"))
+    total = q.count()
+    items = q.order_by(CommodityPrice.collection_date.desc()).offset((page - 1) * page_size).limit(page_size).all()
+    return {"items": [_commodity_dict(c) for c in items], "total": total, "page": page}
+
+
+@router.post("/commodity-prices")
+def create_commodity_price(data: CommodityPriceCreate, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    c = CommodityPrice(**data.model_dump())
+    c.collection_date = datetime.utcnow()
+    db.add(c)
+    db.commit()
+    db.refresh(c)
+    return _commodity_dict(c)
+
+
+@router.delete("/commodity-prices/{cid}")
+def delete_commodity_price(cid: int, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    c = db.query(CommodityPrice).filter(CommodityPrice.id == cid).first()
+    if not c:
+        raise HTTPException(404, "Commodity price not found")
+    db.delete(c)
+    db.commit()
+    return {"ok": True}
+
+
+def _commodity_dict(c):
+    return {
+        "id": c.id, "commodity_name": c.commodity_name,
+        "commodity_category": c.commodity_category, "unit": c.unit,
+        "price": c.price, "currency": c.currency,
+        "governorate": c.governorate, "district": c.district,
+        "market_name": c.market_name,
+        "collection_date": str(c.collection_date) if c.collection_date else None,
+        "price_previous": c.price_previous, "price_change_pct": c.price_change_pct,
+        "source": c.source, "is_meb_item": c.is_meb_item, "notes": c.notes,
+        "created_at": str(c.created_at) if c.created_at else None,
+    }
+
+
+@router.get("/meb-baskets")
+def list_meb_baskets(
+    governorate: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(25, ge=1, le=100),
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
+):
+    q = db.query(MEBBasket)
+    if governorate:
+        q = q.filter(MEBBasket.governorate.ilike(f"%{governorate}%"))
+    total = q.count()
+    items = q.order_by(MEBBasket.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
+    return {"items": [_meb_dict(m) for m in items], "total": total, "page": page}
+
+
+@router.post("/meb-baskets")
+def create_meb_basket(data: MEBBasketCreate, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    m = MEBBasket(**data.model_dump())
+    db.add(m)
+    db.commit()
+    db.refresh(m)
+    return _meb_dict(m)
+
+
+def _meb_dict(m):
+    return {
+        "id": m.id, "name": m.name, "basket_type": m.basket_type,
+        "governorate": m.governorate, "district": m.district,
+        "total_cost": m.total_cost, "currency": m.currency,
+        "household_size": m.household_size, "items": m.items or [],
+        "previous_cost": m.previous_cost, "cost_change_pct": m.cost_change_pct,
+        "methodology": m.methodology, "source": m.source, "notes": m.notes,
+        "created_at": str(m.created_at) if m.created_at else None,
+    }
+
+
+# ── Needs Assessments CRUD ───────────────────────────────────────────────────
+
+@router.get("/needs-assessments")
+def list_needs_assessments(
+    governorate: Optional[str] = None,
+    sector: Optional[str] = None,
+    severity: Optional[str] = None,
+    search: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(25, ge=1, le=100),
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
+):
+    q = db.query(NeedsAssessmentRecord)
+    if governorate:
+        q = q.filter(NeedsAssessmentRecord.governorate.ilike(f"%{governorate}%"))
+    if sector:
+        q = q.filter(NeedsAssessmentRecord.sector == sector)
+    if severity:
+        q = q.filter(NeedsAssessmentRecord.severity == severity)
+    if search:
+        q = q.filter(or_(
+            NeedsAssessmentRecord.title.ilike(f"%{search}%"),
+            NeedsAssessmentRecord.key_findings.ilike(f"%{search}%"),
+        ))
+    total = q.count()
+    items = q.order_by(NeedsAssessmentRecord.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
+    return {"items": [_needs_dict(n) for n in items], "total": total, "page": page}
+
+
+@router.post("/needs-assessments")
+def create_needs_assessment(data: NeedsAssessmentCreate, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    n = NeedsAssessmentRecord(**data.model_dump())
+    db.add(n)
+    db.commit()
+    db.refresh(n)
+    return _needs_dict(n)
+
+
+@router.get("/needs-assessments/{nid}")
+def get_needs_assessment(nid: int, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    n = db.query(NeedsAssessmentRecord).filter(NeedsAssessmentRecord.id == nid).first()
+    if not n:
+        raise HTTPException(404, "Needs assessment not found")
+    return _needs_dict(n)
+
+
+@router.delete("/needs-assessments/{nid}")
+def delete_needs_assessment(nid: int, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    n = db.query(NeedsAssessmentRecord).filter(NeedsAssessmentRecord.id == nid).first()
+    if not n:
+        raise HTTPException(404, "Needs assessment not found")
+    db.delete(n)
+    db.commit()
+    return {"ok": True}
+
+
+def _needs_dict(n):
+    return {
+        "id": n.id, "title": n.title, "assessment_type": n.assessment_type,
+        "sector": n.sector, "governorate": n.governorate, "district": n.district,
+        "sub_district": n.sub_district,
+        "severity": n.severity.value if n.severity else None,
+        "people_in_need": n.people_in_need, "people_targeted": n.people_targeted,
+        "people_reached": n.people_reached, "households_assessed": n.households_assessed,
+        "key_findings": n.key_findings, "priority_needs": n.priority_needs or [],
+        "gaps_identified": n.gaps_identified or [], "recommendations": n.recommendations,
+        "methodology": n.methodology, "conducted_by": n.conducted_by,
+        "hno_year": n.hno_year, "ipc_phase": n.ipc_phase, "notes": n.notes,
+        "created_at": str(n.created_at) if n.created_at else None,
+    }
+
+
+# ── Sector Facilities CRUD ───────────────────────────────────────────────────
+
+@router.get("/facilities")
+def list_facilities(
+    governorate: Optional[str] = None,
+    facility_type: Optional[str] = None,
+    status: Optional[str] = None,
+    search: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(25, ge=1, le=100),
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
+):
+    q = db.query(SectorFacility)
+    if governorate:
+        q = q.filter(SectorFacility.governorate.ilike(f"%{governorate}%"))
+    if facility_type:
+        q = q.filter(SectorFacility.facility_type == facility_type)
+    if status:
+        q = q.filter(SectorFacility.status == status)
+    if search:
+        q = q.filter(or_(
+            SectorFacility.name.ilike(f"%{search}%"),
+            SectorFacility.managed_by.ilike(f"%{search}%"),
+        ))
+    total = q.count()
+    items = q.order_by(SectorFacility.name).offset((page - 1) * page_size).limit(page_size).all()
+    return {"items": [_facility_dict(f) for f in items], "total": total, "page": page}
+
+
+@router.post("/facilities")
+def create_facility(data: SectorFacilityCreate, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    f = SectorFacility(**data.model_dump())
+    db.add(f)
+    db.commit()
+    db.refresh(f)
+    return _facility_dict(f)
+
+
+@router.get("/facilities/{fid}")
+def get_facility(fid: int, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    f = db.query(SectorFacility).filter(SectorFacility.id == fid).first()
+    if not f:
+        raise HTTPException(404, "Facility not found")
+    return _facility_dict(f)
+
+
+@router.put("/facilities/{fid}")
+def update_facility(fid: int, data: SectorFacilityCreate, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    f = db.query(SectorFacility).filter(SectorFacility.id == fid).first()
+    if not f:
+        raise HTTPException(404, "Facility not found")
+    for k, v in data.model_dump().items():
+        setattr(f, k, v)
+    f.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(f)
+    return _facility_dict(f)
+
+
+@router.delete("/facilities/{fid}")
+def delete_facility(fid: int, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    f = db.query(SectorFacility).filter(SectorFacility.id == fid).first()
+    if not f:
+        raise HTTPException(404, "Facility not found")
+    db.delete(f)
+    db.commit()
+    return {"ok": True}
+
+
+def _facility_dict(f):
+    return {
+        "id": f.id, "name": f.name,
+        "facility_type": f.facility_type.value if f.facility_type else None,
+        "status": f.status.value if f.status else None,
+        "governorate": f.governorate, "district": f.district, "sub_district": f.sub_district,
+        "latitude": f.latitude, "longitude": f.longitude,
+        "capacity": f.capacity, "current_utilization": f.current_utilization,
+        "managed_by": f.managed_by, "supported_by": f.supported_by or [],
+        "services_provided": f.services_provided or [], "staff_count": f.staff_count,
+        "operating_hours": f.operating_hours, "beneficiaries_served": f.beneficiaries_served,
+        "catchment_population": f.catchment_population,
+        "challenges": f.challenges or [], "needs": f.needs or [],
+        "notes": f.notes, "is_active": f.is_active,
+        "created_at": str(f.created_at) if f.created_at else None,
     }

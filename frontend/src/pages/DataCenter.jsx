@@ -4,7 +4,9 @@ import {
   Database, FileText, Users, Globe, Shield, Phone,
   DollarSign, MapPin, Building2, Plus, Search, Trash2,
   Edit, Download, BookOpen, Scale, AlertTriangle,
-  Briefcase, FileCheck, Clock, TrendingUp, Layers
+  Briefcase, FileCheck, Clock, TrendingUp, Layers,
+  UserCheck, Tent, ShoppingCart, ClipboardList, Hospital,
+  BarChart3, Home
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import api from '../services/api';
@@ -13,6 +15,13 @@ import { downloadJSON, downloadCSV } from '../lib/exportUtils';
 
 const TABS = [
   { id: 'dashboard', label: 'لوحة التحكم', icon: Database },
+  { id: 'population', label: 'بيانات السكان والفئات', icon: UserCheck },
+  { id: 'camps', label: 'بيانات المخيمات والمواقع', icon: Tent },
+  { id: 'market_studies', label: 'دراسات السوق', icon: ShoppingCart },
+  { id: 'commodity_prices', label: 'أسعار السلع', icon: BarChart3 },
+  { id: 'meb', label: 'سلة الحد الأدنى للإنفاق', icon: Home },
+  { id: 'needs', label: 'تقييمات الاحتياجات', icon: ClipboardList },
+  { id: 'facilities', label: 'المرافق القطاعية', icon: Hospital },
   { id: 'policies', label: 'السياسات والإجراءات', icon: FileText },
   { id: 'contacts', label: 'دليل جهات الاتصال', icon: Users },
   { id: 'resources', label: 'الموارد والقوالب', icon: BookOpen },
@@ -22,6 +31,65 @@ const TABS = [
   { id: 'sectors', label: 'القطاعات الإنسانية', icon: Layers },
   { id: 'emergency', label: 'جهات الطوارئ', icon: Phone },
   { id: 'currency', label: 'أسعار العملات', icon: DollarSign },
+];
+
+const POPULATION_CATEGORIES = [
+  { value: 'idp', label: 'نازحون' },
+  { value: 'host_community', label: 'مجتمعات مضيفة' },
+  { value: 'returnee', label: 'عائدون' },
+  { value: 'refugee', label: 'لاجئون' },
+  { value: 'asylum_seeker', label: 'طالبو لجوء' },
+  { value: 'non_displaced', label: 'غير نازحين' },
+];
+
+const GENDER_GROUPS = [
+  { value: 'male', label: 'ذكور' },
+  { value: 'female', label: 'إناث' },
+  { value: 'total', label: 'الإجمالي' },
+];
+
+const AGE_GROUPS = [
+  { value: 'under_5', label: 'أقل من 5 سنوات' },
+  { value: '5_17', label: '5-17 سنة' },
+  { value: '18_59', label: '18-59 سنة' },
+  { value: '60_plus', label: '60+ سنة' },
+  { value: 'total', label: 'الإجمالي' },
+];
+
+const CAMP_STATUSES = [
+  { value: 'active', label: 'نشط' },
+  { value: 'closed', label: 'مغلق' },
+  { value: 'planned', label: 'مخطط' },
+  { value: 'transitional', label: 'انتقالي' },
+];
+
+const FACILITY_TYPES = [
+  { value: 'health_center', label: 'مركز صحي' },
+  { value: 'hospital', label: 'مستشفى' },
+  { value: 'school', label: 'مدرسة' },
+  { value: 'water_point', label: 'نقطة مياه' },
+  { value: 'nutrition_center', label: 'مركز تغذية' },
+  { value: 'protection_center', label: 'مركز حماية' },
+  { value: 'distribution_point', label: 'نقطة توزيع' },
+  { value: 'shelter', label: 'مأوى' },
+  { value: 'wash_facility', label: 'مرفق WASH' },
+  { value: 'livelihood_center', label: 'مركز سبل عيش' },
+];
+
+const FACILITY_STATUSES = [
+  { value: 'functional', label: 'فعّال' },
+  { value: 'partially_functional', label: 'فعّال جزئياً' },
+  { value: 'non_functional', label: 'غير فعّال' },
+  { value: 'destroyed', label: 'مدمّر' },
+  { value: 'under_construction', label: 'قيد الإنشاء' },
+];
+
+const SEVERITY_LEVELS = [
+  { value: '1_minimal', label: 'حد أدنى (1)' },
+  { value: '2_stress', label: 'إجهاد (2)' },
+  { value: '3_severe', label: 'شديد (3)' },
+  { value: '4_extreme', label: 'متطرف (4)' },
+  { value: '5_catastrophic', label: 'كارثي (5)' },
 ];
 
 const POLICY_CATEGORIES = [
@@ -137,6 +205,13 @@ export default function DataCenter() {
   }, [activeTab]);
 
   const endpointMap = {
+    population: '/data-center/population',
+    camps: '/data-center/camps',
+    market_studies: '/data-center/market-studies',
+    commodity_prices: '/data-center/commodity-prices',
+    meb: '/data-center/meb-baskets',
+    needs: '/data-center/needs-assessments',
+    facilities: '/data-center/facilities',
     policies: '/data-center/policies',
     contacts: '/data-center/contacts',
     resources: '/data-center/resources',
@@ -187,6 +262,26 @@ export default function DataCenter() {
 
   const renderDashboard = () => (
     <div className="space-y-8">
+      <div className="p-8 rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white mb-6">
+        <h3 className="text-2xl font-black mb-4">مركز المعلومات والبيانات</h3>
+        <p className="text-blue-100 font-medium leading-relaxed">
+          مرجعك الشامل لبيانات السكان والفئات (نازحين، مجتمعات مضيفة، عائدين، لاجئين) بحسب المحافظة والمديرية والعزلة،
+          بيانات المخيمات، دراسات السوق، أسعار السلع، تقييمات الاحتياجات، المرافق القطاعية، والمزيد.
+        </p>
+      </div>
+
+      <h3 className="text-lg font-black text-[var(--text-primary)]">البيانات الميدانية</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard icon={UserCheck} label="سجلات السكان" value={dashboard.population_records || 0} color="bg-violet-600" />
+        <StatCard icon={Tent} label="المخيمات والمواقع" value={dashboard.camp_sites || 0} color="bg-amber-600" />
+        <StatCard icon={ShoppingCart} label="دراسات السوق" value={dashboard.market_studies || 0} color="bg-pink-600" />
+        <StatCard icon={BarChart3} label="أسعار السلع" value={dashboard.commodity_prices || 0} color="bg-red-600" />
+        <StatCard icon={Home} label="سلة الحد الأدنى" value={dashboard.meb_baskets || 0} color="bg-sky-600" />
+        <StatCard icon={ClipboardList} label="تقييمات الاحتياجات" value={dashboard.needs_assessments || 0} color="bg-fuchsia-600" />
+        <StatCard icon={Hospital} label="المرافق القطاعية" value={dashboard.sector_facilities || 0} color="bg-teal-600" />
+      </div>
+
+      <h3 className="text-lg font-black text-[var(--text-primary)] mt-6">البيانات المؤسسية</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard icon={FileText} label="السياسات النشطة" value={dashboard.active_policies || 0} color="bg-blue-600" />
         <StatCard icon={Users} label="جهات الاتصال" value={dashboard.contacts || 0} color="bg-emerald-600" />
@@ -200,27 +295,126 @@ export default function DataCenter() {
         <StatCard icon={DollarSign} label="أسعار العملات" value={dashboard.currency_rates || 0} color="bg-lime-600" />
       </div>
 
-      <div className="p-8 rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white">
-        <h3 className="text-2xl font-black mb-4">🏢 مركز المعلومات والبيانات</h3>
-        <p className="text-blue-100 font-medium leading-relaxed mb-4">
-          مرجعك الشامل لجميع البيانات والمعلومات التي تحتاجها المنظمة: السياسات الداخلية، دليل جهات الاتصال، القوالب والنماذج،
-          الوثائق القانونية، ملفات المانحين، بيانات الدول والقطاعات الإنسانية، وأسعار العملات.
-        </p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-          {TABS.filter(t => t.id !== 'dashboard').map(tab => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              className="p-4 rounded-2xl bg-white/10 hover:bg-white/20 transition-all text-center">
-              <tab.icon size={24} className="mx-auto mb-2" />
-              <span className="text-xs font-bold">{tab.label}</span>
-            </button>
-          ))}
-        </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+        {TABS.filter(t => t.id !== 'dashboard').map(tab => (
+          <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+            className="p-4 rounded-2xl bg-[var(--bg-primary)] border border-[var(--border)] hover:border-blue-500 transition-all text-center">
+            <tab.icon size={24} className="mx-auto mb-2 text-blue-600" />
+            <span className="text-xs font-bold text-[var(--text-primary)]">{tab.label}</span>
+          </button>
+        ))}
       </div>
     </div>
   );
 
   const renderForm = () => {
     switch (activeTab) {
+      case 'population':
+        return (<>
+          <Input label="المحافظة" value={form.governorate || ''} onChange={e => setForm({ ...form, governorate: e.target.value })} />
+          <Input label="المديرية" value={form.district || ''} onChange={e => setForm({ ...form, district: e.target.value })} />
+          <Input label="العزلة" value={form.sub_district || ''} onChange={e => setForm({ ...form, sub_district: e.target.value })} />
+          <Select label="الفئة" options={POPULATION_CATEGORIES} value={form.category || 'idp'} onChange={e => setForm({ ...form, category: e.target.value })} />
+          <Select label="الجنس" options={GENDER_GROUPS} value={form.gender || 'total'} onChange={e => setForm({ ...form, gender: e.target.value })} />
+          <Select label="الفئة العمرية" options={AGE_GROUPS} value={form.age_group || 'total'} onChange={e => setForm({ ...form, age_group: e.target.value })} />
+          <Input label="العدد" type="number" value={form.count || 0} onChange={e => setForm({ ...form, count: parseInt(e.target.value) })} />
+          <Input label="السنة" type="number" value={form.year || 2026} onChange={e => setForm({ ...form, year: parseInt(e.target.value) })} />
+          <Input label="الربع" type="number" value={form.quarter || ''} onChange={e => setForm({ ...form, quarter: parseInt(e.target.value) || null })} placeholder="1-4" />
+          <Input label="المصدر" value={form.source || ''} onChange={e => setForm({ ...form, source: e.target.value })} />
+          <Input label="المنهجية" value={form.methodology || ''} onChange={e => setForm({ ...form, methodology: e.target.value })} />
+          <TextArea label="ملاحظات" value={form.notes || ''} onChange={e => setForm({ ...form, notes: e.target.value })} />
+        </>);
+      case 'camps':
+        return (<>
+          <Input label="اسم المخيم/الموقع" value={form.name || ''} onChange={e => setForm({ ...form, name: e.target.value })} />
+          <Input label="رقم الموقع" value={form.site_id || ''} onChange={e => setForm({ ...form, site_id: e.target.value })} />
+          <Input label="نوع المخيم" value={form.camp_type || ''} onChange={e => setForm({ ...form, camp_type: e.target.value })} />
+          <Select label="الحالة" options={CAMP_STATUSES} value={form.status || 'active'} onChange={e => setForm({ ...form, status: e.target.value })} />
+          <Input label="المحافظة" value={form.governorate || ''} onChange={e => setForm({ ...form, governorate: e.target.value })} />
+          <Input label="المديرية" value={form.district || ''} onChange={e => setForm({ ...form, district: e.target.value })} />
+          <Input label="العزلة" value={form.sub_district || ''} onChange={e => setForm({ ...form, sub_district: e.target.value })} />
+          <Input label="خط العرض" type="number" step="0.0001" value={form.latitude || ''} onChange={e => setForm({ ...form, latitude: parseFloat(e.target.value) })} />
+          <Input label="خط الطول" type="number" step="0.0001" value={form.longitude || ''} onChange={e => setForm({ ...form, longitude: parseFloat(e.target.value) })} />
+          <Input label="السعة" type="number" value={form.capacity || 0} onChange={e => setForm({ ...form, capacity: parseInt(e.target.value) })} />
+          <Input label="السكان الحاليون" type="number" value={form.current_population || 0} onChange={e => setForm({ ...form, current_population: parseInt(e.target.value) })} />
+          <Input label="عدد الأسر" type="number" value={form.households || 0} onChange={e => setForm({ ...form, households: parseInt(e.target.value) })} />
+          <Input label="الجهة المديرة" value={form.managed_by || ''} onChange={e => setForm({ ...form, managed_by: e.target.value })} />
+          <Input label="مصدر المياه" value={form.water_source || ''} onChange={e => setForm({ ...form, water_source: e.target.value })} />
+          <TextArea label="ملاحظات" value={form.notes || ''} onChange={e => setForm({ ...form, notes: e.target.value })} />
+        </>);
+      case 'market_studies':
+        return (<>
+          <Input label="عنوان الدراسة" value={form.title || ''} onChange={e => setForm({ ...form, title: e.target.value })} />
+          <Input label="نوع الدراسة" value={form.study_type || ''} onChange={e => setForm({ ...form, study_type: e.target.value })} />
+          <Input label="المحافظة" value={form.governorate || ''} onChange={e => setForm({ ...form, governorate: e.target.value })} />
+          <Input label="المديرية" value={form.district || ''} onChange={e => setForm({ ...form, district: e.target.value })} />
+          <Input label="اسم السوق" value={form.market_name || ''} onChange={e => setForm({ ...form, market_name: e.target.value })} />
+          <Input label="وظيفية السوق" value={form.market_functionality || ''} onChange={e => setForm({ ...form, market_functionality: e.target.value })} />
+          <Input label="المنهجية" value={form.methodology || ''} onChange={e => setForm({ ...form, methodology: e.target.value })} />
+          <Input label="حجم العينة" type="number" value={form.sample_size || 0} onChange={e => setForm({ ...form, sample_size: parseInt(e.target.value) })} />
+          <Input label="الجهة المنفذة" value={form.conducted_by || ''} onChange={e => setForm({ ...form, conducted_by: e.target.value })} />
+          <TextArea label="التوصيات" value={form.recommendations || ''} onChange={e => setForm({ ...form, recommendations: e.target.value })} />
+          <TextArea label="ملاحظات" value={form.notes || ''} onChange={e => setForm({ ...form, notes: e.target.value })} />
+        </>);
+      case 'commodity_prices':
+        return (<>
+          <Input label="اسم السلعة" value={form.commodity_name || ''} onChange={e => setForm({ ...form, commodity_name: e.target.value })} />
+          <Input label="فئة السلعة" value={form.commodity_category || ''} onChange={e => setForm({ ...form, commodity_category: e.target.value })} placeholder="غذائية / غير غذائية" />
+          <Input label="الوحدة" value={form.unit || ''} onChange={e => setForm({ ...form, unit: e.target.value })} placeholder="كغ / لتر / حبة" />
+          <Input label="السعر" type="number" step="0.01" value={form.price || ''} onChange={e => setForm({ ...form, price: parseFloat(e.target.value) })} />
+          <Input label="العملة" value={form.currency || 'YER'} onChange={e => setForm({ ...form, currency: e.target.value })} />
+          <Input label="المحافظة" value={form.governorate || ''} onChange={e => setForm({ ...form, governorate: e.target.value })} />
+          <Input label="اسم السوق" value={form.market_name || ''} onChange={e => setForm({ ...form, market_name: e.target.value })} />
+          <Input label="المصدر" value={form.source || ''} onChange={e => setForm({ ...form, source: e.target.value })} />
+          <TextArea label="ملاحظات" value={form.notes || ''} onChange={e => setForm({ ...form, notes: e.target.value })} />
+        </>);
+      case 'meb':
+        return (<>
+          <Input label="اسم السلة" value={form.name || ''} onChange={e => setForm({ ...form, name: e.target.value })} />
+          <Input label="نوع السلة" value={form.basket_type || ''} onChange={e => setForm({ ...form, basket_type: e.target.value })} placeholder="غذائية / كاملة" />
+          <Input label="المحافظة" value={form.governorate || ''} onChange={e => setForm({ ...form, governorate: e.target.value })} />
+          <Input label="المديرية" value={form.district || ''} onChange={e => setForm({ ...form, district: e.target.value })} />
+          <Input label="التكلفة الإجمالية" type="number" step="0.01" value={form.total_cost || 0} onChange={e => setForm({ ...form, total_cost: parseFloat(e.target.value) })} />
+          <Input label="العملة" value={form.currency || 'YER'} onChange={e => setForm({ ...form, currency: e.target.value })} />
+          <Input label="حجم الأسرة" type="number" value={form.household_size || 7} onChange={e => setForm({ ...form, household_size: parseInt(e.target.value) })} />
+          <Input label="المنهجية" value={form.methodology || ''} onChange={e => setForm({ ...form, methodology: e.target.value })} />
+          <Input label="المصدر" value={form.source || ''} onChange={e => setForm({ ...form, source: e.target.value })} />
+          <TextArea label="ملاحظات" value={form.notes || ''} onChange={e => setForm({ ...form, notes: e.target.value })} />
+        </>);
+      case 'needs':
+        return (<>
+          <Input label="عنوان التقييم" value={form.title || ''} onChange={e => setForm({ ...form, title: e.target.value })} />
+          <Input label="نوع التقييم" value={form.assessment_type || ''} onChange={e => setForm({ ...form, assessment_type: e.target.value })} placeholder="HNO / RNA / MSNA" />
+          <Input label="القطاع" value={form.sector || ''} onChange={e => setForm({ ...form, sector: e.target.value })} />
+          <Input label="المحافظة" value={form.governorate || ''} onChange={e => setForm({ ...form, governorate: e.target.value })} />
+          <Input label="المديرية" value={form.district || ''} onChange={e => setForm({ ...form, district: e.target.value })} />
+          <Input label="العزلة" value={form.sub_district || ''} onChange={e => setForm({ ...form, sub_district: e.target.value })} />
+          <Select label="مستوى الشدة" options={SEVERITY_LEVELS} value={form.severity || '3_severe'} onChange={e => setForm({ ...form, severity: e.target.value })} />
+          <Input label="المحتاجون" type="number" value={form.people_in_need || 0} onChange={e => setForm({ ...form, people_in_need: parseInt(e.target.value) })} />
+          <Input label="المستهدفون" type="number" value={form.people_targeted || 0} onChange={e => setForm({ ...form, people_targeted: parseInt(e.target.value) })} />
+          <Input label="الأسر المقيّمة" type="number" value={form.households_assessed || 0} onChange={e => setForm({ ...form, households_assessed: parseInt(e.target.value) })} />
+          <Input label="الجهة المنفذة" value={form.conducted_by || ''} onChange={e => setForm({ ...form, conducted_by: e.target.value })} />
+          <Input label="المنهجية" value={form.methodology || ''} onChange={e => setForm({ ...form, methodology: e.target.value })} />
+          <TextArea label="النتائج الرئيسية" value={form.key_findings || ''} onChange={e => setForm({ ...form, key_findings: e.target.value })} />
+          <TextArea label="التوصيات" value={form.recommendations || ''} onChange={e => setForm({ ...form, recommendations: e.target.value })} />
+        </>);
+      case 'facilities':
+        return (<>
+          <Input label="اسم المرفق" value={form.name || ''} onChange={e => setForm({ ...form, name: e.target.value })} />
+          <Select label="نوع المرفق" options={FACILITY_TYPES} value={form.facility_type || 'health_center'} onChange={e => setForm({ ...form, facility_type: e.target.value })} />
+          <Select label="الحالة" options={FACILITY_STATUSES} value={form.status || 'functional'} onChange={e => setForm({ ...form, status: e.target.value })} />
+          <Input label="المحافظة" value={form.governorate || ''} onChange={e => setForm({ ...form, governorate: e.target.value })} />
+          <Input label="المديرية" value={form.district || ''} onChange={e => setForm({ ...form, district: e.target.value })} />
+          <Input label="العزلة" value={form.sub_district || ''} onChange={e => setForm({ ...form, sub_district: e.target.value })} />
+          <Input label="خط العرض" type="number" step="0.0001" value={form.latitude || ''} onChange={e => setForm({ ...form, latitude: parseFloat(e.target.value) })} />
+          <Input label="خط الطول" type="number" step="0.0001" value={form.longitude || ''} onChange={e => setForm({ ...form, longitude: parseFloat(e.target.value) })} />
+          <Input label="السعة" type="number" value={form.capacity || 0} onChange={e => setForm({ ...form, capacity: parseInt(e.target.value) })} />
+          <Input label="الجهة المديرة" value={form.managed_by || ''} onChange={e => setForm({ ...form, managed_by: e.target.value })} />
+          <Input label="عدد الموظفين" type="number" value={form.staff_count || 0} onChange={e => setForm({ ...form, staff_count: parseInt(e.target.value) })} />
+          <Input label="المستفيدون" type="number" value={form.beneficiaries_served || 0} onChange={e => setForm({ ...form, beneficiaries_served: parseInt(e.target.value) })} />
+          <Input label="ساعات العمل" value={form.operating_hours || ''} onChange={e => setForm({ ...form, operating_hours: e.target.value })} />
+          <TextArea label="ملاحظات" value={form.notes || ''} onChange={e => setForm({ ...form, notes: e.target.value })} />
+        </>);
       case 'policies':
         return (<>
           <Input label="عنوان السياسة" value={form.title || ''} onChange={e => setForm({ ...form, title: e.target.value })} />
@@ -327,6 +521,162 @@ export default function DataCenter() {
 
   const renderItemCard = (item) => {
     switch (activeTab) {
+      case 'population':
+        return (
+          <div key={item.id} className="p-6 rounded-2xl bg-[var(--bg-primary)] border border-[var(--border)] shadow-sm">
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">
+                    {POPULATION_CATEGORIES.find(c => c.value === item.category)?.label || item.category}
+                  </span>
+                  <span className="text-[10px] font-bold text-[var(--text-secondary)]">{item.year}{item.quarter ? ` Q${item.quarter}` : ''}</span>
+                </div>
+                <h4 className="font-black text-[var(--text-primary)]">{item.governorate}</h4>
+                <div className="flex flex-wrap gap-3 mt-2 text-xs text-[var(--text-secondary)]">
+                  {item.district && <span>{item.district}</span>}
+                  {item.sub_district && <span>/ {item.sub_district}</span>}
+                  <span className="font-black text-blue-600">{item.count?.toLocaleString()} شخص</span>
+                  {item.gender !== 'total' && <span>{GENDER_GROUPS.find(g => g.value === item.gender)?.label}</span>}
+                  {item.age_group !== 'total' && <span>{AGE_GROUPS.find(a => a.value === item.age_group)?.label}</span>}
+                </div>
+                {item.source && <p className="text-xs text-[var(--text-secondary)] mt-1">المصدر: {item.source}</p>}
+              </div>
+              <button onClick={() => handleDelete(item.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-xl"><Trash2 size={16} /></button>
+            </div>
+          </div>
+        );
+      case 'camps':
+        return (
+          <div key={item.id} className="p-6 rounded-2xl bg-[var(--bg-primary)] border border-[var(--border)] shadow-sm">
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-black",
+                    item.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                  )}>{CAMP_STATUSES.find(s => s.value === item.status)?.label || item.status}</span>
+                  {item.site_id && <span className="text-[10px] font-bold text-[var(--text-secondary)]">{item.site_id}</span>}
+                </div>
+                <h4 className="font-black text-[var(--text-primary)]">{item.name}</h4>
+                <div className="flex flex-wrap gap-3 mt-2 text-xs text-[var(--text-secondary)]">
+                  {item.governorate && <span>{item.governorate}</span>}
+                  {item.district && <span>/ {item.district}</span>}
+                  <span className="font-black text-blue-600">{item.current_population?.toLocaleString()} نسمة</span>
+                  <span>{item.households?.toLocaleString()} أسرة</span>
+                  <span>السعة: {item.capacity?.toLocaleString()}</span>
+                </div>
+                {item.managed_by && <p className="text-xs text-[var(--text-secondary)] mt-1">الإدارة: {item.managed_by}</p>}
+              </div>
+              <button onClick={() => handleDelete(item.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-xl"><Trash2 size={16} /></button>
+            </div>
+          </div>
+        );
+      case 'market_studies':
+        return (
+          <div key={item.id} className="p-6 rounded-2xl bg-[var(--bg-primary)] border border-[var(--border)] shadow-sm">
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                <h4 className="font-black text-[var(--text-primary)]">{item.title}</h4>
+                <div className="flex flex-wrap gap-3 mt-2 text-xs text-[var(--text-secondary)]">
+                  {item.study_type && <span className="px-2 py-0.5 rounded-full bg-pink-100 text-pink-700 font-black">{item.study_type}</span>}
+                  {item.governorate && <span>{item.governorate}</span>}
+                  {item.market_name && <span>سوق: {item.market_name}</span>}
+                  {item.market_functionality && <span>الوظيفية: {item.market_functionality}</span>}
+                </div>
+                {item.conducted_by && <p className="text-xs text-[var(--text-secondary)] mt-1">المنفذ: {item.conducted_by}</p>}
+              </div>
+              <button onClick={() => handleDelete(item.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-xl"><Trash2 size={16} /></button>
+            </div>
+          </div>
+        );
+      case 'commodity_prices':
+        return (
+          <div key={item.id} className="p-4 rounded-2xl bg-[var(--bg-primary)] border border-[var(--border)] shadow-sm flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-2 rounded-xl bg-red-100 dark:bg-red-900/30"><BarChart3 size={18} className="text-red-700" /></div>
+              <div>
+                <span className="font-black text-[var(--text-primary)]">{item.commodity_name}</span>
+                <div className="flex gap-2 text-xs text-[var(--text-secondary)]">
+                  <span className="text-lg font-black text-blue-600">{item.price} {item.currency}/{item.unit}</span>
+                  {item.price_change_pct && <span className={item.price_change_pct > 0 ? 'text-red-600' : 'text-green-600'}>{item.price_change_pct > 0 ? '+' : ''}{item.price_change_pct}%</span>}
+                </div>
+                <div className="flex gap-2 text-[10px] text-[var(--text-secondary)]">
+                  {item.governorate && <span>{item.governorate}</span>}
+                  {item.market_name && <span>{item.market_name}</span>}
+                  {item.is_meb_item && <span className="px-1 py-0.5 rounded bg-sky-100 text-sky-700 font-black">MEB</span>}
+                </div>
+              </div>
+            </div>
+            <button onClick={() => handleDelete(item.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-xl"><Trash2 size={16} /></button>
+          </div>
+        );
+      case 'meb':
+        return (
+          <div key={item.id} className="p-6 rounded-2xl bg-[var(--bg-primary)] border border-[var(--border)] shadow-sm">
+            <h4 className="font-black text-[var(--text-primary)]">{item.name}</h4>
+            <div className="flex flex-wrap gap-3 mt-2 text-xs text-[var(--text-secondary)]">
+              <span className="text-xl font-black text-blue-600">{item.total_cost?.toLocaleString()} {item.currency}</span>
+              {item.governorate && <span>{item.governorate}</span>}
+              <span>حجم الأسرة: {item.household_size}</span>
+              {item.cost_change_pct && <span className={item.cost_change_pct > 0 ? 'text-red-600' : 'text-green-600'}>{item.cost_change_pct > 0 ? '+' : ''}{item.cost_change_pct}%</span>}
+            </div>
+          </div>
+        );
+      case 'needs':
+        return (
+          <div key={item.id} className="p-6 rounded-2xl bg-[var(--bg-primary)] border border-[var(--border)] shadow-sm">
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  {item.severity && <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-black",
+                    item.severity?.includes('5') ? 'bg-red-100 text-red-700' :
+                    item.severity?.includes('4') ? 'bg-orange-100 text-orange-700' :
+                    item.severity?.includes('3') ? 'bg-amber-100 text-amber-700' :
+                    'bg-green-100 text-green-700'
+                  )}>{SEVERITY_LEVELS.find(s => s.value === item.severity)?.label || item.severity}</span>}
+                  {item.sector && <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-100 text-blue-700">{item.sector}</span>}
+                </div>
+                <h4 className="font-black text-[var(--text-primary)]">{item.title}</h4>
+                <div className="flex flex-wrap gap-3 mt-2 text-xs text-[var(--text-secondary)]">
+                  {item.governorate && <span>{item.governorate}</span>}
+                  {item.people_in_need > 0 && <span>المحتاجون: {item.people_in_need?.toLocaleString()}</span>}
+                  {item.people_targeted > 0 && <span>المستهدفون: {item.people_targeted?.toLocaleString()}</span>}
+                  {item.conducted_by && <span>المنفذ: {item.conducted_by}</span>}
+                </div>
+                {item.key_findings && <p className="text-sm text-[var(--text-secondary)] mt-2 line-clamp-2">{item.key_findings}</p>}
+              </div>
+              <button onClick={() => handleDelete(item.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-xl"><Trash2 size={16} /></button>
+            </div>
+          </div>
+        );
+      case 'facilities':
+        return (
+          <div key={item.id} className="p-6 rounded-2xl bg-[var(--bg-primary)] border border-[var(--border)] shadow-sm">
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400">
+                    {FACILITY_TYPES.find(f => f.value === item.facility_type)?.label || item.facility_type}
+                  </span>
+                  <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-black",
+                    item.status === 'functional' ? 'bg-green-100 text-green-700' :
+                    item.status === 'partially_functional' ? 'bg-amber-100 text-amber-700' :
+                    'bg-red-100 text-red-700'
+                  )}>{FACILITY_STATUSES.find(s => s.value === item.status)?.label || item.status}</span>
+                </div>
+                <h4 className="font-black text-[var(--text-primary)]">{item.name}</h4>
+                <div className="flex flex-wrap gap-3 mt-2 text-xs text-[var(--text-secondary)]">
+                  {item.governorate && <span>{item.governorate}</span>}
+                  {item.district && <span>/ {item.district}</span>}
+                  {item.managed_by && <span>الإدارة: {item.managed_by}</span>}
+                  {item.staff_count > 0 && <span>الموظفون: {item.staff_count}</span>}
+                  {item.beneficiaries_served > 0 && <span>المستفيدون: {item.beneficiaries_served?.toLocaleString()}</span>}
+                </div>
+              </div>
+              <button onClick={() => handleDelete(item.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-xl"><Trash2 size={16} /></button>
+            </div>
+          </div>
+        );
       case 'policies':
         return (
           <div key={item.id} className="p-6 rounded-2xl bg-[var(--bg-primary)] border border-[var(--border)] shadow-sm">
