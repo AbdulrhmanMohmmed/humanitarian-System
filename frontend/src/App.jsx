@@ -113,6 +113,7 @@ const StandardsPage        = lazy(() => import('./pages/StandardsPage'));
 const BulkOperationsPage   = lazy(() => import('./pages/BulkOperationsPage'));
 const UserManagement       = lazy(() => import('./pages/UserManagement'));
 const DonorPortal          = lazy(() => import('./pages/DonorPortal'));
+const DataCenter           = lazy(() => import('./pages/DataCenter'));
 
 // ── Loading Fallback ─────────────────────────────────────────────────────────
 
@@ -295,6 +296,7 @@ function AppRoutes() {
         <Route path="/bulk-operations"       element={<P element={<BulkOperationsPage />} />} />
         <Route path="/user-management"      element={<P element={<UserManagement />} />} />
         <Route path="/donor-portal"         element={<P element={<DonorPortal />} />} />
+        <Route path="/data-center"          element={<P element={<DataCenter />} />} />
 
         {/* 404 Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />

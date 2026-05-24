@@ -92,7 +92,7 @@ class Settings(BaseSettings):
 
     ENABLED_MODULES: str = os.getenv(
         "ENABLED_MODULES",
-        "core,meal,projects,finance,hr,inventory,data_collection,beneficiaries,documents,integrations,procurement,grants,gis,logistics,payroll,ai_hub,strategic,risk,partners,financial_engine,communications,security,accounting,meal_advanced,hr_advanced,supply_chain,standards,protection,emergency,camps,nutrition,wash,education,livelihoods,early_warning,bulk,search,geographic,users,donor_portal"
+        "core,meal,projects,finance,hr,inventory,data_collection,beneficiaries,documents,integrations,procurement,grants,gis,logistics,payroll,ai_hub,strategic,risk,partners,financial_engine,communications,security,accounting,meal_advanced,hr_advanced,supply_chain,standards,protection,emergency,camps,nutrition,wash,education,livelihoods,early_warning,bulk,search,geographic,users,donor_portal,data_center"
     )
 
     @property
