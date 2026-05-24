@@ -333,6 +333,22 @@ const navSections = [
       { path: '/bulk-operations',    label: 'الاستيراد والتصدير المجمّع', icon: Database, module: 'core' },
     ],
   },
+  {
+    id: 18,
+    title: '👥 إدارة المستخدمين',
+    collapsible: true,
+    items: [
+      { path: '/user-management',    label: 'المستخدمون والصلاحيات', icon: Users, module: 'core' },
+    ],
+  },
+  {
+    id: 19,
+    title: '🤝 بوابة المانحين',
+    collapsible: true,
+    items: [
+      { path: '/donor-portal',       label: 'المقترحات وفرص التمويل', icon: Handshake, module: 'core' },
+    ],
+  },
 ];
 
 const pathPermissions = {
@@ -404,6 +420,8 @@ const pathPermissions = {
   '/hr-advanced': ['hr.read'],
   '/standards': ['audit.read'],
   '/bulk-operations': ['settings.manage'],
+  '/user-management': ['users.read'],
+  '/donor-portal': ['projects.read'],
 };
 
 export default function Layout({ children }) {

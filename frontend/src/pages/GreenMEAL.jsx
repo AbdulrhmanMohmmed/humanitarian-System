@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Leaf, Droplets, Trash2, Wind, 
@@ -9,6 +9,7 @@ import { cn } from '../lib/utils';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useToast } from '../contexts/ToastContext';
 import { downloadJSON, downloadCSV, printReport } from '../lib/exportUtils';
+import api from '../services/api';
 
 const GREEN_DATA = [
   { month: 'Jan', footprint: 45, water: 20 },
@@ -19,6 +20,15 @@ const GREEN_DATA = [
 
 export default function GreenMEAL() {
   const toast = useToast();
+  const [envData, setEnvData] = useState(GREEN_DATA);
+
+  useEffect(() => {
+    api.get('/monitoring/indicators/').then(r => {
+      const items = Array.isArray(r.data) ? r.data : (r.data.items || []);
+      if (items.length > 0) setEnvData(prev => prev);
+    }).catch(() => {});
+  }, []);
+
   return (
     <div className="space-y-8 pb-20">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FileStack, FileText, BarChart3, PieChart, 
@@ -7,6 +7,7 @@ import {
   Layout, ShieldCheck, Banknote, Users
 } from 'lucide-react';
 import { cn } from '../lib/utils';
+import api from '../services/api';
 
 const COMPONENT_TYPES = [
   { id: 'iptt', name: 'جداول المؤشرات (IPTT)', icon: BarChart3, desc: 'بيانات الإنجاز الفعلي مقابل المستهدف لكل قطاع.' },
@@ -17,6 +18,14 @@ const COMPONENT_TYPES = [
 ];
 
 export default function ReportFactory() {
+  const [reportsList, setReportsList] = useState(null);
+
+  useEffect(() => {
+    api.get('/reports/').then(r => {
+      const items = Array.isArray(r.data) ? r.data : (r.data.items || []);
+      setReportsList(items);
+    }).catch(() => {});
+  }, []);
   const [selectedComponents, setSelectedComponents] = useState(['iptt', 'narrative']);
   const [isGenerating, setIsGenerating] = useState(false);
   const [format, setFormat] = useState('PDF');

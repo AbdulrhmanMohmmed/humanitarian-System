@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import api from '../services/api';
 import { motion } from 'framer-motion';
 import { 
   Globe, FileCode, CheckCircle2, AlertCircle, 
@@ -12,14 +13,25 @@ export default function IATIExport() {
   const toast = useToast();
   const [isExporting, setIsExporting] = useState(false);
   const [status, setStatus] = useState('Draft');
+  const [stats, setStats] = useState({});
 
-  const handleExport = () => {
+  useEffect(() => {
+    api.get('/iati/stats').then(r => { setStats(r.data); if (r.data.last_published) setStatus('Published'); }).catch(() => {});
+  }, []);
+
+  const handleExport = async () => {
     setIsExporting(true);
-    setTimeout(() => {
-      setIsExporting(false);
+    try {
+      const res = await api.get('/iati/activities-xml', { responseType: 'blob' });
+      const url = URL.createObjectURL(new Blob([res.data], { type: 'application/xml' }));
+      const a = document.createElement('a'); a.href = url; a.download = 'iati-activities.xml'; a.click();
       setStatus('Published');
-      alert('تم توليد ملف IATI XML بنجاح. يمكنك الآن رفعه إلى منصة IATI Registry.');
-    }, 2500);
+      toast.addToast ? toast.addToast('تم توليد ملف IATI XML بنجاح', 'success') : alert('تم توليد ملف IATI XML بنجاح');
+    } catch {
+      toast.addToast ? toast.addToast('حدث خطأ أثناء التصدير', 'error') : alert('حدث خطأ أثناء التصدير');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (

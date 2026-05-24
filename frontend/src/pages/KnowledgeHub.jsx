@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useToast } from '../contexts/ToastContext';
+import api from '../services/api';
 
 const DEFAULT_LESSONS = [
   { id: 1, sector: 'WASH', title: 'تحسين كفاءة المضخات في المناطق الجبلية', text: 'بناءً على 4 مشاريع سابقة، تبين أن استخدام الصمامات الثنائية يقلل الصيانة بنسبة 30%.', tags: ['تقني', 'مياه'], impact: 'High' },
@@ -24,14 +25,13 @@ export default function KnowledgeHub() {
   const [newLesson, setNewLesson] = useState({ sector: 'WASH', title: '', text: '', impact: 'Medium' });
 
   useEffect(() => {
-    // Load from localStorage (seeded or user-added)
-    const local = localStorage.getItem('hiaos_data_lessons');
-    if (local) {
-      setLessons(JSON.parse(local));
-    } else {
-      setLessons(DEFAULT_LESSONS);
-      localStorage.setItem('hiaos_data_lessons', JSON.stringify(DEFAULT_LESSONS));
-    }
+    api.get('/learning/lessons').then(r => {
+      const items = Array.isArray(r.data) ? r.data : (r.data.items || []);
+      setLessons(items.length > 0 ? items : DEFAULT_LESSONS);
+    }).catch(() => {
+      const local = localStorage.getItem('hiaos_data_lessons');
+      setLessons(local ? JSON.parse(local) : DEFAULT_LESSONS);
+    });
   }, []);
 
   const addLesson = () => {

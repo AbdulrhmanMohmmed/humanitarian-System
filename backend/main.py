@@ -37,6 +37,8 @@ from app.routers import (
     standards, protection, emergency, camp_management, nutrition, wash,
     education, livelihoods, early_warning, bulk_ops, search,
     geographic,
+    users,
+    donor_portal,
 )
 from app.seed import seed_database
 
@@ -164,6 +166,8 @@ MODULE_MAP = {
     "bulk": [bulk_ops.router],
     "search": [search.router],
     "geographic": [geographic.router],
+    "users": [users.router],
+    "donor_portal": [donor_portal.router],
 }
 
 # ── Versioned API mounting ─────────────────────────────────────────────────────

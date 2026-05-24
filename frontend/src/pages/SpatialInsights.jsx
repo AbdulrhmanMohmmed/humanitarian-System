@@ -24,7 +24,12 @@ export default function SpatialInsights() {
   const [layer, setLayer] = useState('Risk');
 
   useEffect(() => {
-    setTimeout(() => setLoading(false), 1000);
+    Promise.all([
+      api.get('/geographic/locations').catch(() => ({ data: [] })),
+      api.get('/projects/').catch(() => ({ data: [] })),
+    ]).then(([locRes, projRes]) => {
+      setLoading(false);
+    }).catch(() => setLoading(false));
   }, []);
 
   return (

@@ -5,8 +5,15 @@ import {
   Lock, Globe, Database
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import api from '../services/api';
 
 const DevConsole = () => {
+  const [apiStatus, setApiStatus] = useState('checking...');
+  useEffect(() => {
+    api.get('/').then(() => setApiStatus('online')).catch(() => setApiStatus('offline'));
+  }, []);
+
   return (
     <div className="space-y-8 animate-in fade-in duration-1000">
       <div className="p-12 rounded-[3rem] bg-slate-900 text-white shadow-2xl relative overflow-hidden">

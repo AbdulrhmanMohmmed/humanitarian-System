@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useBranding } from '../contexts/BrandingContext';
 import { Palette, Upload, Check, RotateCcw, ShieldCheck, Globe } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useToast } from '../contexts/ToastContext';
+import api from '../services/api';
 
 export default function BrandingSettings() {
   const toast = useToast();

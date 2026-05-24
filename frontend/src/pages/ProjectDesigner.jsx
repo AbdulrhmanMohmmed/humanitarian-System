@@ -17,6 +17,7 @@ import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '../contexts/ToastContext';
 import { downloadJSON, downloadCSV, printReport } from '../lib/exportUtils';
+import api from '../services/api';
 
 const STORAGE_KEY = 'hiaos_project_designs';
 
@@ -84,6 +85,15 @@ export default function ProjectDesigner() {
   const [design, setDesign] = useState(emptyDesign);
 
   useEffect(() => {
+    api.get('/projects/').then(r => {
+      const items = Array.isArray(r.data) ? r.data : (r.data.items || []);
+      if (items.length > 0) {
+        const mapped = items.map(p => ({ ...emptyDesign, id: p.id, title: p.name || p.title, sector: p.sector || 'General', status: p.status, updated_at: p.updated_at }));
+        setDesigns(mapped);
+        setDesign(mapped[0]);
+        return;
+      }
+    }).catch(() => {});
     const existing = loadDesigns();
     if (existing.length === 0) {
       const demo = {

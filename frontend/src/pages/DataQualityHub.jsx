@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   ShieldCheck, AlertCircle, Map, Zap, Users, 
@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useToast } from '../contexts/ToastContext';
+import api from '../services/api';
 
 const ISSUES = [
   { id: 1, type: 'Outlier', field: 'household_size', value: '45', status: 'Pending', severity: 'High', inspector: 'AI Engine' },
@@ -16,6 +17,14 @@ const ISSUES = [
 
 export default function DataQualityHub() {
   const toast = useToast();
+  const [qualityRules, setQualityRules] = useState(null);
+
+  useEffect(() => {
+    api.get('/meal-advanced/data-quality/rules').then(r => {
+      const items = Array.isArray(r.data) ? r.data : (r.data.items || []);
+      setQualityRules(items);
+    }).catch(() => {});
+  }, []);
   const [activeTab, setActiveTab] = useState('all');
 
   return (

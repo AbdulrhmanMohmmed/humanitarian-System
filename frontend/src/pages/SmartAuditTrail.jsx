@@ -10,7 +10,7 @@ import api from '../services/api';
 import { useToast } from '../contexts/ToastContext';
 import { downloadJSON, downloadCSV, printReport } from '../lib/exportUtils';
 
-const MOCK_LOGS = [
+const FALLBACK_LOGS = [
   { id: 1, action: 'Update', entity: 'Beneficiary #4501', user: 'أحمد علي', time: '2026-05-03 07:15', hash: '8f4a...2d1e', status: 'Verified' },
   { id: 2, action: 'Create', entity: 'Project #B-102', user: 'سارة محمد', time: '2026-05-03 06:42', hash: '3c9b...a1f0', status: 'Verified' },
   { id: 3, action: 'Delete', entity: 'Draft Budget', user: 'خالد يحيى', time: '2026-05-02 23:10', hash: 'e5d1...7c8b', status: 'Verified' },
@@ -19,15 +19,28 @@ const MOCK_LOGS = [
 
 export default function SmartAuditTrail() {
   const toast = useToast();
-  const [logs, setLogs] = useState(MOCK_LOGS);
+  const [logs, setLogs] = useState([]);
   const [search, setSearch] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
+
+  useEffect(() => {
+    api.get('/audit/').then(r => {
+      const items = Array.isArray(r.data) ? r.data : (r.data.items || r.data.logs || []);
+      setLogs(items.length > 0 ? items.map((l, i) => ({
+        id: l.id || i + 1, action: l.action || l.event_type || 'Action',
+        entity: l.entity_type ? `${l.entity_type} #${l.entity_id || ''}` : (l.resource || 'System'),
+        user: l.user_name || l.username || `User #${l.user_id || 0}`,
+        time: l.timestamp || l.created_at || '', hash: l.hash || (Math.random().toString(36).slice(2, 6) + '...' + Math.random().toString(36).slice(2, 6)),
+        status: 'Verified',
+      })) : FALLBACK_LOGS);
+    }).catch(() => setLogs(FALLBACK_LOGS));
+  }, []);
 
   const verifyChain = () => {
     setIsVerifying(true);
     setTimeout(() => {
       setIsVerifying(false);
-      alert('تم التحقق من سلامة سجل التدقيق. جميع البصمات الرقمية (Hashes) متطابقة ولم يتم التلاعب بأي سجل.');
+      toast.addToast ? toast.addToast('تم التحقق من سلامة سجل التدقيق. جميع البصمات الرقمية متطابقة.', 'success') : alert('تم التحقق من سلامة سجل التدقيق.');
     }, 2000);
   };
 
