@@ -349,6 +349,14 @@ const navSections = [
       { path: '/donor-portal',       label: 'المقترحات وفرص التمويل', icon: Handshake, module: 'core' },
     ],
   },
+  {
+    id: 20,
+    title: '🏢 مركز المعلومات والبيانات',
+    collapsible: true,
+    items: [
+      { path: '/data-center',        label: 'مركز بيانات المنظمة', icon: Database, module: 'core' },
+    ],
+  },
 ];
 
 const pathPermissions = {
@@ -422,6 +430,7 @@ const pathPermissions = {
   '/bulk-operations': ['settings.manage'],
   '/user-management': ['users.read'],
   '/donor-portal': ['projects.read'],
+  '/data-center': ['settings.manage'],
 };
 
 export default function Layout({ children }) {

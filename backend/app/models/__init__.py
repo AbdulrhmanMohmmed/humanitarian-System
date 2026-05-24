@@ -48,3 +48,7 @@ from .new_modules import (
 )
 from .geographic import AdminBoundary, Location, SpatialQuery
 from .donor_portal import Proposal, FundingOpportunity, DonorInstallment, DonorVisit, DonorCommunication
+from .data_center import (
+    OrgPolicy, ContactDirectory, OrgResource, LegalDocument,
+    DonorProfile, CountryProfile, SectorReference, EmergencyContact, CurrencyRate,
+)

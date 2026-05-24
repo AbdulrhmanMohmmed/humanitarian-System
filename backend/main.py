@@ -39,6 +39,7 @@ from app.routers import (
     geographic,
     users,
     donor_portal,
+    data_center,
 )
 from app.seed import seed_database
 
@@ -168,6 +169,7 @@ MODULE_MAP = {
     "geographic": [geographic.router],
     "users": [users.router],
     "donor_portal": [donor_portal.router],
+    "data_center": [data_center.router],
 }
 
 # ── Versioned API mounting ─────────────────────────────────────────────────────
