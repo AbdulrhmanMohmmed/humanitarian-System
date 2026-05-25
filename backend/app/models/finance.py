@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, Date, Text, ForeignKey, Enum as SAEnum
 from sqlalchemy.orm import relationship
-from datetime import datetime, date
+from datetime import datetime, timezone, date
 from app.database import Base
 from app.custom_values import CustomValuesMixin
 from .enums import GrantStatus, TransactionType, Currency, GrantCategory
@@ -16,7 +16,7 @@ class Donor(Base):
     website = Column(String(255))
     contact_person = Column(String(255))
     email = Column(String(255))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     grants = relationship("Grant", back_populates="donor")
 
@@ -38,8 +38,8 @@ class Grant(SoftDeleteMixin, CustomValuesMixin, Base):
     donor = relationship("Donor", back_populates="grants")
     conditions = Column(Text)
     custom_values_json = Column(Text, default="{}")
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     project = relationship("Project", back_populates="grants")
     transactions = relationship("Transaction", back_populates="grant")
@@ -59,6 +59,6 @@ class Transaction(SoftDeleteMixin, CustomValuesMixin, Base):
     approved_by = Column(Integer, ForeignKey("users.id"))
     transaction_date = Column(Date, default=date.today)
     custom_values_json = Column(Text, default="{}")
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     grant = relationship("Grant", back_populates="transactions")

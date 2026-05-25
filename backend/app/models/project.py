@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, Date, Text, ForeignKey, Enum as SAEnum
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database import Base
 from app.custom_values import CustomValuesMixin
 from .enums import ProjectStatus, Currency
@@ -29,8 +29,8 @@ class Project(SoftDeleteMixin, CustomValuesMixin, Base):
     longitude = Column(Float)
     custom_values_json = Column(Text, default="{}")
     manager_id = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     activities = relationship("Activity", back_populates="project")
     grants = relationship("Grant", back_populates="project")
@@ -55,7 +55,7 @@ class Activity(CustomValuesMixin, Base):
     parent_id = Column(Integer, ForeignKey("activities.id"))
     order = Column(Integer, default=0)
     custom_values_json = Column(Text, default="{}")
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     project = relationship("Project", back_populates="activities")
     children = relationship("Activity", backref="parent", remote_side=[id])

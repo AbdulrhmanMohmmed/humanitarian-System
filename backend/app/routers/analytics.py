@@ -13,6 +13,7 @@ from app.models import (
 )
 from app.schemas import DQACreate, DQAOut
 from app.auth import get_current_user
+from app.cache import cache_get, cache_set
 
 router = APIRouter(prefix="/analytics", tags=["التحليلات"])
 
@@ -22,6 +23,10 @@ def analytics_overview(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    cached = cache_get("analytics:overview")
+    if cached is not None:
+        return cached
+
     total_projects = db.query(Project).count()
     active_projects = db.query(Project).filter(Project.status == "active").count()
     total_beneficiaries = db.query(Beneficiary).count()
@@ -32,7 +37,7 @@ def analytics_overview(
     total_budget = db.query(func.sum(Project.budget)).scalar() or 0
     total_spent = db.query(func.sum(Project.spent)).scalar() or 0
 
-    return {
+    result = {
         "total_projects": total_projects,
         "active_projects": active_projects,
         "total_beneficiaries": total_beneficiaries,
@@ -43,6 +48,8 @@ def analytics_overview(
         "total_spent": total_spent,
         "budget_utilization": round((total_spent / total_budget * 100) if total_budget > 0 else 0, 1),
     }
+    cache_set("analytics:overview", result, ttl=120)
+    return result
 
 
 @router.get("/geographic")

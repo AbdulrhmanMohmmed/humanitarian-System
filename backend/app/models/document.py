@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, ForeignKey, Enum as SAEnum
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database import Base
 from app.custom_values import CustomValuesMixin
 from .enums import DocumentCategory, ReportType
@@ -21,8 +21,8 @@ class Document(CustomValuesMixin, Base):
     is_archived = Column(Boolean, default=False)
     custom_values_json = Column(Text, default="{}")
     uploaded_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 class ReportTemplate(Base):
     __tablename__ = "report_templates"
@@ -33,5 +33,5 @@ class ReportTemplate(Base):
     report_type = Column(SAEnum(ReportType), default=ReportType.CUSTOM)
     template_config = Column(Text)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))

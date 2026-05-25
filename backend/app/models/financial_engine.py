@@ -14,7 +14,7 @@ class ExchangeRate(Base):
     rate = Column(Float, nullable=False)
     region = Column(String(50), default="Global") # For Yemen: "Sana'a", "Aden"
     source = Column(String(100)) # Central Bank, Market, etc.
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class BudgetAllocation(Base):
     __tablename__ = "budget_allocations"

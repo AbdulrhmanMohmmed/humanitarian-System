@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, Date, Text, ForeignKey, Enum as SAEnum
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database import Base
 from app.custom_values import CustomValuesMixin
 from .enums import Gender, BeneficiaryStatus, DisabilityType
@@ -29,8 +29,8 @@ class Beneficiary(SoftDeleteMixin, CustomValuesMixin, Base):
     notes = Column(Text)
     custom_values_json = Column(Text, default="{}")
     registered_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     distributions = relationship("DistributionItem", back_populates="beneficiary")
     cash_transfers = relationship("CashTransfer", back_populates="beneficiary")

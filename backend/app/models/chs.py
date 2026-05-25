@@ -3,7 +3,7 @@ Core Humanitarian Standard (CHS) 2024 compliance tracking.
 Tracks compliance across all 9 CHS commitments with evidence and scoring.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
@@ -39,5 +39,5 @@ class CHSAssessmentItem(Base):
 
     commitment = relationship("CHSCommitment", back_populates="assessments")
 
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))

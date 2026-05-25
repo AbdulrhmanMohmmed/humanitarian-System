@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Enum, Text, Table
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database import Base
 from app.models.enums import ProcurementStatus, PurchaseOrderStatus, VendorCategory, Currency
 
@@ -25,8 +25,8 @@ class Vendor(Base):
     tax_id = Column(String)
     bank_details = Column(Text)
     is_active = Column(Integer, default=1)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     quotes = relationship("Quote", back_populates="vendor")
     purchase_orders = relationship("PurchaseOrder", back_populates="vendor")
@@ -45,8 +45,8 @@ class PurchaseRequest(Base):
     project_id = Column(Integer, ForeignKey("projects.id"))
     requested_by_id = Column(Integer, ForeignKey("users.id"))
     
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     project = relationship("Project")
     requester = relationship("User")
@@ -66,7 +66,7 @@ class Quote(Base):
     terms = Column(Text)
     is_winner = Column(Integer, default=0)
     
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     purchase_request = relationship("PurchaseRequest", back_populates="quotes")
     vendor = relationship("Vendor", back_populates="quotes")
@@ -83,8 +83,8 @@ class PurchaseOrder(Base):
     currency = Column(Enum(Currency))
     status = Column(Enum(PurchaseOrderStatus), default=PurchaseOrderStatus.DRAFT)
     
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     purchase_request = relationship("PurchaseRequest")
     vendor = relationship("Vendor", back_populates="purchase_orders")

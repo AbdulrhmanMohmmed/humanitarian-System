@@ -1,10 +1,11 @@
 """Unified Search API — full-text search across all entities."""
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
 from app.auth import get_current_user
 from app.database import get_db
+from app.middleware.rate_limit import limiter
 from app.models import User, Beneficiary, Project, Grant
 from app.models.data_center import (
     OrgPolicy, ContactDirectory, OrgResource, CountryProfile,
@@ -21,9 +22,12 @@ VALID_ENTITIES = (
 
 
 @router.get("/")
+@limiter.limit("30/minute")
 def unified_search(
+    request: Request,
     q: str = Query(..., min_length=2, description="Search query"),
     entity: str = Query("all", description="Entity filter"),
+    page: int = Query(1, ge=1, description="Page number"),
     limit: int = Query(20, le=100),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -121,4 +125,7 @@ def unified_search(
         for row in db.query(SectorFacility).filter(or_(SectorFacility.name.ilike(term), SectorFacility.governorate.ilike(term))).limit(per).all():
             results.append({"type": "facility", "id": row.id, "title": row.name, "subtitle": row.governorate or ""})
 
-    return {"query": q, "total": len(results), "results": results[:limit]}
+    total = len(results)
+    start = (page - 1) * limit
+    page_results = results[start:start + limit]
+    return {"query": q, "total": total, "page": page, "limit": limit, "results": page_results}

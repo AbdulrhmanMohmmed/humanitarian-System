@@ -1,6 +1,6 @@
 """Token blacklist and login attempt tracking for security."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Column, DateTime, Integer, String
 
@@ -15,7 +15,7 @@ class TokenBlacklist(Base):
     jti = Column(String(255), unique=True, nullable=False, index=True)
     token_type = Column(String(20), default="access")
     user_id = Column(Integer, index=True)
-    revoked_at = Column(DateTime, default=datetime.utcnow)
+    revoked_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     expires_at = Column(DateTime)
 
 
@@ -27,4 +27,4 @@ class LoginAttempt(Base):
     username = Column(String(255), nullable=False, index=True)
     ip_address = Column(String(50))
     success = Column(Integer, default=0)
-    attempted_at = Column(DateTime, default=datetime.utcnow)
+    attempted_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

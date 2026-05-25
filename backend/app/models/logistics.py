@@ -25,8 +25,8 @@ class Asset(Base):
     project_id = Column(Integer, ForeignKey("projects.id"))
     
     notes = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 class Vehicle(Base):
     __tablename__ = "vehicles"
@@ -50,7 +50,7 @@ class Vehicle(Base):
     assigned_driver_id = Column(Integer, ForeignKey("users.id"))
     project_id = Column(Integer, ForeignKey("projects.id"))
     
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class FuelLog(Base):
     __tablename__ = "fuel_logs"
@@ -66,4 +66,4 @@ class FuelLog(Base):
     coupon_number = Column(String(50))
     
     recorded_by_id = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
