@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, Date, Text, ForeignKey, Enum as SAEnum
 from sqlalchemy.orm import relationship
-from datetime import datetime, date
+from datetime import datetime, timezone, date
 from app.database import Base
 from app.custom_values import CustomValuesMixin
 from .enums import (
@@ -40,8 +40,8 @@ class Complaint(CustomValuesMixin, Base):
     auto_classification = Column(String(255))
     custom_values_json = Column(Text, default="{}")
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     responses = relationship("ComplaintResponse", back_populates="complaint")
 
@@ -53,7 +53,7 @@ class ComplaintResponse(Base):
     response_text = Column(Text, nullable=False)
     action_taken = Column(Text)
     responded_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     complaint = relationship("Complaint", back_populates="responses")
 
@@ -72,8 +72,8 @@ class LessonLearned(Base):
     impact = Column(Text)
     tags = Column(Text)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 class ActionReview(Base):
     __tablename__ = "action_reviews"
@@ -90,7 +90,7 @@ class ActionReview(Base):
     action_items = Column(Text)
     participants = Column(Text)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class CaseStudy(Base):
     __tablename__ = "case_studies"
@@ -112,8 +112,8 @@ class CaseStudy(Base):
     tags = Column(Text)
     is_published = Column(Boolean, default=False)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 class Risk(Base):
     __tablename__ = "risks"
@@ -132,8 +132,8 @@ class Risk(Base):
     owner = Column(Integer, ForeignKey("users.id"))
     review_date = Column(Date)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 class MEALPlan(Base):
     __tablename__ = "meal_plans"
@@ -153,8 +153,8 @@ class MEALPlan(Base):
     start_date = Column(Date)
     end_date = Column(Date)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 class CHSAssessment(Base):
     __tablename__ = "chs_assessments"
@@ -168,7 +168,7 @@ class CHSAssessment(Base):
     action_plan = Column(Text)
     assessed_by = Column(Integer, ForeignKey("users.id"))
     assessment_date = Column(Date, default=date.today)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class SafeguardingReport(Base):
     __tablename__ = "safeguarding_reports"
@@ -184,8 +184,8 @@ class SafeguardingReport(Base):
     action_taken = Column(Text)
     reported_by = Column(Integer, ForeignKey("users.id"))
     assigned_to = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 class Notification(Base):
     __tablename__ = "notifications"
@@ -197,7 +197,7 @@ class Notification(Base):
     type = Column(SAEnum(NotificationType), default=NotificationType.SYSTEM)
     is_read = Column(Boolean, default=False)
     link = Column(String(500))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class NeedsAssessment(Base):
     __tablename__ = "needs_assessments"
@@ -217,7 +217,7 @@ class NeedsAssessment(Base):
     sample_size = Column(Integer)
     households_surveyed = Column(Integer)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class FieldVisit(CustomValuesMixin, Base):
     __tablename__ = "field_visits"
@@ -244,8 +244,8 @@ class FieldVisit(CustomValuesMixin, Base):
     follow_up_date = Column(Date)
     custom_values_json = Column(Text, default="{}")
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 class Recommendation(Base):
     __tablename__ = "recommendations"
@@ -264,8 +264,8 @@ class Recommendation(Base):
     completion_date = Column(Date)
     priority = Column(String(50), default="medium")
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 class ComplianceAssessment(Base):
     __tablename__ = "compliance_assessments"
@@ -284,8 +284,8 @@ class ComplianceAssessment(Base):
     deadline = Column(Date)
     assessed_by = Column(Integer, ForeignKey("users.id"))
     assessment_date = Column(Date, default=date.today)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 class AuditLog(Base):
     __tablename__ = "audit_logs"
@@ -299,4 +299,4 @@ class AuditLog(Base):
     ip_address = Column(String(50))
     old_values = Column(Text)
     new_values = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, String, Text
 
@@ -21,8 +21,8 @@ class IndicatorReference(Base):
     review_frequency = Column(String(50))
     last_reviewed_at = Column(DateTime)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 class DataQualityFinding(Base):
@@ -41,7 +41,7 @@ class DataQualityFinding(Base):
     assigned_to = Column(Integer, ForeignKey("users.id"))
     resolution_notes = Column(Text)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     resolved_at = Column(DateTime)
 
 
@@ -57,7 +57,7 @@ class WorkflowApproval(Base):
     reviewed_by = Column(Integer, ForeignKey("users.id"))
     decision_notes = Column(Text)
     required_role = Column(String(100))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     reviewed_at = Column(DateTime)
 
 
@@ -72,4 +72,4 @@ class OperatingAuditEvent(Base):
     sensitivity = Column(String(30), default="normal")
     summary = Column(Text)
     metadata_json = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

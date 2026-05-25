@@ -4,7 +4,7 @@ from typing import List, Optional
 import json
 import os
 import shutil
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database import get_db
 from app.models import Document, User, DocumentCategory
 from app.schemas import DocumentOut, DocumentUpdate
@@ -53,7 +53,7 @@ async def upload_document(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     safe_filename = f"{timestamp}_{file.filename}"
     file_path = os.path.join(UPLOAD_DIR, safe_filename)
 
@@ -112,7 +112,7 @@ def update_document(
     update_data = data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(doc, key, value)
-    doc.updated_at = datetime.utcnow()
+    doc.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(doc)
     return doc

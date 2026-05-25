@@ -1,37 +1,57 @@
-import { useState, useEffect, useRef } from 'react';
-import { Search, Command, ArrowRight, FileText, Users, FolderKanban, Activity, X } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Search, Command, ArrowRight, FileText, Users, FolderKanban, Activity, X, DollarSign, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { cn } from '../lib/utils';
+import api from '../services/api';
+
+const TYPE_PATH = {
+  beneficiary: '/beneficiaries',
+  project: '/projects',
+  grant: '/grants',
+  activity: '/activities',
+  report: '/reports',
+};
 
 export default function GlobalSearch({ isOpen, onClose }) {
   const { t } = useLanguage();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const inputRef = useRef(null);
+  const debounceRef = useRef(null);
 
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 100);
       setQuery('');
+      setResults([]);
     }
   }, [isOpen]);
 
-  // Mock search logic (can be expanded to call real API)
-  const handleSearch = (q) => {
+  const handleSearch = useCallback((q) => {
     setQuery(q);
     if (q.length < 2) { setResults([]); return; }
-    
-    const mockResults = [
-      { id: 1, type: 'project', title: 'مشروع الإغاثة العاجلة', path: '/projects' },
-      { id: 2, type: 'beneficiary', title: 'أحمد محمد علي', path: '/beneficiaries' },
-      { id: 3, type: 'activity', title: 'توزيع السلال الغذائية', path: '/activities' },
-      { id: 4, type: 'report', title: 'تقرير الربع الثالث', path: '/reports' },
-    ].filter(r => r.title.includes(q));
-    setResults(mockResults);
-  };
+
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const r = await api.get('/search/', { params: { q, limit: 20 } });
+        const items = (r.data?.results || []).map(item => ({
+          ...item,
+          path: TYPE_PATH[item.type] || '/projects',
+        }));
+        setResults(items);
+      } catch {
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 300);
+  }, []);
 
   if (!isOpen) return null;
 
@@ -65,7 +85,12 @@ export default function GlobalSearch({ isOpen, onClose }) {
         </div>
 
         <div className="max-h-[60vh] overflow-y-auto p-4 custom-scrollbar">
-           {results.length > 0 ? (
+           {loading ? (
+             <div className="py-20 text-center text-slate-400">
+                <Loader2 size={32} className="mx-auto animate-spin opacity-30 mb-4" />
+                <p className="font-black text-sm uppercase tracking-widest">جاري البحث...</p>
+             </div>
+           ) : results.length > 0 ? (
              <div className="space-y-2">
                 {results.map((res) => (
                   <button 
@@ -77,6 +102,7 @@ export default function GlobalSearch({ isOpen, onClose }) {
                         <div className="w-10 h-10 rounded-xl bg-black/5 dark:bg-white/10 flex items-center justify-center text-slate-400 group-hover:text-white">
                            {res.type === 'project' && <FolderKanban size={18} />}
                            {res.type === 'beneficiary' && <Users size={18} />}
+                           {res.type === 'grant' && <DollarSign size={18} />}
                            {res.type === 'activity' && <Activity size={18} />}
                            {res.type === 'report' && <FileText size={18} />}
                         </div>

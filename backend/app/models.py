@@ -3,7 +3,7 @@ from sqlalchemy import (
     ForeignKey, Enum as SAEnum, Table
 )
 from sqlalchemy.orm import relationship
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from app.database import Base
 import enum
 
@@ -325,8 +325,8 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     phone = Column(String(20))
     department = Column(String(100))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 # -- Beneficiaries --
@@ -350,8 +350,8 @@ class Beneficiary(Base):
     status = Column(SAEnum(BeneficiaryStatus), default=BeneficiaryStatus.ACTIVE)
     notes = Column(Text)
     registered_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     distributions = relationship("DistributionItem", back_populates="beneficiary")
     cash_transfers = relationship("CashTransfer", back_populates="beneficiary")
@@ -379,8 +379,8 @@ class Project(Base):
     district = Column(String(100))
     donor = Column(String(255))
     manager_id = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     activities = relationship("Activity", back_populates="project")
     grants = relationship("Grant", back_populates="project")
@@ -405,7 +405,7 @@ class Activity(Base):
     responsible = Column(String(255))
     parent_id = Column(Integer, ForeignKey("activities.id"))
     order = Column(Integer, default=0)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     project = relationship("Project", back_populates="activities")
     children = relationship("Activity", backref="parent")
@@ -428,8 +428,8 @@ class Grant(Base):
     end_date = Column(Date)
     project_id = Column(Integer, ForeignKey("projects.id"))
     conditions = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     project = relationship("Project", back_populates="grants")
     transactions = relationship("Transaction", back_populates="grant")
@@ -449,7 +449,7 @@ class Transaction(Base):
     project_id = Column(Integer, ForeignKey("projects.id"))
     approved_by = Column(Integer, ForeignKey("users.id"))
     transaction_date = Column(Date, default=date.today)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     grant = relationship("Grant", back_populates="transactions")
 
@@ -477,8 +477,8 @@ class Employee(Base):
     office_location = Column(String(100))
     supervisor_id = Column(Integer, ForeignKey("employees.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     leaves = relationship("LeaveRequest", back_populates="employee")
     attendances = relationship("Attendance", back_populates="employee")
@@ -496,7 +496,7 @@ class LeaveRequest(Base):
     reason = Column(Text)
     status = Column(SAEnum(LeaveStatus), default=LeaveStatus.PENDING)
     approved_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     employee = relationship("Employee", back_populates="leaves")
 
@@ -528,7 +528,7 @@ class Warehouse(Base):
     capacity = Column(Float, default=0)
     manager_id = Column(Integer, ForeignKey("users.id"))
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     items = relationship("InventoryItem", back_populates="warehouse")
 
@@ -548,8 +548,8 @@ class InventoryItem(Base):
     batch_number = Column(String(100))
     unit_cost = Column(Float, default=0)
     currency = Column(SAEnum(Currency), default=Currency.USD)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     warehouse = relationship("Warehouse", back_populates="items")
 
@@ -568,8 +568,8 @@ class Distribution(Base):
     total_beneficiaries = Column(Integer, default=0)
     notes = Column(Text)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     items = relationship("DistributionItem", back_populates="distribution")
 
@@ -611,8 +611,8 @@ class CashTransfer(Base):
     agent_phone = Column(String(20))
     approved_by = Column(Integer, ForeignKey("users.id"))
     notes = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     beneficiary = relationship("Beneficiary", back_populates="cash_transfers")
 
@@ -641,8 +641,8 @@ class Indicator(Base):
     cumulative_target = Column(Float, default=0)
     deviation_explanation = Column(Text)
     corrective_action = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     project = relationship("Project", back_populates="indicators")
     measurements = relationship("Measurement", back_populates="indicator")
@@ -659,7 +659,7 @@ class Measurement(Base):
     collected_by = Column(Integer, ForeignKey("users.id"))
     governorate = Column(String(100))
     district = Column(String(100))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     indicator = relationship("Indicator", back_populates="measurements")
 
@@ -676,7 +676,7 @@ class Survey(Base):
     start_date = Column(Date)
     end_date = Column(Date)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     questions = relationship("SurveyQuestion", back_populates="survey")
 
@@ -704,7 +704,7 @@ class SurveyResponse(Base):
     respondent_id = Column(Integer, ForeignKey("beneficiaries.id"))
     answer = Column(Text)
     collected_by = Column(Integer, ForeignKey("users.id"))
-    collected_at = Column(DateTime, default=datetime.utcnow)
+    collected_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     governorate = Column(String(100))
 
     question = relationship("SurveyQuestion", back_populates="responses")
@@ -726,8 +726,8 @@ class DataCollectionForm(Base):
     require_authentication = Column(Boolean, default=True)
     submission_limit = Column(Integer)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     fields = relationship("FormField", back_populates="form", order_by="FormField.order")
     submissions = relationship("FormSubmission", back_populates="form")
@@ -770,8 +770,8 @@ class FormSubmission(Base):
     notes = Column(Text)
     validated_by = Column(Integer, ForeignKey("users.id"))
     validated_at = Column(DateTime)
-    submitted_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    submitted_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     form = relationship("DataCollectionForm", back_populates="submissions")
 
@@ -794,8 +794,8 @@ class Document(Base):
     version = Column(Integer, default=1)
     is_archived = Column(Boolean, default=False)
     uploaded_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 # -- Report Templates --
@@ -809,8 +809,8 @@ class ReportTemplate(Base):
     report_type = Column(SAEnum(ReportType), default=ReportType.CUSTOM)
     template_config = Column(Text)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 # -- Accountability: Complaints & Feedback Mechanism --
@@ -843,8 +843,8 @@ class Complaint(Base):
     satisfaction_feedback = Column(Text)
     auto_classification = Column(String(255))
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     responses = relationship("ComplaintResponse", back_populates="complaint")
 
@@ -857,7 +857,7 @@ class ComplaintResponse(Base):
     response_text = Column(Text, nullable=False)
     action_taken = Column(Text)
     responded_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     complaint = relationship("Complaint", back_populates="responses")
 
@@ -879,8 +879,8 @@ class LessonLearned(Base):
     impact = Column(Text)
     tags = Column(Text)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 class ActionReview(Base):
@@ -898,7 +898,7 @@ class ActionReview(Base):
     action_items = Column(Text)
     participants = Column(Text)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class CaseStudy(Base):
@@ -921,8 +921,8 @@ class CaseStudy(Base):
     tags = Column(Text)
     is_published = Column(Boolean, default=False)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 # -- LogFrame & Results Framework --
@@ -945,8 +945,8 @@ class LogFrame(Base):
     disaggregation = Column(Text)
     parent_id = Column(Integer, ForeignKey("logframes.id"))
     order = Column(Integer, default=0)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     children = relationship("LogFrame", backref="parent")
 
@@ -970,7 +970,7 @@ class DataQualityAssessment(Base):
     findings = Column(Text)
     recommendations = Column(Text)
     assessed_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 # -- Risk Management --
@@ -992,8 +992,8 @@ class Risk(Base):
     owner = Column(Integer, ForeignKey("users.id"))
     review_date = Column(Date)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 # -- MEAL Plan --
@@ -1016,8 +1016,8 @@ class MEALPlan(Base):
     start_date = Column(Date)
     end_date = Column(Date)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 # -- CHS Compliance --
@@ -1034,7 +1034,7 @@ class CHSAssessment(Base):
     action_plan = Column(Text)
     assessed_by = Column(Integer, ForeignKey("users.id"))
     assessment_date = Column(Date, default=date.today)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 # -- Safeguarding Reports --
@@ -1053,8 +1053,8 @@ class SafeguardingReport(Base):
     action_taken = Column(Text)
     reported_by = Column(Integer, ForeignKey("users.id"))
     assigned_to = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 # -- Notifications --
@@ -1069,7 +1069,7 @@ class Notification(Base):
     type = Column(SAEnum(NotificationType), default=NotificationType.SYSTEM)
     is_read = Column(Boolean, default=False)
     link = Column(String(500))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 # -- Needs Assessment Templates --
@@ -1092,7 +1092,7 @@ class NeedsAssessment(Base):
     sample_size = Column(Integer)
     households_surveyed = Column(Integer)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 # -- Field Visits --
@@ -1121,8 +1121,8 @@ class FieldVisit(Base):
     visit_type = Column(String(100))
     follow_up_date = Column(Date)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 # -- IPTT (Indicator Performance Tracking Table) --
@@ -1147,7 +1147,7 @@ class IPTTEntry(Base):
     corrective_action = Column(Text)
     data_source = Column(String(255))
     entered_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 # -- Recommendations Tracking --
@@ -1169,8 +1169,8 @@ class Recommendation(Base):
     completion_date = Column(Date)
     priority = Column(String(50), default="medium")
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 # -- Compliance & Quality --
@@ -1192,8 +1192,8 @@ class ComplianceAssessment(Base):
     deadline = Column(Date)
     assessed_by = Column(Integer, ForeignKey("users.id"))
     assessment_date = Column(Date, default=date.today)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 # -- Audit Trail --
@@ -1210,7 +1210,7 @@ class AuditLog(Base):
     ip_address = Column(String(50))
     old_values = Column(Text)
     new_values = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 # -- Sector Indicators --
@@ -1230,4 +1230,4 @@ class SectorIndicator(Base):
     target = Column(Float)
     unit = Column(String(50))
     is_standard = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

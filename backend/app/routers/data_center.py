@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func, or_
 from typing import Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from app.database import get_db
 from app.auth import get_current_user
 from app.models.data_center import (
@@ -121,7 +121,7 @@ class CurrencyRateCreate(BaseModel):
 
 @router.get("/dashboard")
 def data_center_dashboard(db: Session = Depends(get_db), user=Depends(get_current_user)):
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     expiring_soon = db.query(func.count(LegalDocument.id)).filter(
         LegalDocument.end_date != None,
         LegalDocument.end_date <= now + timedelta(days=30),
@@ -195,7 +195,7 @@ def update_policy(pid: int, data: PolicyCreate, db: Session = Depends(get_db), u
         raise HTTPException(404, "Policy not found")
     for k, v in data.model_dump().items():
         setattr(p, k, v)
-    p.updated_at = datetime.utcnow()
+    p.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(p)
     return _policy_dict(p)
@@ -768,7 +768,7 @@ def update_population(pid: int, data: PopulationCreate, db: Session = Depends(ge
         raise HTTPException(404, "Population record not found")
     for k, v in data.model_dump().items():
         setattr(p, k, v)
-    p.updated_at = datetime.utcnow()
+    p.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(p)
     return _population_dict(p)
@@ -876,7 +876,7 @@ def update_camp(cid: int, data: CampSiteCreate, db: Session = Depends(get_db), u
         raise HTTPException(404, "Camp not found")
     for k, v in data.model_dump().items():
         setattr(c, k, v)
-    c.updated_at = datetime.utcnow()
+    c.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(c)
     return _camp_dict(c)
@@ -991,7 +991,7 @@ def list_commodity_prices(
 @router.post("/commodity-prices")
 def create_commodity_price(data: CommodityPriceCreate, db: Session = Depends(get_db), user=Depends(get_current_user)):
     c = CommodityPrice(**data.model_dump())
-    c.collection_date = datetime.utcnow()
+    c.collection_date = datetime.now(timezone.utc)
     db.add(c)
     db.commit()
     db.refresh(c)
@@ -1186,7 +1186,7 @@ def update_facility(fid: int, data: SectorFacilityCreate, db: Session = Depends(
         raise HTTPException(404, "Facility not found")
     for k, v in data.model_dump().items():
         setattr(f, k, v)
-    f.updated_at = datetime.utcnow()
+    f.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(f)
     return _facility_dict(f)

@@ -1,7 +1,7 @@
 """API Key service for machine-to-machine authentication."""
 import hashlib
 import secrets
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 
@@ -42,9 +42,9 @@ def validate_api_key(db: Session, raw_key: str) -> APIKey | None:
     ).first()
     if not api_key:
         return None
-    if api_key.expires_at and api_key.expires_at < datetime.utcnow():
+    if api_key.expires_at and api_key.expires_at < datetime.now(timezone.utc):
         return None
-    api_key.last_used_at = datetime.utcnow()
+    api_key.last_used_at = datetime.now(timezone.utc)
     db.commit()
     return api_key
 

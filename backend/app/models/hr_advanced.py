@@ -1,6 +1,6 @@
 """Advanced HR models: Payroll, Performance, Training, Timesheets, Safety, Contracts."""
 from sqlalchemy import Column, Integer, String, Float, DateTime, Date, Text, ForeignKey, Boolean
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database import Base
 
 
@@ -22,7 +22,7 @@ class PayrollRecord(Base):
     paid_at = Column(DateTime, nullable=True)
     grant_id = Column(Integer, ForeignKey("grants.id"), nullable=True)
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class PerformanceReview(Base):
@@ -38,7 +38,7 @@ class PerformanceReview(Base):
     employee_comments = Column(Text)
     goals_next_period = Column(Text)
     status = Column(String(20), default="draft")  # draft, submitted, acknowledged
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class Training(Base):
@@ -53,7 +53,7 @@ class Training(Base):
     location = Column(String(255))
     cost = Column(Float, default=0)
     max_participants = Column(Integer, default=0)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class TrainingParticipant(Base):
@@ -78,7 +78,7 @@ class Timesheet(Base):
     activity_type = Column(String(100))  # field_work, office, travel, training
     status = Column(String(20), default="draft")  # draft, submitted, approved
     approved_by = Column(Integer, ForeignKey("users.id"), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class StaffSafetyCheckIn(Base):
@@ -91,7 +91,7 @@ class StaffSafetyCheckIn(Base):
     longitude = Column(Float, nullable=True)
     notes = Column(Text)
     is_safe = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class EmployeeContract(Base):
@@ -108,4 +108,4 @@ class EmployeeContract(Base):
     renewal_date = Column(Date, nullable=True)
     status = Column(String(20), default="active")  # active, expired, terminated
     document_url = Column(String(500))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

@@ -1,6 +1,6 @@
 """Security services: token blacklist and account lockout."""
 
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from typing import Optional
 
 from sqlalchemy.orm import Session
@@ -31,7 +31,7 @@ def is_token_blacklisted(db: Session, jti: str) -> bool:
 def cleanup_expired_tokens(db: Session):
     """Remove expired tokens from blacklist to keep table small."""
     db.query(TokenBlacklist).filter(
-        TokenBlacklist.expires_at < datetime.utcnow(),
+        TokenBlacklist.expires_at < datetime.now(timezone.utc),
     ).delete()
     db.commit()
 
@@ -58,7 +58,7 @@ def record_login_attempt(
 
 def is_account_locked(db: Session, username: str) -> bool:
     """Check if account is locked due to too many failed attempts."""
-    cutoff = datetime.utcnow() - timedelta(minutes=LOCKOUT_DURATION_MINUTES)
+    cutoff = datetime.now(timezone.utc) - timedelta(minutes=LOCKOUT_DURATION_MINUTES)
     failed_count = (
         db.query(LoginAttempt)
         .filter(
@@ -75,7 +75,7 @@ def get_remaining_lockout_seconds(db: Session, username: str) -> int:
     """Get seconds remaining on account lockout, or 0 if not locked."""
     if not is_account_locked(db, username):
         return 0
-    cutoff = datetime.utcnow() - timedelta(minutes=LOCKOUT_DURATION_MINUTES)
+    cutoff = datetime.now(timezone.utc) - timedelta(minutes=LOCKOUT_DURATION_MINUTES)
     oldest_in_window = (
         db.query(LoginAttempt)
         .filter(
@@ -88,6 +88,6 @@ def get_remaining_lockout_seconds(db: Session, username: str) -> int:
     )
     if oldest_in_window:
         unlock_at = oldest_in_window.attempted_at + timedelta(minutes=LOCKOUT_DURATION_MINUTES)
-        remaining = (unlock_at - datetime.utcnow()).total_seconds()
+        remaining = (unlock_at - datetime.now(timezone.utc)).total_seconds()
         return max(0, int(remaining))
     return 0

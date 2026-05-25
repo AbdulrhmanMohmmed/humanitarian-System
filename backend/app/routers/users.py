@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from pydantic import BaseModel, EmailStr
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.database import get_db
 from app.models import User
@@ -183,7 +183,7 @@ def update_user(
             raise HTTPException(status_code=400, detail="لا يمكنك تعطيل حسابك الخاص")
         user.is_active = body.is_active
 
-    user.updated_at = datetime.utcnow()
+    user.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(user)
     return to_user_out(user, db)
@@ -216,6 +216,6 @@ def reset_user_password(
         raise HTTPException(status_code=404, detail="المستخدم غير موجود")
     temp_password = "Hiaos@2026!"
     user.hashed_password = get_password_hash(temp_password)
-    user.updated_at = datetime.utcnow()
+    user.updated_at = datetime.now(timezone.utc)
     db.commit()
     return {"message": "تم إعادة تعيين كلمة المرور", "temp_password": temp_password}

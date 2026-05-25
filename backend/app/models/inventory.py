@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, Date, Text, ForeignKey, Enum as SAEnum
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database import Base
 from .enums import ItemCategory, DistributionStatus, Currency
 
@@ -15,7 +15,7 @@ class Warehouse(Base):
     capacity = Column(Float, default=0)
     manager_id = Column(Integer, ForeignKey("users.id"))
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     items = relationship("InventoryItem", back_populates="warehouse")
 
@@ -34,8 +34,8 @@ class InventoryItem(Base):
     batch_number = Column(String(100))
     unit_cost = Column(Float, default=0)
     currency = Column(SAEnum(Currency), default=Currency.USD)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     warehouse = relationship("Warehouse", back_populates="items")
 
@@ -53,8 +53,8 @@ class Distribution(Base):
     total_beneficiaries = Column(Integer, default=0)
     notes = Column(Text)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     items = relationship("DistributionItem", back_populates="distribution")
 

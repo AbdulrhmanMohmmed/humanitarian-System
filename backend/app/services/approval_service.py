@@ -1,6 +1,6 @@
 """Service layer for financial approval workflows (maker-checker)."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from sqlalchemy.orm import Session
@@ -106,7 +106,7 @@ def process_approval(
 
     step.status = ApprovalStatus.APPROVED if approved else ApprovalStatus.REJECTED
     step.comment = comment
-    step.decided_at = datetime.utcnow()
+    step.decided_at = datetime.now(timezone.utc)
 
     if not approved:
         req.status = ApprovalStatus.REJECTED
@@ -115,7 +115,7 @@ def process_approval(
         if next_level >= req.required_level:
             req.status = ApprovalStatus.APPROVED
 
-    req.updated_at = datetime.utcnow()
+    req.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(req)
     return req

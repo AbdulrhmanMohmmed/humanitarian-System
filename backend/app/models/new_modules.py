@@ -1,6 +1,6 @@
 """New humanitarian modules: Protection, Emergency Response, Camp, Nutrition, WASH, Education, Livelihoods, Early Warning."""
 from sqlalchemy import Column, Integer, String, Float, DateTime, Date, Text, ForeignKey, Boolean
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database import Base
 
 
@@ -22,7 +22,7 @@ class ProtectionCase(Base):
     closure_reason = Column(Text)
     closed_at = Column(DateTime, nullable=True)
     is_confidential = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class ProtectionReferral(Base):
@@ -33,7 +33,7 @@ class ProtectionReferral(Base):
     referred_to = Column(String(255))
     referral_reason = Column(Text)
     status = Column(String(20), default="pending")  # pending, accepted, completed
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 # ── Emergency Response ───────────────────────────────────────────────────────
@@ -51,7 +51,7 @@ class EmergencyResponse(Base):
     deactivation_date = Column(Date, nullable=True)
     lead_coordinator_id = Column(Integer, ForeignKey("users.id"))
     sitrep = Column(Text)  # Latest situation report
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class RapidAssessment(Base):
@@ -64,7 +64,7 @@ class RapidAssessment(Base):
     priority_needs = Column(Text)  # JSON: [{sector, priority, description}]
     assessment_date = Column(Date)
     assessor_id = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 # ── Camp Management (CCCM) ──────────────────────────────────────────────────
@@ -82,7 +82,7 @@ class Camp(Base):
     camp_manager_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     services = Column(Text)  # JSON: available services
     infrastructure = Column(Text)  # JSON: infrastructure details
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class CampService(Base):
@@ -94,7 +94,7 @@ class CampService(Base):
     capacity = Column(Integer, default=0)
     status = Column(String(20), default="active")
     notes = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 # ── Nutrition ────────────────────────────────────────────────────────────────
@@ -112,7 +112,7 @@ class NutritionScreening(Base):
     referred = Column(Boolean, default=False)
     treatment_program = Column(String(100))  # OTP, SFP, TSFP
     screener_id = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 # ── WASH ─────────────────────────────────────────────────────────────────────
@@ -130,7 +130,7 @@ class WaterPoint(Base):
     water_quality_status = Column(String(20), default="unknown")  # safe, contaminated, unknown
     last_tested_at = Column(DateTime, nullable=True)
     status = Column(String(20), default="functional")
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class WaterQualityTest(Base):
@@ -144,7 +144,7 @@ class WaterQualityTest(Base):
     e_coli = Column(Float, nullable=True)
     result = Column(String(20))  # pass, fail
     tester_id = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 # ── Education in Emergencies ─────────────────────────────────────────────────
@@ -161,7 +161,7 @@ class School(Base):
     status = Column(String(20), default="active")
     has_wash = Column(Boolean, default=False)
     has_protection = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 # ── Livelihoods ──────────────────────────────────────────────────────────────
@@ -177,7 +177,7 @@ class LivelihoodProgram(Base):
     graduated = Column(Integer, default=0)
     budget = Column(Float, default=0)
     status = Column(String(20), default="active")
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 # ── Early Warning ────────────────────────────────────────────────────────────
@@ -192,8 +192,8 @@ class EarlyWarningIndicator(Base):
     current_value = Column(Float, default=0)
     location = Column(String(255))
     status = Column(String(20), default="normal")  # normal, warning, critical
-    last_updated = Column(DateTime, default=datetime.utcnow)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    last_updated = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class EarlyWarningAlert(Base):
@@ -205,4 +205,4 @@ class EarlyWarningAlert(Base):
     recommended_actions = Column(Text)
     is_acknowledged = Column(Boolean, default=False)
     acknowledged_by = Column(Integer, ForeignKey("users.id"), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

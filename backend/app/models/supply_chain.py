@@ -1,6 +1,6 @@
 """Supply Chain models: Stock Movement, Batch Tracking, Expiry, Barcode, Last-Mile, Maintenance."""
 from sqlalchemy import Column, Integer, String, Float, DateTime, Date, Text, ForeignKey, Boolean
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database import Base
 
 
@@ -16,7 +16,7 @@ class StockMovement(Base):
     destination_warehouse_id = Column(Integer, ForeignKey("warehouses.id"), nullable=True)
     notes = Column(Text)
     performed_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class BatchLot(Base):
@@ -32,7 +32,7 @@ class BatchLot(Base):
     supplier = Column(String(255))
     warehouse_id = Column(Integer, ForeignKey("warehouses.id"))
     status = Column(String(20), default="active")  # active, expired, recalled
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class ExpiryAlert(Base):
@@ -43,7 +43,7 @@ class ExpiryAlert(Base):
     alert_date = Column(Date)
     is_acknowledged = Column(Boolean, default=False)
     acknowledged_by = Column(Integer, ForeignKey("users.id"), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class BarcodeItem(Base):
@@ -55,7 +55,7 @@ class BarcodeItem(Base):
     batch_id = Column(Integer, ForeignKey("batch_lots.id"), nullable=True)
     asset_id = Column(Integer, ForeignKey("assets.id"), nullable=True)
     metadata_json = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class LastMileDelivery(Base):
@@ -74,7 +74,7 @@ class LastMileDelivery(Base):
     delivery_proof = Column(String(500))  # photo URL
     recipient_signature = Column(Text)  # base64 or URL
     notes = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class VehicleMaintenanceSchedule(Base):
@@ -90,4 +90,4 @@ class VehicleMaintenanceSchedule(Base):
     notes = Column(Text)
     status = Column(String(20), default="scheduled")  # scheduled, completed, overdue
     performed_by = Column(String(255))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

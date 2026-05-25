@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database import get_db
 from app.models import User, Complaint, ComplaintStatus, Project
 from app.auth import get_current_user
@@ -33,7 +33,7 @@ def create_feedback_action(
         "impact_description": data.get("impact_description"),
         "status": "open",
         "created_by": current_user.id,
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
     }
     FEEDBACK_ACTIONS.append(action)
     return action
@@ -87,7 +87,7 @@ def create_community_session(
         "facilitator": current_user.full_name,
         "photos": data.get("photos", []),
         "notes": data.get("notes"),
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
     }
     COMMUNITY_SESSIONS.append(session)
     return session

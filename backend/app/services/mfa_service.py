@@ -2,7 +2,7 @@
 import hashlib
 import json
 import secrets
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pyotp
 from sqlalchemy.orm import Session
@@ -43,7 +43,7 @@ def setup_mfa(db: Session, user_id: int) -> dict:
         existing.totp_secret = secret
         existing.is_enabled = False
         existing.backup_codes = json.dumps(hashed_codes)
-        existing.updated_at = datetime.utcnow()
+        existing.updated_at = datetime.now(timezone.utc)
     else:
         existing = UserMFA(
             user_id=user_id,
@@ -64,7 +64,7 @@ def confirm_mfa(db: Session, user_id: int, code: str) -> bool:
     if not verify_totp(mfa.totp_secret, code):
         return False
     mfa.is_enabled = True
-    mfa.updated_at = datetime.utcnow()
+    mfa.updated_at = datetime.now(timezone.utc)
     db.commit()
     return True
 
@@ -74,7 +74,7 @@ def disable_mfa(db: Session, user_id: int) -> bool:
     if not mfa:
         return False
     mfa.is_enabled = False
-    mfa.updated_at = datetime.utcnow()
+    mfa.updated_at = datetime.now(timezone.utc)
     db.commit()
     return True
 

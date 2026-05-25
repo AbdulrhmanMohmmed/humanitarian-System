@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import Optional, List
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database import get_db
 from app.models import User
 from app.auth import get_current_user
@@ -38,7 +38,7 @@ def create_phone_survey(
         "call_quality": data.get("call_quality"),
         "notes": data.get("notes"),
         "consent_given": data.get("consent_given", False),
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
     }
     PHONE_SURVEYS.append(survey)
     return survey
@@ -70,7 +70,7 @@ def update_phone_survey(
         if s["id"] == survey_id:
             s.update({k: v for k, v in data.items() if k != "id"})
             if data.get("status") == "completed":
-                s["completed_date"] = datetime.utcnow().isoformat()
+                s["completed_date"] = datetime.now(timezone.utc).isoformat()
             return s
     raise HTTPException(status_code=404, detail="المسح غير موجود")
 
@@ -96,7 +96,7 @@ def create_third_party_check(
         "risk_level": data.get("risk_level", "high"),
         "access_constraints": data.get("access_constraints"),
         "created_by": current_user.id,
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
     }
     REMOTE_CHECKS.append(check)
     return check

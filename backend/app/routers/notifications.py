@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from app.database import get_db
 from app.models import Notification, User, Complaint, Risk, Project, NotificationType
 from app.schemas import NotificationOut
@@ -71,7 +71,7 @@ def generate_notifications(
     current_user: User = Depends(get_current_user),
 ):
     generated = 0
-    today = datetime.utcnow()
+    today = datetime.now(timezone.utc)
 
     critical_complaints = db.query(Complaint).filter(
         Complaint.priority == "critical",

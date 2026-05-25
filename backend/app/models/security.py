@@ -1,6 +1,6 @@
 """Security models: MFA, Password History, API Keys, Sessions, Data Consent, IP Whitelist."""
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, ForeignKey
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database import Base
 
 
@@ -11,8 +11,8 @@ class UserMFA(Base):
     totp_secret = Column(String(255), nullable=False)
     is_enabled = Column(Boolean, default=False)
     backup_codes = Column(Text)  # JSON list of hashed backup codes
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 class PasswordHistory(Base):
@@ -20,7 +20,7 @@ class PasswordHistory(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     hashed_password = Column(String(255), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class APIKey(Base):
@@ -34,7 +34,7 @@ class APIKey(Base):
     is_active = Column(Boolean, default=True)
     last_used_at = Column(DateTime, nullable=True)
     expires_at = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class UserSession(Base):
@@ -46,8 +46,8 @@ class UserSession(Base):
     user_agent = Column(String(500))
     device_info = Column(String(255))
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    last_activity = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    last_activity = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     expires_at = Column(DateTime)
 
 
@@ -63,7 +63,7 @@ class DataConsent(Base):
     legal_basis = Column(String(100))  # consent, legitimate_interest, vital_interest
     retention_days = Column(Integer, default=365 * 3)
     collector_id = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class IPWhitelist(Base):
@@ -74,7 +74,7 @@ class IPWhitelist(Base):
     description = Column(String(255))
     is_active = Column(Boolean, default=True)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class ErasureRequest(Base):
@@ -87,4 +87,4 @@ class ErasureRequest(Base):
     status = Column(String(50), default="pending")  # pending, approved, completed, rejected
     approved_by = Column(Integer, ForeignKey("users.id"), nullable=True)
     completed_at = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

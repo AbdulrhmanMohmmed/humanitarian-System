@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import Optional, List
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 import calendar
 from app.database import get_db
 from app.models import User, Project, Indicator, Complaint, ComplaintStatus, Recommendation, RecommendationStatus, Risk, IPTTEntry, FieldVisit
@@ -33,15 +33,15 @@ def create_schedule(
         "last_run": None,
         "next_run": None,
         "created_by": current_user.id,
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
     }
 
     if schedule["frequency"] == "weekly":
-        today = datetime.utcnow()
+        today = datetime.now(timezone.utc)
         days_ahead = (schedule.get("day_of_week", 0) - today.weekday()) % 7
         schedule["next_run"] = (today + timedelta(days=days_ahead or 7)).strftime("%Y-%m-%d")
     elif schedule["frequency"] == "monthly":
-        today = datetime.utcnow()
+        today = datetime.now(timezone.utc)
         dom = min(schedule["day_of_month"], calendar.monthrange(today.year, today.month)[1])
         if today.day <= dom:
             schedule["next_run"] = today.replace(day=dom).strftime("%Y-%m-%d")

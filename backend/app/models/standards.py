@@ -1,6 +1,6 @@
 """International Standards models: Sphere, Grand Bargain, Do No Harm, Gender Marker, Disability."""
 from sqlalchemy import Column, Integer, String, Float, DateTime, Text, ForeignKey, Boolean
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database import Base
 
 
@@ -13,7 +13,7 @@ class SphereStandard(Base):
     title_ar = Column(String(500))
     key_indicator = Column(Text)
     minimum_standard = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class GrandBargainCommitment(Base):
@@ -27,7 +27,7 @@ class GrandBargainCommitment(Base):
     evidence = Column(Text)
     assessed_by = Column(Integer, ForeignKey("users.id"), nullable=True)
     assessed_at = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class DoNoHarmAnalysis(Base):
@@ -40,7 +40,7 @@ class DoNoHarmAnalysis(Base):
     implicit_ethical_messages = Column(Text)
     mitigation_actions = Column(Text)
     analyst_id = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class GenderMarker(Base):
@@ -55,7 +55,7 @@ class GenderMarker(Base):
     benefits_equitable = Column(Text)
     overall_score = Column(Float, default=0)
     assessor_id = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class DisabilityInclusionMarker(Base):
@@ -73,4 +73,4 @@ class DisabilityInclusionMarker(Base):
     barriers_identified = Column(Text)
     accommodations_planned = Column(Text)
     assessor_id = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

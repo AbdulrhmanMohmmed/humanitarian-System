@@ -1,7 +1,7 @@
 """Webhook system for external notifications (Slack, Teams, Email, custom)."""
 
 import enum
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
@@ -27,8 +27,8 @@ class Webhook(Base):
     events = Column(Text, default="*")
     is_active = Column(Integer, default=1)
     created_by = Column(Integer)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     deliveries = relationship("WebhookDelivery", back_populates="webhook")
 
@@ -43,6 +43,6 @@ class WebhookDelivery(Base):
     response_status = Column(Integer)
     response_body = Column(Text)
     success = Column(Integer, default=0)
-    attempted_at = Column(DateTime, default=datetime.utcnow)
+    attempted_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     webhook = relationship("Webhook", back_populates="deliveries")

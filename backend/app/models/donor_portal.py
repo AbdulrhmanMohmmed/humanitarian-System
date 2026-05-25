@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, Float, Text, DateTime, ForeignKey, Boolean, Enum as SAEnum
 from sqlalchemy.orm import relationship
 from app.database import Base
@@ -67,8 +67,8 @@ class Proposal(Base):
     approved_at = Column(DateTime, nullable=True)
     rejection_reason = Column(Text, nullable=True)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 class FundingOpportunity(Base):
@@ -91,8 +91,8 @@ class FundingOpportunity(Base):
     contact_email = Column(String(255))
     is_featured = Column(Boolean, default=False)
     source = Column(String(100))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 class DonorInstallment(Base):
@@ -108,8 +108,8 @@ class DonorInstallment(Base):
     status = Column(SAEnum(InstallmentStatus), default=InstallmentStatus.SCHEDULED)
     conditions = Column(Text)
     notes = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 class DonorVisit(Base):
@@ -126,8 +126,8 @@ class DonorVisit(Base):
     recommendations_text = Column(Text)
     visitors = Column(Text, default="[]")
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 class DonorCommunication(Base):
@@ -140,5 +140,5 @@ class DonorCommunication(Base):
     direction = Column(String(10), default="outgoing")
     channel = Column(String(50), default="email")
     sent_by = Column(Integer, ForeignKey("users.id"))
-    sent_at = Column(DateTime, default=datetime.utcnow)
+    sent_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     read_at = Column(DateTime, nullable=True)

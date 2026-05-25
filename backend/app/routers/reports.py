@@ -461,7 +461,7 @@ def generate_cluster_report(
     return {
         "template": template,
         "sector": sector,
-        "generated_at": datetime.utcnow().isoformat(),
+        "generated_at": datetime.now(timezone.utc).isoformat(),
         "summary": {
             "total_projects": len(projects),
             "total_beneficiaries": total_beneficiaries,
@@ -503,7 +503,7 @@ def generate_monthly_meal_report(
     return {
         "report_type": "monthly_meal",
         "project": {"id": project.id, "name": project.name, "sector": project.sector},
-        "generated_at": datetime.utcnow().isoformat(),
+        "generated_at": datetime.now(timezone.utc).isoformat(),
         "monitoring": {
             "total_indicators": len(indicators),
             "iptt_entries": len(iptt_entries),
@@ -556,7 +556,7 @@ def generate_iptt_report(
     return {
         "report_type": "iptt",
         "project": {"id": project.id, "name": project.name},
-        "generated_at": datetime.utcnow().isoformat(),
+        "generated_at": datetime.now(timezone.utc).isoformat(),
         "indicators": result,
     }
 
@@ -590,7 +590,7 @@ def generate_cfm_report(
 
     return {
         "report_type": "cfm",
-        "generated_at": datetime.utcnow().isoformat(),
+        "generated_at": datetime.now(timezone.utc).isoformat(),
         "total_complaints": len(complaints),
         "by_status": by_status,
         "by_channel": by_channel,
@@ -628,7 +628,7 @@ def generate_compliance_report(
     return {
         "report_type": "compliance",
         "project_id": project_id,
-        "generated_at": datetime.utcnow().isoformat(),
+        "generated_at": datetime.now(timezone.utc).isoformat(),
         "total_assessments": len(assessments),
         "by_area": by_area,
     }
@@ -687,14 +687,14 @@ def export_iati_xml(
     xml_content += '<iati-activities version="2.03">\n'
     
     for p in projects:
-        xml_content += f'  <iati-activity last-updated-datetime="{datetime.utcnow().isoformat()[:19]}">\n'
+        xml_content += f'  <iati-activity last-updated-datetime="{datetime.now(timezone.utc).isoformat()[:19]}">\n'
         xml_content += f'    <iati-identifier>XM-OCHA-{p.id}</iati-identifier>\n'
         xml_content += f'    <title><narrative>{p.name}</narrative></title>\n'
         status_code = "2" if p.status and p.status.value == "active" else "3" if p.status and p.status.value == "completed" else "1"
         xml_content += f'    <activity-status code="{status_code}" />\n'
         xml_content += f'    <participating-org ref="GB-CHC-HIAOS" role="1" type="21"><narrative>HIAOS Implementing Partner</narrative></participating-org>\n'
         if p.budget:
-            xml_content += f'    <budget><value currency="USD" value-date="{datetime.utcnow().date().isoformat()}">{p.budget}</value></budget>\n'
+            xml_content += f'    <budget><value currency="USD" value-date="{datetime.now(timezone.utc).date().isoformat()}">{p.budget}</value></budget>\n'
         xml_content += f'  </iati-activity>\n'
         
     xml_content += '</iati-activities>'
@@ -716,7 +716,7 @@ def generate_donor_report(
     template_name = DONOR_TEMPLATES.get(donor_id.upper(), {"name": f"تقرير {donor_id}"})["name"]
     doc = DocxDocument()
     doc.add_heading(f"Narrative Report - {template_name}", level=0)
-    doc.add_paragraph(f"Generated at: {datetime.utcnow().isoformat()[:10]}")
+    doc.add_paragraph(f"Generated at: {datetime.now(timezone.utc).isoformat()[:10]}")
     doc.add_heading("1. Executive Summary", level=1)
     doc.add_paragraph("This is an AI-generated narrative report summary based on actual field data, IPTT indicator achievements, and FCRM analytics.")
     

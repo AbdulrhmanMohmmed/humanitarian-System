@@ -10,7 +10,7 @@ Broadcast system events to connected clients with:
 import asyncio
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import WebSocket, WebSocketDisconnect, Depends, Query
@@ -44,7 +44,7 @@ class ConnectionManager:
         await self._send_to_socket(websocket, {
             "type": "connected",
             "message": "مرحباً — الاتصال الفوري نشط",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "user_id": user_id,
         })
 
@@ -119,7 +119,7 @@ async def notify_user(user_id: int, title: str, body: str, notification_type: st
         "title": title,
         "body": body,
         "link": link,
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     })
 
 
@@ -130,7 +130,7 @@ async def broadcast_alert(title: str, body: str, level: str = "info") -> None:
         "level": level,
         "title": title,
         "body": body,
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     })
 
 
@@ -142,7 +142,7 @@ async def notify_data_change(resource: str, action: str, resource_id: Optional[i
             "resource": resource,
             "action": action,  # created | updated | deleted
             "resource_id": resource_id,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         },
         exclude_user=changed_by_user_id,
     )
@@ -191,7 +191,7 @@ async def websocket_notifications(
             # Keep alive — accept ping from client
             data = await websocket.receive_text()
             if data == "ping":
-                await websocket.send_text(json.dumps({"type": "pong", "timestamp": datetime.utcnow().isoformat()}))
+                await websocket.send_text(json.dumps({"type": "pong", "timestamp": datetime.now(timezone.utc).isoformat()}))
     except WebSocketDisconnect:
         await manager.disconnect(websocket, user_id)
     except Exception as e:
