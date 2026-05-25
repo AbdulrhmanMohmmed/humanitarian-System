@@ -17,17 +17,7 @@ export default function OutcomeHarvesting() {
     const fetchStories = async () => {
       setLoading(true);
       const data = await apiClient.getOutcomes();
-      // If empty, put default mock for first time
-      if (data.length === 0) {
-        const mock = [
-          { id: 1, title: 'تحول في الممارسات الزراعية لدى نازحي الحديدة', change: 'Behavioral', actor: 'لجنة المزارعين المحلية', impact: 'High', date: '2026-04-12' },
-          { id: 2, title: 'نجاح نموذج الادخار النسائي في قرية السلام', change: 'Social', actor: 'مجموعة تمكين المرأة', impact: 'Transformative', date: '2026-04-15' },
-        ];
-        for (const s of mock) await apiClient.saveOutcome(s);
-        setStories(await apiClient.getOutcomes());
-      } else {
-        setStories(data);
-      }
+      setStories(data);
       setLoading(false);
     };
     fetchStories();

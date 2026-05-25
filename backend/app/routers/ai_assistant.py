@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from app.database import get_db
 from app.models import (
     User, Project, Indicator, Measurement, Complaint, ComplaintStatus,
@@ -105,7 +105,7 @@ def ai_chat(
         "answer": result,
         "model": settings.OPENAI_MODEL,
         "ai_enabled": settings.AI_ENABLED,
-        "generated_at": datetime.utcnow().isoformat(),
+        "generated_at": datetime.now(timezone.utc).isoformat(),
     }
 
 
@@ -120,7 +120,7 @@ def generate_auto_report(
     if not project:
         raise HTTPException(status_code=404, detail="المشروع غير موجود")
 
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     month_ago = now - timedelta(days=30)
 
     indicators = db.query(Indicator).filter(Indicator.project_id == project_id).all()
@@ -235,7 +235,7 @@ def analyze_complaints(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    since = datetime.utcnow() - timedelta(days=days)
+    since = datetime.now(timezone.utc) - timedelta(days=days)
     complaints = db.query(Complaint).filter(Complaint.created_at >= since).all()
 
     by_category, by_channel, by_governorate, by_week = {}, {}, {}, {}
@@ -304,7 +304,7 @@ def detect_risks(project_id: int, db: Session = Depends(get_db), current_user: U
         raise HTTPException(status_code=404, detail="المشروع غير موجود")
 
     detected_risks = []
-    if project.end_date and project.end_date < datetime.utcnow().date():
+    if project.end_date and project.end_date < datetime.now(timezone.utc).date():
         detected_risks.append({"type": "timeline", "severity": "high", "description": "المشروع تجاوز تاريخ الانتهاء المخطط", "recommendation": "مراجعة الجدول الزمني مع المانح وطلب تمديد إذا لزم الأمر"})
 
     if project.budget and project.spent:
@@ -321,7 +321,7 @@ def detect_risks(project_id: int, db: Session = Depends(get_db), current_user: U
 
     overdue_recs = db.query(Recommendation).filter(
         Recommendation.project_id == project_id,
-        Recommendation.deadline < datetime.utcnow().date(),
+        Recommendation.deadline < datetime.now(timezone.utc).date(),
         Recommendation.status.notin_([RecommendationStatus.COMPLETED, RecommendationStatus.CANCELLED]),
     ).count()
     if overdue_recs > 3:
@@ -334,7 +334,7 @@ def detect_risks(project_id: int, db: Session = Depends(get_db), current_user: U
         "risk_level": "critical" if risk_score >= 9 else "high" if risk_score >= 6 else "medium" if risk_score >= 3 else "low",
         "detected_risks": detected_risks,
         "total_risks": len(detected_risks),
-        "analyzed_at": datetime.utcnow().isoformat(),
+        "analyzed_at": datetime.now(timezone.utc).isoformat(),
     }
 
 
@@ -419,5 +419,5 @@ def process_ai_task(
         "result": result,
         "ai_enabled": settings.AI_ENABLED,
         "model": settings.OPENAI_MODEL if settings.AI_ENABLED else "fallback",
-        "generated_at": datetime.utcnow().isoformat(),
+        "generated_at": datetime.now(timezone.utc).isoformat(),
     }

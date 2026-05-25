@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 from app.database import get_db
 from app.models import CashTransfer, User
@@ -46,7 +46,7 @@ def transfer_stats(db: Session = Depends(get_db), current_user: User = Depends(g
 
 @router.post("/transfers", response_model=CashTransferOut)
 def create_transfer(data: CashTransferCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    reference = f"CT-{datetime.utcnow().strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
+    reference = f"CT-{datetime.now(timezone.utc).strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
     t = CashTransfer(**data.model_dump(), reference=reference, approved_by=current_user.id)
     db.add(t)
     db.commit()

@@ -11,7 +11,7 @@ from app.auth import (
 from app.permissions import Permission, require_permission, roles_catalog
 from pydantic import BaseModel
 from typing import List
-from datetime import datetime
+from datetime import datetime, timezone
 from app.config import settings
 
 router = APIRouter(prefix="/auth", tags=["المصادقة"])
@@ -177,7 +177,7 @@ def change_password(
         raise HTTPException(status_code=422, detail=error_msg)
 
     current_user.hashed_password = get_password_hash(body.new_password)
-    current_user.updated_at = datetime.utcnow()
+    current_user.updated_at = datetime.now(timezone.utc)
     db.commit()
     return {"message": "تم تغيير كلمة المرور بنجاح"}
 

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -102,7 +102,7 @@ def phase_one_overview(
     pending_approvals = db.query(WorkflowApproval).filter(WorkflowApproval.status == "pending").count()
     open_findings = db.query(DataQualityFinding).filter(DataQualityFinding.status.in_(["open", "investigating"])).count()
     overdue_complaints = db.query(Complaint).filter(
-        Complaint.response_deadline < datetime.utcnow(),
+        Complaint.response_deadline < datetime.now(timezone.utc),
         Complaint.status.in_([ComplaintStatus.RECEIVED, ComplaintStatus.UNDER_REVIEW, ComplaintStatus.IN_PROGRESS]),
     ).count()
     open_complaints = db.query(Complaint).filter(
@@ -364,7 +364,7 @@ def apply_cfm_sla(
     complaints = db.query(Complaint).filter(Complaint.response_deadline.is_(None)).all()
     updated = 0
     for complaint in complaints:
-        base = complaint.created_at or datetime.utcnow()
+        base = complaint.created_at or datetime.now(timezone.utc)
         complaint.response_deadline = base + timedelta(hours=_priority_hours(complaint.priority, policy))
         updated += 1
     _audit(db, current_user.id, "apply_cfm_sla", "complaint", None, f"SLA deadlines applied to {updated} complaints")

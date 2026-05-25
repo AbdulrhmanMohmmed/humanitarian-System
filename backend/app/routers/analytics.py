@@ -458,7 +458,7 @@ def realtime_dqa(
         "complete_records": complete_submissions,
         "dimensions": dimensions,
         "status": "good" if overall >= 80 else "acceptable" if overall >= 60 else "poor",
-        "assessed_at": datetime.utcnow().isoformat(),
+        "assessed_at": datetime.now(timezone.utc).isoformat(),
     }
 
 
@@ -471,7 +471,7 @@ def risk_overview(
     from app.models import Complaint, ComplaintStatus, Recommendation, RecommendationStatus, Risk, RiskStatus
     from datetime import timedelta
 
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     month_ago = now - timedelta(days=30)
 
     alerts = []

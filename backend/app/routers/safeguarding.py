@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 import random
 import string
 from app.database import get_db
@@ -29,7 +29,7 @@ CHS_LABELS = {
 
 
 def _gen_sg_ref():
-    return f"SG-{datetime.utcnow().strftime('%Y%m')}-{''.join(random.choices(string.digits, k=6))}"
+    return f"SG-{datetime.now(timezone.utc).strftime('%Y%m')}-{''.join(random.choices(string.digits, k=6))}"
 
 
 @router.get("/reports", response_model=List[SafeguardingOut])

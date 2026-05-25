@@ -65,7 +65,7 @@ export default function Projects() {
     const projectActs = activities.filter(a => a.project_id === p.id);
     const avgProgress = projectActs.length > 0 
       ? projectActs.reduce((acc, a) => acc + a.progress, 0) / projectActs.length 
-      : 75; // Default mock progress
+      : 0;
 
     const health = 100 - Math.abs(avgProgress - budgetUsed);
     if (health > 85) return { score: health.toFixed(0), color: 'emerald', label: 'Healthy' };

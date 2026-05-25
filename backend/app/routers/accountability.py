@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 import random
 import string
 from sqlalchemy.exc import IntegrityError
@@ -20,7 +20,7 @@ router = APIRouter(prefix="/accountability", tags=["المساءلة"])
 
 
 def _generate_ref():
-    return f"CFM-{datetime.utcnow().strftime('%Y%m')}-{''.join(random.choices(string.digits, k=8))}"
+    return f"CFM-{datetime.now(timezone.utc).strftime('%Y%m')}-{''.join(random.choices(string.digits, k=8))}"
 
 
 @router.get("/complaints", response_model=List[ComplaintOut])
@@ -99,7 +99,7 @@ def update_complaint(
         raise HTTPException(status_code=404, detail="الشكوى غير موجودة")
     update_data = data.model_dump(exclude_unset=True)
     if "status" in update_data and update_data["status"] in ["resolved", "closed"]:
-        complaint.resolution_date = datetime.utcnow()
+        complaint.resolution_date = datetime.now(timezone.utc)
     for key, value in update_data.items():
         setattr(complaint, key, value)
     db.commit()
@@ -173,7 +173,7 @@ def refer_complaint(
     if not complaint:
         raise HTTPException(status_code=404, detail="الشكوى غير موجودة")
     complaint.referred_to = referred_to
-    complaint.referral_date = datetime.utcnow()
+    complaint.referral_date = datetime.now(timezone.utc)
     complaint.status = ComplaintStatus.REFERRED
     db.commit()
     return {"message": "تم إحالة الشكوى"}
@@ -228,7 +228,7 @@ def accountability_stats(
     sensitive = db.query(Complaint).filter(Complaint.is_sensitive == True).count()
 
     overdue = db.query(Complaint).filter(
-        Complaint.response_deadline < datetime.utcnow(),
+        Complaint.response_deadline < datetime.now(timezone.utc),
         Complaint.status.in_([ComplaintStatus.RECEIVED, ComplaintStatus.IN_PROGRESS, ComplaintStatus.UNDER_REVIEW]),
     ).count()
 

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, Date, Text, ForeignKey, Enum as SAEnum
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database import Base
 from .enums import AssetStatus, VehicleStatus, FuelType, Currency
 
@@ -57,7 +57,7 @@ class FuelLog(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     vehicle_id = Column(Integer, ForeignKey("vehicles.id"), nullable=False)
-    date = Column(Date, default=datetime.utcnow().date())
+    date = Column(Date, default=lambda: datetime.now(timezone.utc).date())
     odometer_reading = Column(Integer)
     liters = Column(Float)
     cost = Column(Float)

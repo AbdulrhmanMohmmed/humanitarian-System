@@ -1,5 +1,5 @@
 """GDPR/Data Protection services — consent management and right to erasure."""
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from app.models.security import DataConsent, ErasureRequest
 
@@ -17,7 +17,7 @@ def record_consent(
         beneficiary_id=beneficiary_id,
         consent_type=consent_type,
         granted=granted,
-        granted_at=datetime.utcnow() if granted else None,
+        granted_at=datetime.now(timezone.utc) if granted else None,
         purpose=purpose,
         legal_basis=legal_basis,
         collector_id=collector_id,
@@ -33,7 +33,7 @@ def revoke_consent(db: Session, consent_id: int) -> bool:
     if not consent:
         return False
     consent.granted = False
-    consent.revoked_at = datetime.utcnow()
+    consent.revoked_at = datetime.now(timezone.utc)
     db.commit()
     return True
 
@@ -79,7 +79,7 @@ def process_erasure(db: Session, request_id: int, approved_by: int, approve: boo
     if approve:
         req.status = "completed"
         req.approved_by = approved_by
-        req.completed_at = datetime.utcnow()
+        req.completed_at = datetime.now(timezone.utc)
         # Anonymize beneficiary data
         from app.models import Beneficiary
         ben = db.query(Beneficiary).filter(Beneficiary.id == req.beneficiary_id).first()

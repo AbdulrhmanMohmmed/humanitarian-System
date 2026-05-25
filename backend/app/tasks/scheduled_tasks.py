@@ -3,7 +3,7 @@ Celery background tasks: scheduled reports, overdue checks, DB health.
 """
 
 import logging
-from datetime import datetime, timedelta, date
+from datetime import datetime, timezone, timedelta, date
 
 from app.tasks.celery_app import celery_app
 
@@ -24,7 +24,7 @@ def process_scheduled_reports(self):
 
         db = SessionLocal()
         try:
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
             due_reports = db.query(ScheduledReport).filter(
                 ScheduledReport.is_active == True,
                 ScheduledReport.next_run_at <= now,
@@ -122,7 +122,7 @@ def database_health_check():
         from app.database import engine
         with engine.connect() as conn:
             conn.execute(engine.dialect.statement_compiler(engine.dialect, None).visit_textclause("SELECT 1"))
-        return {"status": "ok", "checked_at": datetime.utcnow().isoformat()}
+        return {"status": "ok", "checked_at": datetime.now(timezone.utc).isoformat()}
     except Exception as e:
         logger.error(f"DB health check failed: {e}")
         return {"status": "error", "error": str(e)}

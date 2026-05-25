@@ -10,7 +10,7 @@ from app.schemas import (
     FormSubmissionCreate, FormSubmissionOut,
 )
 from app.auth import get_current_user
-from datetime import datetime
+from datetime import datetime, timezone
 
 router = APIRouter(prefix="/data-collection", tags=["جمع البيانات"])
 
@@ -146,7 +146,7 @@ def update_form(
     update_data = data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(form, key, value)
-    form.updated_at = datetime.utcnow()
+    form.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(form)
     return {
@@ -282,7 +282,7 @@ def validate_submission(
         raise HTTPException(status_code=404, detail="الاستجابة غير موجودة")
     sub.status = SubmissionStatus.VALIDATED if approved else SubmissionStatus.REJECTED
     sub.validated_by = current_user.id
-    sub.validated_at = datetime.utcnow()
+    sub.validated_at = datetime.now(timezone.utc)
     db.commit()
     return {"message": "تم التحقق من الاستجابة بنجاح"}
 

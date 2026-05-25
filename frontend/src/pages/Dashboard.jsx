@@ -20,13 +20,10 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import api from '../services/api';
 import ActionCenter from '../components/ActionCenter';
 
-const trendFallback = [
-  { name: 'Jan', value: 400 },
-  { name: 'Feb', value: 700 },
-  { name: 'Mar', value: 1200 },
-  { name: 'Apr', value: 900 },
-  { name: 'May', value: 1500 },
-  { name: 'Jun', value: 2100 },
+const EMPTY_TREND = [
+  { name: 'Jan', value: 0 },
+  { name: 'Feb', value: 0 },
+  { name: 'Mar', value: 0 },
 ];
 
 const riskColor = {
@@ -48,6 +45,7 @@ export default function Dashboard() {
   const [visits, setVisits] = useState([]);
   const [indicators, setIndicators] = useState([]);
   const [geo, setGeo] = useState({ beneficiaries_by_governorate: [] });
+  const [trend, setTrend] = useState([]);
 
   useEffect(() => {
     const calls = [
@@ -61,6 +59,11 @@ export default function Dashboard() {
       api.get('/field-visits/').then((r) => setVisits(Array.isArray(r.data) ? r.data : r.data.items || [])).catch(() => {}),
       api.get('/monitoring/indicators').then((r) => setIndicators(Array.isArray(r.data) ? r.data : r.data.items || [])).catch(() => {}),
       api.get('/analytics/geographic').then((r) => setGeo(r.data)).catch(() => {}),
+      api.get('/analytics/trends').then((r) => {
+        const trends = r.data?.trends || [];
+        const points = trends.flatMap(t => (t.data_points || []).map(dp => ({ name: dp.date, value: dp.value })));
+        setTrend(points.slice(-12));
+      }).catch(() => {}),
     ];
     Promise.allSettled(calls).finally(() => setLoading(false));
   }, []);
@@ -143,7 +146,7 @@ export default function Dashboard() {
               </div>
               <div className="h-[260px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={geoChart.length ? geoChart : trendFallback}>
+                  <BarChart data={geoChart.length ? geoChart : EMPTY_TREND}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.06)" />
                     <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#64748b' }} />
                     <YAxis tick={{ fontSize: 10, fill: '#64748b' }} />
@@ -196,7 +199,7 @@ export default function Dashboard() {
               <h3 className="mb-4 flex items-center gap-2 font-black"><Calendar size={18} className="text-indigo-600" /> اتجاه الوصول</h3>
               <div className="h-[120px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={trendFallback}>
+                  <AreaChart data={trend.length ? trend : EMPTY_TREND}>
                     <Area type="monotone" dataKey="value" stroke="#4f46e5" strokeWidth={3} fill="#4f46e5" fillOpacity={0.12} />
                     <XAxis dataKey="name" hide />
                     <YAxis hide />

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Date, JSON, Enum as SAEnum
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database import Base
 from .enums import Currency
 
@@ -8,7 +8,7 @@ class ExchangeRate(Base):
     __tablename__ = "exchange_rates"
 
     id = Column(Integer, primary_key=True, index=True)
-    date = Column(Date, default=datetime.utcnow().date())
+    date = Column(Date, default=lambda: datetime.now(timezone.utc).date())
     from_currency = Column(SAEnum(Currency), nullable=False)
     to_currency = Column(SAEnum(Currency), nullable=False)
     rate = Column(Float, nullable=False)

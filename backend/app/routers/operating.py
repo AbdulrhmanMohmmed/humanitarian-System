@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -205,7 +205,7 @@ def upsert_indicator_reference(
 
     ref.health_score = _indicator_health(indicator, ref)
     ref.health_status = _status_from_score(ref.health_score)
-    ref.last_reviewed_at = datetime.utcnow()
+    ref.last_reviewed_at = datetime.now(timezone.utc)
     _log_event(db, current_user.id, "upsert", "indicator_reference", data.indicator_id, "Indicator reference sheet updated")
     db.commit()
     db.refresh(ref)
@@ -254,7 +254,7 @@ def update_data_quality_finding(
     for key, value in data.model_dump(exclude_unset=True).items():
         setattr(finding, key, value)
     if finding.status in ["resolved", "closed"] and not finding.resolved_at:
-        finding.resolved_at = datetime.utcnow()
+        finding.resolved_at = datetime.now(timezone.utc)
     _log_event(db, current_user.id, "update", "data_quality_finding", finding.id, "Data quality finding updated", finding.severity)
     db.commit()
     db.refresh(finding)
@@ -302,7 +302,7 @@ def decide_approval(
     approval.status = data.status
     approval.decision_notes = data.decision_notes
     approval.reviewed_by = current_user.id
-    approval.reviewed_at = datetime.utcnow()
+    approval.reviewed_at = datetime.now(timezone.utc)
     _log_event(db, current_user.id, data.status, approval.entity_type, approval.entity_id, f"Approval decision: {data.status}")
     db.commit()
     db.refresh(approval)

@@ -6,21 +6,32 @@ from sqlalchemy import or_
 from app.auth import get_current_user
 from app.database import get_db
 from app.models import User, Beneficiary, Project, Grant
+from app.models.data_center import (
+    OrgPolicy, ContactDirectory, OrgResource, CountryProfile,
+    SectorReference, PopulationRecord, CampSiteProfile, SectorFacility,
+)
 
 router = APIRouter(prefix="/search", tags=["البحث"])
+
+VALID_ENTITIES = (
+    "all", "beneficiaries", "projects", "grants",
+    "policies", "contacts", "resources", "countries",
+    "sectors", "population", "camps", "facilities",
+)
 
 
 @router.get("/")
 def unified_search(
     q: str = Query(..., min_length=2, description="Search query"),
-    entity: str = Query("all", description="Entity filter: all, beneficiaries, projects, grants"),
+    entity: str = Query("all", description="Entity filter"),
     limit: int = Query(20, le=100),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Search across beneficiaries, projects, and grants."""
+    """Search across beneficiaries, projects, grants, and data center."""
     results = []
     term = f"%{q}%"
+    per = max(limit // 4, 5)
 
     if entity in ("all", "beneficiaries"):
         bens = (
@@ -34,7 +45,7 @@ def unified_search(
                     Beneficiary.governorate.ilike(term),
                 ),
             )
-            .limit(limit)
+            .limit(per)
             .all()
         )
         for b in bens:
@@ -57,7 +68,7 @@ def unified_search(
                     Project.sector.ilike(term),
                 ),
             )
-            .limit(limit)
+            .limit(per)
             .all()
         )
         for p in projects:
@@ -79,7 +90,7 @@ def unified_search(
                     Grant.conditions.ilike(term),
                 ),
             )
-            .limit(limit)
+            .limit(per)
             .all()
         )
         for g in grants:
@@ -89,5 +100,25 @@ def unified_search(
                 "title": g.name,
                 "subtitle": f"{g.amount} {g.currency.value if hasattr(g.currency, 'value') else 'USD'}",
             })
+
+    if entity in ("all", "policies"):
+        for row in db.query(OrgPolicy).filter(or_(OrgPolicy.title.ilike(term), OrgPolicy.category.ilike(term))).limit(per).all():
+            results.append({"type": "policy", "id": row.id, "title": row.title, "subtitle": row.category or ""})
+
+    if entity in ("all", "contacts"):
+        for row in db.query(ContactDirectory).filter(or_(ContactDirectory.name.ilike(term), ContactDirectory.organization.ilike(term))).limit(per).all():
+            results.append({"type": "contact", "id": row.id, "title": row.name, "subtitle": row.organization or ""})
+
+    if entity in ("all", "countries"):
+        for row in db.query(CountryProfile).filter(or_(CountryProfile.name.ilike(term), CountryProfile.region.ilike(term))).limit(per).all():
+            results.append({"type": "country", "id": row.id, "title": row.name, "subtitle": row.region or ""})
+
+    if entity in ("all", "camps"):
+        for row in db.query(CampSiteProfile).filter(or_(CampSiteProfile.name.ilike(term), CampSiteProfile.governorate.ilike(term))).limit(per).all():
+            results.append({"type": "camp", "id": row.id, "title": row.name, "subtitle": row.governorate or ""})
+
+    if entity in ("all", "facilities"):
+        for row in db.query(SectorFacility).filter(or_(SectorFacility.name.ilike(term), SectorFacility.governorate.ilike(term))).limit(per).all():
+            results.append({"type": "facility", "id": row.id, "title": row.name, "subtitle": row.governorate or ""})
 
     return {"query": q, "total": len(results), "results": results[:limit]}
