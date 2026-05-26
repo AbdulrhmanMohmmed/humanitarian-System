@@ -8,12 +8,17 @@ from app.models import (
 )
 from app.schemas import DashboardStats
 from app.auth import get_current_user
+from app.cache import cache_get, cache_set
 
 router = APIRouter(prefix="/dashboard", tags=["لوحة المعلومات"])
 
 
 @router.get("/stats", response_model=DashboardStats)
 def get_dashboard_stats(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    cached = cache_get("dashboard:stats")
+    if cached is not None:
+        return DashboardStats(**cached)
+
     total_beneficiaries = db.query(Beneficiary).count()
     active_projects = db.query(Project).filter(Project.status == "active").count()
     total_employees = db.query(Employee).filter(Employee.status == "active").count()
@@ -25,7 +30,7 @@ def get_dashboard_stats(db: Session = Depends(get_db), current_user: User = Depe
     low_stock_items = db.query(InventoryItem).filter(InventoryItem.quantity <= InventoryItem.min_stock).count()
     active_surveys = db.query(Survey).filter(Survey.is_active == True).count()
 
-    return DashboardStats(
+    result = DashboardStats(
         total_beneficiaries=total_beneficiaries,
         active_projects=active_projects,
         total_employees=total_employees,
@@ -37,6 +42,8 @@ def get_dashboard_stats(db: Session = Depends(get_db), current_user: User = Depe
         low_stock_items=low_stock_items,
         active_surveys=active_surveys,
     )
+    cache_set("dashboard:stats", result.model_dump(), ttl=60)
+    return result
 
 
 @router.get("/recent-activities")
