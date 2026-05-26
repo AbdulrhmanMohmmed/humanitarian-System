@@ -375,6 +375,8 @@ class TestSectorFacilities:
 
 class TestExtendedDashboard:
     def test_dashboard_includes_new_sections(self, client, auth_headers):
+        from app.cache import cache_delete
+        cache_delete("datacenter:dashboard")
         r = client.get("/api/v1/data-center/dashboard", headers=auth_headers)
         assert r.status_code == 200
         data = r.json()

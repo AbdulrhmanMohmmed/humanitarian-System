@@ -5,6 +5,7 @@ from typing import Optional
 from datetime import datetime, timedelta, timezone
 from app.database import get_db
 from app.auth import get_current_user
+from app.cache import cache_get, cache_set
 from app.models.data_center import (
     OrgPolicy, ContactDirectory, OrgResource, LegalDocument,
     DonorProfile, CountryProfile, SectorReference, EmergencyContact, CurrencyRate,
@@ -121,6 +122,10 @@ class CurrencyRateCreate(BaseModel):
 
 @router.get("/dashboard")
 def data_center_dashboard(db: Session = Depends(get_db), user=Depends(get_current_user)):
+    cached = cache_get("datacenter:dashboard")
+    if cached is not None:
+        return cached
+
     now = datetime.now(timezone.utc)
     expiring_soon = db.query(func.count(LegalDocument.id)).filter(
         LegalDocument.end_date != None,
@@ -128,7 +133,7 @@ def data_center_dashboard(db: Session = Depends(get_db), user=Depends(get_curren
         LegalDocument.end_date >= now,
     ).scalar()
 
-    return {
+    result = {
         "policies": db.query(func.count(OrgPolicy.id)).scalar(),
         "active_policies": db.query(func.count(OrgPolicy.id)).filter(OrgPolicy.is_active == True).scalar(),
         "contacts": db.query(func.count(ContactDirectory.id)).scalar(),
@@ -148,6 +153,8 @@ def data_center_dashboard(db: Session = Depends(get_db), user=Depends(get_curren
         "needs_assessments": db.query(func.count(NeedsAssessmentRecord.id)).scalar(),
         "sector_facilities": db.query(func.count(SectorFacility.id)).scalar(),
     }
+    cache_set("datacenter:dashboard", result, ttl=120)
+    return result
 
 
 # ── Policies CRUD ────────────────────────────────────────────────────────────
