@@ -7,6 +7,34 @@ import { Edit3, Key, Plus, Save, Shield, Trash2, UserCheck, UserMinus, Users } f
 import { useToast } from '../contexts/ToastContext';
 import { cn } from '../lib/utils';
 
+interface UserForm {
+  username: string;
+  email: string;
+  full_name: string;
+  password: string;
+  role: string;
+  phone: string;
+  department: string;
+  is_active: boolean;
+}
+
+interface User extends UserForm {
+  id: number | string;
+  created_at?: string;
+  last_login?: string;
+}
+
+interface UserStats {
+  total?: number;
+  active?: number;
+  by_role?: Record<string, number>;
+}
+
+interface FilterState {
+  role: string;
+  search: string;
+}
+
 const ROLES = [
   { value: 'admin', label: 'مدير النظام', color: 'bg-rose-100 text-rose-700' },
   { value: 'manager', label: 'مدير برامج', color: 'bg-blue-100 text-blue-700' },
@@ -25,13 +53,13 @@ const emptyForm = {
 
 export default function UserManagement() {
   const { addToast } = useToast();
-  const [data, setData] = useState([]);
-  const [stats, setStats] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [editing, setEditing] = useState(null);
-  const [form, setForm] = useState(emptyForm);
-  const [filter, setFilter] = useState({ role: '', search: '' });
+  const [data, setData] = useState<User[]>([]);
+  const [stats, setStats] = useState<UserStats>({});
+  const [loading, setLoading] = useState<boolean>(true);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [editing, setEditing] = useState<User | null>(null);
+  const [form, setForm] = useState<UserForm>(emptyForm);
+  const [filter, setFilter] = useState<FilterState>({ role: '', search: '' });
 
   const load = useCallback(() => {
     setLoading(true);

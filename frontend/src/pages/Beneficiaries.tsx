@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import api from '../services/api';
 import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
@@ -11,8 +11,40 @@ import CustomizeModuleButton from '../components/CustomizeModuleButton';
 import { renderCustomFieldValue, useCustomization } from '../hooks/useCustomization';
 import { saveBeneficiaries, getAllBeneficiaries } from '../lib/db';
 
+interface BeneficiaryForm {
+  first_name: string;
+  last_name: string;
+  national_id: string;
+  gender: string;
+  phone: string;
+  governorate: string;
+  district: string;
+  household_size: number;
+  has_disability: boolean;
+  disability_type: string;
+  vulnerability_score: number;
+  custom_values: Record<string, unknown>;
+}
 
-const emptyForm = {
+interface Beneficiary extends BeneficiaryForm {
+  id: number | string;
+  status?: string;
+}
+
+interface DuplicateWarning {
+  duplicate: boolean;
+  confidence: number;
+  beneficiary?: { first_name: string; last_name: string };
+}
+
+interface GovernorateOption {
+  value: string;
+  label: string;
+  label_ar: string;
+}
+
+
+const emptyForm: BeneficiaryForm = {
   first_name: '',
   last_name: '',
   national_id: '',
@@ -42,12 +74,12 @@ const governorates = [
 
 export default function Beneficiaries() {
   const { language, t } = useLanguage();
-  const [showModal, setShowModal] = useState(false);
-  const [editingBeneficiary, setEditingBeneficiary] = useState(null);
-  const [form, setForm] = useState(emptyForm);
-  const [data, setData] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [duplicateWarning, setDuplicateWarning] = useState(null);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [editingBeneficiary, setEditingBeneficiary] = useState<Beneficiary | null>(null);
+  const [form, setForm] = useState<BeneficiaryForm>(emptyForm);
+  const [data, setData] = useState<Beneficiary[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [duplicateWarning, setDuplicateWarning] = useState<DuplicateWarning | null>(null);
   const { fields: customFields, listsBySlug } = useCustomization('beneficiary');
   const governorateOptions = listsBySlug.governorates?.length ? listsBySlug.governorates : governorates.map((g) => ({ value: g.ar, label: g.en, label_ar: g.ar }));
 
@@ -100,7 +132,7 @@ export default function Beneficiaries() {
     loadBeneficiaries();
   }, [loadBeneficiaries]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (editingBeneficiary) {
       const { national_id, ...payload } = form;
@@ -115,7 +147,7 @@ export default function Beneficiaries() {
     loadBeneficiaries();
   };
 
-  const openEdit = (beneficiary) => {
+  const openEdit = (beneficiary: Beneficiary) => {
     setEditingBeneficiary(beneficiary);
     setDuplicateWarning(null);
     setForm({
@@ -144,14 +176,14 @@ export default function Beneficiaries() {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: number | string) => {
     if (confirm(t('confirmDeleteBeneficiary'))) {
       await api.delete(`/beneficiaries/${id}`);
       loadBeneficiaries();
     }
   };
 
-  const handleBulkDelete = async (ids) => {
+  const handleBulkDelete = async (ids: (number | string)[]) => {
     if (confirm(`هل أنت متأكد من حذف ${ids.length} سجل؟`)) {
       await Promise.all(ids.map(id => api.delete(`/beneficiaries/${id}`)));
       loadBeneficiaries();

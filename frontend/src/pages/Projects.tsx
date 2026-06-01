@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import api from '../services/api';
 import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
@@ -15,16 +15,53 @@ import { renderCustomFieldValue, useCustomization } from '../hooks/useCustomizat
 import CollaborationThread from '../components/CollaborationThread';
 import { useToast } from '../contexts/ToastContext';
 
+interface ProjectForm {
+  code: string;
+  name: string;
+  sector: string;
+  description: string;
+  budget: number;
+  target_beneficiaries: number;
+  governorate: string;
+  donor: string;
+  start_date: string;
+  end_date: string;
+  custom_values: Record<string, unknown>;
+}
+
+interface Project extends ProjectForm {
+  id: number | string;
+  status?: string;
+  spent?: number;
+  progress?: number;
+  health?: string;
+}
+
+interface ProjectStats {
+  total: number;
+  active: number;
+  total_budget: number;
+  total_spent: number;
+}
+
+interface ActivityItem {
+  id: number | string;
+  name?: string;
+  status?: string;
+  progress?: number;
+  project_id?: number | string;
+}
+
 export default function Projects() {
   const toast = useToast();
   const navigate = useNavigate();
-  const [data, setData] = useState([]);
-  const [stats, setStats] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [activeTab, setActiveTab] = useState('list'); // 'list' or 'details'
-  const [selectedProject, setSelectedProject] = useState(null);
-  const [activities, setActivities] = useState([]);
-  const [form, setForm] = useState({ code: '', name: '', sector: '', description: '', budget: 0, target_beneficiaries: 0, governorate: '', donor: '', start_date: '', end_date: '', custom_values: {} });
+  const [data, setData] = useState<Project[]>([]);
+  const [stats, setStats] = useState<ProjectStats | null>(null);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<'list' | 'details'>('list');
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
+  const [form, setForm] = useState<ProjectForm>({ code: '', name: '', sector: '', description: '', budget: 0, target_beneficiaries: 0, governorate: '', donor: '', start_date: '', end_date: '', custom_values: {} });
   const { fields: customFields, listsBySlug } = useCustomization('project');
   const sectorOptions = listsBySlug.sectors?.length ? listsBySlug.sectors : ["الصحة","التعليم","الأمن الغذائي","المياه والصرف الصحي","الحماية","المأوى"].map((value) => ({ value, label: value, label_ar: value }));
 

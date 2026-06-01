@@ -8,7 +8,7 @@ from .finance import Grant, Transaction
 from .hr import Employee, LeaveRequest, Attendance
 from .inventory import Warehouse, InventoryItem, Distribution, DistributionItem
 from .cash import CashTransfer
-from .monitoring import Indicator, Measurement, Survey, SurveyQuestion, SurveyResponse, LogFrame, DataQualityAssessment, IPTTEntry, SectorIndicator
+from .monitoring import Indicator, Measurement, Survey, SurveyQuestion, SurveyResponse, LogFrame, DataQualityAssessment, IPTTEntry, SectorIndicator, PhoneSurvey, ThirdPartyCheck
 from .data_collection import DataCollectionForm, FormField, FormSubmission
 from .document import Document, ReportTemplate
 from .accountability import (
