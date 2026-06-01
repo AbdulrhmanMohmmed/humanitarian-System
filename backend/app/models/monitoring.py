@@ -172,3 +172,48 @@ class SectorIndicator(Base):
     unit = Column(String(50))
     is_standard = Column(Boolean, default=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+
+class PhoneSurvey(Base):
+    __tablename__ = "phone_surveys"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255))
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)
+    beneficiary_id = Column(Integer, ForeignKey("beneficiaries.id"), nullable=True)
+    phone_number = Column(String(20))
+    governorate = Column(String(100))
+    district = Column(String(100))
+    survey_type = Column(String(50), default="pdm")
+    questions = Column(Text, default="[]")
+    responses = Column(Text, default="{}")
+    status = Column(String(30), default="scheduled")
+    scheduled_date = Column(DateTime, nullable=True)
+    completed_date = Column(DateTime, nullable=True)
+    interviewer = Column(String(255))
+    call_duration_minutes = Column(Integer, nullable=True)
+    call_quality = Column(String(20), nullable=True)
+    notes = Column(Text, nullable=True)
+    consent_given = Column(Boolean, default=False)
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+
+class ThirdPartyCheck(Base):
+    __tablename__ = "third_party_checks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)
+    location = Column(String(255))
+    governorate = Column(String(100))
+    check_type = Column(String(50), default="verification")
+    third_party_name = Column(String(255))
+    methodology = Column(Text, nullable=True)
+    findings = Column(Text, nullable=True)
+    photos = Column(Text, default="[]")
+    gps_coordinates = Column(String(100), nullable=True)
+    status = Column(String(30), default="pending")
+    risk_level = Column(String(20), default="high")
+    access_constraints = Column(Text, nullable=True)
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
