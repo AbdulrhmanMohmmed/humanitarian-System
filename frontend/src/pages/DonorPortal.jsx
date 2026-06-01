@@ -11,7 +11,9 @@ import {
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
-const TABS = ['لوحة التحكم', 'المقترحات', 'فرص التمويل', 'الأقساط', 'الزيارات', 'التواصل'];
+import ProposalBuilder from '../components/ProposalBuilder';
+
+const TABS = ['لوحة التحكم', 'المقترحات', 'منشئ المقترحات', 'فرص التمويل', 'الأقساط', 'الزيارات', 'التواصل'];
 
 export default function DonorPortal() {
   const { addToast } = useToast();
@@ -222,8 +224,13 @@ export default function DonorPortal() {
         </div>
       )}
 
-      {/* Funding Opportunities */}
+      {/* Proposal Builder */}
       {tab === 2 && (
+        <ProposalBuilder />
+      )}
+
+      {/* Funding Opportunities */}
+      {tab === 3 && (
         <div className="space-y-4">
           <div className="flex justify-end">
             <button onClick={() => { setForm({ title: '', donor_name: '', sector: '', description: '', min_amount: 0, max_amount: 0, closing_date: '' }); setShowModal('funding'); }} className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-700">
@@ -260,7 +267,7 @@ export default function DonorPortal() {
       )}
 
       {/* Installments */}
-      {tab === 3 && (
+      {tab === 4 && (
         <div className="space-y-4">
           <div className="flex justify-end">
             <button onClick={() => { setForm({ grant_id: '', amount: '', scheduled_date: '', notes: '' }); setShowModal('installment'); }} className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-700">
@@ -286,7 +293,7 @@ export default function DonorPortal() {
       )}
 
       {/* Visits */}
-      {tab === 4 && (
+      {tab === 5 && (
         <div className="space-y-4">
           <div className="flex justify-end">
             <button onClick={() => { setForm({ title: '', visit_date: '', location: '', agenda: '' }); setShowModal('visit'); }} className="flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm text-white hover:bg-purple-700">
@@ -308,7 +315,7 @@ export default function DonorPortal() {
       )}
 
       {/* Communications */}
-      {tab === 5 && (
+      {tab === 6 && (
         <div className="space-y-4">
           <div className="flex justify-end">
             <button onClick={() => { setForm({ subject: '', message: '', channel: 'email' }); setShowModal('communication'); }} className="flex items-center gap-2 rounded-lg bg-slate-700 px-4 py-2 text-sm text-white hover:bg-slate-800">
