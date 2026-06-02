@@ -182,6 +182,9 @@ function AppRoutes() {
         <Route path="/procurement"            element={<P element={<Procurement />} />} />
         <Route path="/grants"                 element={<P element={<Grants />} />} />
         <Route path="/gis"                    element={<P element={<GISDashboard />} />} />
+        <Route path="/hr"                     element={<P element={<HR />} />} />
+        <Route path="/inventory"              element={<P element={<Inventory />} />} />
+        <Route path="/settings"               element={<Navigate to="/system-customization" replace />} />
         <Route path="/assets"                 element={<P element={<Assets />} />} />
         <Route path="/fleet"                  element={<P element={<Fleet />} />} />
         <Route path="/payroll"                element={<P element={<Payroll />} />} />
