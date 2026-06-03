@@ -110,6 +110,19 @@ class GenderMarkerInput(BaseModel):
     overall_score: float = 0
 
 
+@router.get("/gender-marker")
+def list_gender_markers(
+    project_id: Optional[int] = None,
+    params: PaginationParams = Depends(),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    query = db.query(GenderMarker)
+    if project_id:
+        query = query.filter(GenderMarker.project_id == project_id)
+    return paginate(query, params)
+
+
 @router.post("/gender-marker")
 def assess_gender_marker(body: GenderMarkerInput, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     gm = GenderMarker(**body.model_dump(), assessor_id=current_user.id)
@@ -130,6 +143,19 @@ class DisabilityInput(BaseModel):
     communicating: float = 0
     barriers_identified: str = ""
     accommodations_planned: str = ""
+
+
+@router.get("/disability-inclusion")
+def list_disability_markers(
+    project_id: Optional[int] = None,
+    params: PaginationParams = Depends(),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    query = db.query(DisabilityInclusionMarker)
+    if project_id:
+        query = query.filter(DisabilityInclusionMarker.project_id == project_id)
+    return paginate(query, params)
 
 
 @router.post("/disability-inclusion")

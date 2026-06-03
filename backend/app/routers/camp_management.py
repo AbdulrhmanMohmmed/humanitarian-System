@@ -55,6 +55,12 @@ def get_camp(camp_id: int, db: Session = Depends(get_db), current_user: User = D
     }
 
 
+@router.get("/{camp_id}/services")
+def list_camp_services(camp_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    services = db.query(CampService).filter(CampService.camp_id == camp_id).all()
+    return [{"id": s.id, "camp_id": s.camp_id, "service_type": s.service_type, "provider": s.provider, "status": s.status, "capacity": s.capacity} for s in services]
+
+
 class ServiceCreate(BaseModel):
     camp_id: int
     service_type: str

@@ -64,6 +64,22 @@ def _evaluate_water_quality(ph: float | None, turbidity: float | None, e_coli: f
     return "pass"
 
 
+@router.get("/water-tests")
+def list_water_tests(
+    water_point_id: Optional[int] = None,
+    result: Optional[str] = None,
+    params: PaginationParams = Depends(),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    query = db.query(WaterQualityTest)
+    if water_point_id:
+        query = query.filter(WaterQualityTest.water_point_id == water_point_id)
+    if result:
+        query = query.filter(WaterQualityTest.result == result)
+    return paginate(query.order_by(WaterQualityTest.test_date.desc()), params)
+
+
 @router.post("/water-tests")
 def create_water_test(body: WaterTestCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     result = _evaluate_water_quality(body.ph_level, body.turbidity, body.e_coli)

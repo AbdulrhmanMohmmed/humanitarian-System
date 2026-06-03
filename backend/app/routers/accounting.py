@@ -89,6 +89,17 @@ def create_journal_entry(
     return result
 
 
+@router.get("/journal-entries")
+def list_journal_entries(
+    params: PaginationParams = Depends(),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    from app.models.accounting import JournalEntry
+    query = db.query(JournalEntry).order_by(JournalEntry.date.desc())
+    return paginate(query, params)
+
+
 @router.get("/trial-balance")
 def trial_balance(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return accounting_service.get_trial_balance(db)

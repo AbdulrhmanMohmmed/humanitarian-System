@@ -73,6 +73,22 @@ class ReferralCreate(BaseModel):
     referral_reason: str = ""
 
 
+@router.get("/referrals")
+def list_referrals(
+    case_id: Optional[int] = None,
+    status: Optional[str] = None,
+    params: PaginationParams = Depends(),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    query = db.query(ProtectionReferral)
+    if case_id:
+        query = query.filter(ProtectionReferral.case_id == case_id)
+    if status:
+        query = query.filter(ProtectionReferral.status == status)
+    return paginate(query.order_by(ProtectionReferral.created_at.desc()), params)
+
+
 @router.post("/referrals")
 def create_referral(body: ReferralCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     ref = ProtectionReferral(**body.model_dump(), referred_from="HIAOS")

@@ -63,6 +63,19 @@ class AssessmentCreate(BaseModel):
     assessment_date: Optional[date] = None
 
 
+@router.get("/assessments")
+def list_assessments(
+    emergency_id: Optional[int] = None,
+    params: PaginationParams = Depends(),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    query = db.query(RapidAssessment)
+    if emergency_id:
+        query = query.filter(RapidAssessment.emergency_id == emergency_id)
+    return paginate(query.order_by(RapidAssessment.created_at.desc()), params)
+
+
 @router.post("/assessments")
 def create_assessment(body: AssessmentCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     ra = RapidAssessment(**body.model_dump(), assessor_id=current_user.id)

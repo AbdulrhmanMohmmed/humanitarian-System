@@ -178,6 +178,16 @@ def safety_check_in(body: CheckInCreate, db: Session = Depends(get_db), current_
     return {"id": checkin.id, "check_type": checkin.check_type, "is_safe": checkin.is_safe}
 
 
+@router.get("/safety/checkins")
+def list_safety_checkins(
+    params: PaginationParams = Depends(),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    query = db.query(StaffSafetyCheckIn).order_by(StaffSafetyCheckIn.created_at.desc())
+    return paginate(query, params)
+
+
 @router.get("/safety/status")
 def safety_status(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     from app.models.hr import Employee

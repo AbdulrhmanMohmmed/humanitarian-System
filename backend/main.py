@@ -41,6 +41,7 @@ from app.routers import (
     data_center,
 )
 from app.seed import seed_database
+from app.seed_modules import seed_all_modules
 
 # ── Rate Limiter ──────────────────────────────────────────────────────────────
 
@@ -55,6 +56,7 @@ async def lifespan(app: FastAPI):
     if settings.AUTO_CREATE_TABLES:
         Base.metadata.create_all(bind=engine)
     seed_database()
+    seed_all_modules()
     yield
     # Shutdown (nothing needed for now)
 

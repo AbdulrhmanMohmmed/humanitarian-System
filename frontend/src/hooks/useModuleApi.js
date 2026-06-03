@@ -10,7 +10,14 @@ import api from '../services/api';
 function useList(key, endpoint, params = {}) {
   return useQuery({
     queryKey: [key, params],
-    queryFn: async () => { const { data } = await api.get(endpoint, { params }); return data; },
+    queryFn: async () => {
+      const { data } = await api.get(endpoint, { params });
+      // Handle paginated responses — extract items array
+      if (data && typeof data === 'object' && !Array.isArray(data) && Array.isArray(data.items)) {
+        return data.items;
+      }
+      return data;
+    },
     keepPreviousData: true,
   });
 }
@@ -87,8 +94,8 @@ export function useTrainings(params) { return useList('trainings', '/hr-advanced
 export function useCreateTraining() { return useMut('trainings', 'post', '/hr-advanced/trainings'); }
 export function useTimesheets(params) { return useList('timesheets', '/hr-advanced/timesheets', params); }
 export function useCreateTimesheet() { return useMut('timesheets', 'post', '/hr-advanced/timesheets'); }
-export function useSafetyCheckins(params) { return useList('safety', '/hr-advanced/safety-checkins', params); }
-export function useCreateSafetyCheckin() { return useMut('safety', 'post', '/hr-advanced/safety-checkins'); }
+export function useSafetyCheckins(params) { return useList('safety', '/hr-advanced/safety/checkins', params); }
+export function useCreateSafetyCheckin() { return useMut('safety', 'post', '/hr-advanced/safety/check-in'); }
 export function useContracts(params) { return useList('contracts', '/hr-advanced/contracts', params); }
 export function useCreateContract() { return useMut('contracts', 'post', '/hr-advanced/contracts'); }
 
@@ -98,8 +105,8 @@ export function useCreateStockMovement() { return useMut('stock', 'post', '/supp
 export function useBatches(params) { return useList('batches', '/supply-chain/batches', params); }
 export function useCreateBatch() { return useMut('batches', 'post', '/supply-chain/batches'); }
 export function useExpiryAlerts() { return useList('expiry-alerts', '/supply-chain/expiry-alerts'); }
-export function useLastMileDeliveries(params) { return useList('deliveries', '/supply-chain/deliveries', params); }
-export function useCreateDelivery() { return useMut('deliveries', 'post', '/supply-chain/deliveries'); }
+export function useLastMileDeliveries(params) { return useList('deliveries', '/supply-chain/last-mile', params); }
+export function useCreateDelivery() { return useMut('deliveries', 'post', '/supply-chain/last-mile'); }
 export function useVehicleMaintenance(params) { return useList('vehicles', '/supply-chain/vehicle-maintenance', params); }
 
 // ── Standards ───────────────────────────────────────────────────────────────
@@ -108,10 +115,10 @@ export function useSeedSphere() { return useMut('sphere', 'post', '/standards/sp
 export function useGrandBargain() { return useList('grand-bargain', '/standards/grand-bargain'); }
 export function useDoNoHarm(params) { return useList('do-no-harm', '/standards/do-no-harm', params); }
 export function useCreateDoNoHarm() { return useMut('do-no-harm', 'post', '/standards/do-no-harm'); }
-export function useGenderMarkers(params) { return useList('gender-markers', '/standards/gender-markers', params); }
-export function useCreateGenderMarker() { return useMut('gender-markers', 'post', '/standards/gender-markers'); }
-export function useDisabilityMarkers(params) { return useList('disability', '/standards/disability-markers', params); }
-export function useCreateDisabilityMarker() { return useMut('disability', 'post', '/standards/disability-markers'); }
+export function useGenderMarkers(params) { return useList('gender-markers', '/standards/gender-marker', params); }
+export function useCreateGenderMarker() { return useMut('gender-markers', 'post', '/standards/gender-marker'); }
+export function useDisabilityMarkers(params) { return useList('disability', '/standards/disability-inclusion', params); }
+export function useCreateDisabilityMarker() { return useMut('disability', 'post', '/standards/disability-inclusion'); }
 
 // ── Protection ──────────────────────────────────────────────────────────────
 export function useProtectionCases(params) { return useList('protection-cases', '/protection/cases', params); }
@@ -120,8 +127,8 @@ export function useProtectionReferrals(params) { return useList('referrals', '/p
 export function useCreateReferral() { return useMut('referrals', 'post', '/protection/referrals'); }
 
 // ── Emergency ───────────────────────────────────────────────────────────────
-export function useEmergencies(params) { return useList('emergencies', '/emergency/emergencies', params); }
-export function useCreateEmergency() { return useMut('emergencies', 'post', '/emergency/emergencies'); }
+export function useEmergencies(params) { return useList('emergencies', '/emergency/', params); }
+export function useCreateEmergency() { return useMut('emergencies', 'post', '/emergency/'); }
 export function useRapidAssessments(params) { return useList('assessments', '/emergency/assessments', params); }
 export function useCreateAssessment() { return useMut('assessments', 'post', '/emergency/assessments'); }
 

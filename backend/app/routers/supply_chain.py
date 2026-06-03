@@ -155,6 +155,19 @@ class LastMileCreate(BaseModel):
     destination_lng: Optional[float] = None
 
 
+@router.get("/last-mile")
+def list_deliveries(
+    status: Optional[str] = None,
+    params: PaginationParams = Depends(),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    query = db.query(LastMileDelivery)
+    if status:
+        query = query.filter(LastMileDelivery.status == status)
+    return paginate(query.order_by(LastMileDelivery.created_at.desc()), params)
+
+
 @router.post("/last-mile")
 def create_delivery(body: LastMileCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     delivery = LastMileDelivery(**body.model_dump())
