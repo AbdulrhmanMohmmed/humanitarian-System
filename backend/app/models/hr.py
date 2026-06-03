@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, Date, Text, ForeignKey, Enum as SAEnum
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database import Base
 from .enums import Gender, EmployeeStatus, LeaveType, LeaveStatus, Currency
 
@@ -25,8 +25,8 @@ class Employee(Base):
     office_location = Column(String(100))
     supervisor_id = Column(Integer, ForeignKey("employees.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     leaves = relationship("LeaveRequest", back_populates="employee")
     attendances = relationship("Attendance", back_populates="employee")
@@ -43,7 +43,7 @@ class LeaveRequest(Base):
     reason = Column(Text)
     status = Column(SAEnum(LeaveStatus), default=LeaveStatus.PENDING)
     approved_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     employee = relationship("Employee", back_populates="leaves")
 
@@ -70,7 +70,7 @@ class Payroll(Base):
     total_gross = Column(Float, default=0)
     total_net = Column(Float, default=0)
     currency = Column(SAEnum(Currency), default=Currency.USD)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     
     payslips = relationship("Payslip", back_populates="payroll")
 

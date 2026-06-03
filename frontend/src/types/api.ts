@@ -228,6 +228,14 @@ export interface DashboardStats {
   total_projects: number;
   total_budget: number;
   active_projects: number;
+  total_employees: number;
+  total_grants: number;
+  total_spent: number;
+  total_distributions: number;
+  total_cash_transfers: number;
+  pending_leaves: number;
+  low_stock_items: number;
+  active_surveys: number;
 }
 
 // ── Notification ──────────────────────────────────────────────────────────────
@@ -239,4 +247,97 @@ export interface Notification {
   type: string;
   is_read: boolean;
   created_at: string;
+}
+
+// ── Search ────────────────────────────────────────────────────────────────────
+
+export interface SearchResult {
+  type: string;
+  id: number;
+  title: string;
+  subtitle: string;
+}
+
+export interface SearchResponse {
+  query: string;
+  total: number;
+  page: number;
+  limit: number;
+  results: SearchResult[];
+}
+
+// ── Donor Portal ──────────────────────────────────────────────────────────────
+
+export interface Proposal {
+  id: number;
+  title: string;
+  donor_name: string;
+  requested_amount: number;
+  currency: string;
+  sector: string;
+  status: 'draft' | 'submitted' | 'under_review' | 'approved' | 'rejected';
+  description?: string;
+  created_at: string;
+}
+
+export interface FundingOpportunity {
+  id: number;
+  title: string;
+  donor: string;
+  amount: number;
+  currency: string;
+  deadline: string;
+  sectors: string;
+  status: 'open' | 'closed' | 'upcoming';
+}
+
+// ── Data Center ───────────────────────────────────────────────────────────────
+
+export interface PopulationRecord {
+  id: number;
+  governorate: string;
+  district?: string;
+  sub_district?: string;
+  category: string;
+  gender: string;
+  age_group: string;
+  count: number;
+  source?: string;
+  reference_date: string;
+}
+
+export interface CampSiteProfile {
+  id: number;
+  name: string;
+  camp_type: string;
+  governorate: string;
+  district?: string;
+  status: string;
+  capacity: number;
+  current_population: number;
+  latitude?: number;
+  longitude?: number;
+}
+
+export interface NeedsAssessment {
+  id: number;
+  title: string;
+  assessment_type: string;
+  governorate: string;
+  severity_level: number;
+  people_in_need: number;
+  people_targeted: number;
+  reference_date: string;
+}
+
+export interface SectorFacility {
+  id: number;
+  name: string;
+  facility_type: string;
+  sector: string;
+  governorate: string;
+  status: string;
+  capacity?: number;
+  latitude?: number;
+  longitude?: number;
 }

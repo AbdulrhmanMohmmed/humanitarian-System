@@ -1,7 +1,7 @@
 """MEAL models: Indicator Registry, Disaggregation, Data Quality, Beneficiary Dedup."""
 from sqlalchemy import Column, Integer, String, Float, DateTime, Date, Text, ForeignKey, Boolean, JSON
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database import Base
 
 
@@ -23,7 +23,7 @@ class IndicatorDefinition(Base):
     baseline_value = Column(Float, nullable=True)
     target_value = Column(Float, nullable=True)
     is_global = Column(Boolean, default=False)  # from global indicator bank
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class DisaggregatedValue(Base):
@@ -35,7 +35,7 @@ class DisaggregatedValue(Base):
     dimension = Column(String(50), nullable=False)  # gender, age_group, disability, location
     category = Column(String(100), nullable=False)  # male/female, 0-5/6-17/18+, yes/no, etc.
     value = Column(Float, default=0)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class DataQualityRule(Base):
@@ -49,7 +49,7 @@ class DataQualityRule(Base):
     rule_config = Column(Text)  # JSON config for the rule
     severity = Column(String(20), default="warning")  # error, warning, info
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class DataQualityIssue(Base):
@@ -65,7 +65,7 @@ class DataQualityIssue(Base):
     status = Column(String(20), default="open")  # open, resolved, ignored
     resolved_by = Column(Integer, ForeignKey("users.id"), nullable=True)
     resolved_at = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class BeneficiaryMatch(Base):
@@ -79,7 +79,7 @@ class BeneficiaryMatch(Base):
     status = Column(String(20), default="pending")  # pending, confirmed_duplicate, not_duplicate
     reviewed_by = Column(Integer, ForeignKey("users.id"), nullable=True)
     reviewed_at = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class PDMTemplate(Base):
@@ -90,4 +90,4 @@ class PDMTemplate(Base):
     distribution_type = Column(String(100))  # food, NFI, cash, voucher
     questions = Column(Text)  # JSON array of questions
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

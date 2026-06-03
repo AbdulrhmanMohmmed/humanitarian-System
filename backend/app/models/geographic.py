@@ -1,5 +1,5 @@
 """Geographic models for PostGIS spatial data support."""
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, Float, Text, DateTime, ForeignKey, Boolean, Enum as SAEnum
 from sqlalchemy.orm import relationship
 from app.database import Base
@@ -43,7 +43,7 @@ class AdminBoundary(Base):
     bbox_west = Column(Float)
     population = Column(Integer, default=0)
     area_sq_km = Column(Float, default=0)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     parent = relationship("AdminBoundary", remote_side=[id], backref="children")
     locations = relationship("Location", back_populates="admin_boundary")
@@ -65,8 +65,8 @@ class Location(Base):
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)
     is_active = Column(Boolean, default=True)
     metadata_json = Column(Text, default="{}")
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     admin_boundary = relationship("AdminBoundary", back_populates="locations")
 
@@ -84,4 +84,4 @@ class SpatialQuery(Base):
     radius_km = Column(Float)
     filter_criteria = Column(Text, default="{}")
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

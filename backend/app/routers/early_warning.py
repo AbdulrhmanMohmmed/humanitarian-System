@@ -55,9 +55,9 @@ def update_indicator_value(indicator_id: int, body: UpdateValue, db: Session = D
     if not ind:
         raise HTTPException(404, "مؤشر غير موجود")
 
-    from datetime import datetime
+    from datetime import datetime, timezone
     ind.current_value = body.value
-    ind.last_updated = datetime.utcnow()
+    ind.last_updated = datetime.now(timezone.utc)
 
     old_status = ind.status
     if body.value >= ind.threshold_critical:

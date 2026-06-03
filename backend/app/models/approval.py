@@ -4,7 +4,7 @@ Supports multi-level approval chains for transactions above configurable thresho
 """
 
 import enum
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import (
     Column, DateTime, Enum as SAEnum, Float, ForeignKey, Integer,
@@ -45,8 +45,8 @@ class ApprovalRequest(Base):
     requester_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     requester = relationship("User", foreign_keys=[requester_id])
 
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     steps = relationship("ApprovalStep", back_populates="request", order_by="ApprovalStep.level")
 
@@ -65,7 +65,7 @@ class ApprovalStep(Base):
     request = relationship("ApprovalRequest", back_populates="steps")
     approver = relationship("User", foreign_keys=[approver_id])
 
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class ApprovalRule(Base):
@@ -78,4 +78,4 @@ class ApprovalRule(Base):
     max_amount = Column(Float)
     required_levels = Column(Integer, default=1)
     is_active = Column(Integer, default=1)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

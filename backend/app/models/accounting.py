@@ -1,7 +1,7 @@
 """Accounting models: Chart of Accounts, Journal Entries (double-entry), Budget Lines."""
 from sqlalchemy import Column, Integer, String, Float, DateTime, Date, Text, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database import Base
 
 
@@ -16,7 +16,7 @@ class Account(Base):
     parent_id = Column(Integer, ForeignKey("accounts.id"), nullable=True)
     is_active = Column(Boolean, default=True)
     description = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     children = relationship("Account", backref="parent", remote_side="Account.id")
     journal_lines = relationship("JournalLine", back_populates="account")
@@ -35,7 +35,7 @@ class JournalEntry(Base):
     is_posted = Column(Boolean, default=False)
     posted_by = Column(Integer, ForeignKey("users.id"), nullable=True)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     lines = relationship("JournalLine", back_populates="journal_entry", cascade="all, delete-orphan")
 
@@ -68,7 +68,7 @@ class BudgetLine(Base):
     currency = Column(String(10), default="USD")
     period_start = Column(Date)
     period_end = Column(Date)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class DonorReportTemplate(Base):
@@ -81,4 +81,4 @@ class DonorReportTemplate(Base):
     sections = Column(Text)  # JSON array of section definitions
     format = Column(String(20), default="excel")  # excel, pdf, word
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

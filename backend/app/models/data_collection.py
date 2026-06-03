@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, Text, ForeignKey, Enum as SAEnum
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database import Base
 from .enums import FormStatus, FieldType, SubmissionStatus
 
@@ -18,8 +18,8 @@ class DataCollectionForm(Base):
     require_authentication = Column(Boolean, default=True)
     submission_limit = Column(Integer)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     fields = relationship("FormField", back_populates="form", order_by="FormField.order")
     submissions = relationship("FormSubmission", back_populates="form")
@@ -60,7 +60,7 @@ class FormSubmission(Base):
     notes = Column(Text)
     validated_by = Column(Integer, ForeignKey("users.id"))
     validated_at = Column(DateTime)
-    submitted_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    submitted_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     form = relationship("DataCollectionForm", back_populates="submissions")

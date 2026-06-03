@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
 from typing import Optional, List
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.database import get_db
 from app.auth import get_current_user
@@ -162,7 +162,7 @@ def create_proposal(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    code = body.code or f"PROP-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+    code = body.code or f"PROP-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
     proposal = Proposal(
         title=body.title,
         code=code,
@@ -215,12 +215,12 @@ def update_proposal(
         if field == "status" and value:
             p.status = value
             if value == "submitted":
-                p.submitted_at = datetime.utcnow()
+                p.submitted_at = datetime.now(timezone.utc)
             elif value == "approved":
-                p.approved_at = datetime.utcnow()
+                p.approved_at = datetime.now(timezone.utc)
         else:
             setattr(p, field, value)
-    p.updated_at = datetime.utcnow()
+    p.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(p)
     return _proposal_dict(p)
@@ -393,7 +393,7 @@ def disburse_installment(
     if not inst:
         raise HTTPException(status_code=404, detail="القسط غير موجود")
     inst.status = InstallmentStatus.DISBURSED
-    inst.actual_date = datetime.utcnow()
+    inst.actual_date = datetime.now(timezone.utc)
     db.commit()
     return _installment_dict(inst)
 

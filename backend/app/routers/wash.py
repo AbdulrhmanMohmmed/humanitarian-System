@@ -73,9 +73,9 @@ def create_water_test(body: WaterTestCreate, db: Session = Depends(get_db), curr
     # Update water point status
     wp = db.query(WaterPoint).filter(WaterPoint.id == body.water_point_id).first()
     if wp:
-        from datetime import datetime
+        from datetime import datetime, timezone
         wp.water_quality_status = "safe" if result == "pass" else "contaminated"
-        wp.last_tested_at = datetime.utcnow()
+        wp.last_tested_at = datetime.now(timezone.utc)
 
     db.commit()
     return {"id": test.id, "result": result}

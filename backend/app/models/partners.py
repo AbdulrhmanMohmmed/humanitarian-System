@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Text
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database import Base
 
 class Partner(Base):
@@ -13,7 +13,7 @@ class Partner(Base):
     contact_email = Column(String(255))
     rating = Column(Float, default=0) # Capacity rating 1-5
     status = Column(String(20), default="active")
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class SubGrant(Base):
     __tablename__ = "sub_grants"

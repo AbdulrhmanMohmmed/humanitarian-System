@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Text, JSON
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database import Base
 
 class IncidentReport(Base):
@@ -9,7 +9,7 @@ class IncidentReport(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(200), nullable=False)
     description = Column(Text)
-    incident_date = Column(DateTime, default=datetime.utcnow)
+    incident_date = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     location_name = Column(String(100))
     latitude = Column(Float)
     longitude = Column(Float)

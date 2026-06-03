@@ -175,8 +175,8 @@ def update_delivery_status(
         raise HTTPException(404, "تسليم غير موجود")
     delivery.status = status
     if status == "delivered":
-        from datetime import datetime
-        delivery.delivered_at = datetime.utcnow()
+        from datetime import datetime, timezone
+        delivery.delivered_at = datetime.now(timezone.utc)
     db.commit()
     return {"id": delivery.id, "status": delivery.status}
 

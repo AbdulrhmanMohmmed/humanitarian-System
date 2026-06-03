@@ -61,8 +61,8 @@ def update_case_status(case_id: int, status: str, db: Session = Depends(get_db),
         raise HTTPException(404, "حالة غير موجودة")
     case.status = status
     if status == "closed":
-        from datetime import datetime
-        case.closed_at = datetime.utcnow()
+        from datetime import datetime, timezone
+        case.closed_at = datetime.now(timezone.utc)
     db.commit()
     return {"id": case.id, "status": case.status}
 

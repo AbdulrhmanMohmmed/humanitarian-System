@@ -10,7 +10,7 @@ from app.schemas import (
     DistributionItemCreate, DistributionItemOut, DistributionItemUpdate
 )
 from app.auth import get_current_user
-from datetime import datetime
+from datetime import datetime, timezone
 
 router = APIRouter(prefix="/inventory", tags=["المخازن وسلسلة الإمداد"])
 
@@ -184,7 +184,7 @@ def update_distribution_item(
         raise HTTPException(status_code=404, detail="سجل التوزيع غير موجود")
     update_data = data.model_dump(exclude_unset=True)
     if update_data.get("received") and not update_data.get("received_date"):
-        update_data["received_date"] = datetime.utcnow()
+        update_data["received_date"] = datetime.now(timezone.utc)
     for key, value in update_data.items():
         setattr(item, key, value)
     db.commit()

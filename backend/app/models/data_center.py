@@ -1,5 +1,5 @@
 import enum
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, ForeignKey, JSON
 from sqlalchemy import Enum as SAEnum
 from app.database import Base
@@ -66,8 +66,8 @@ class OrgPolicy(Base):
     approved_by = Column(String(200))
     is_active = Column(Boolean, default=True)
     attachment_url = Column(String(500))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 class ContactDirectory(Base):
@@ -86,7 +86,7 @@ class ContactDirectory(Base):
     notes = Column(Text)
     is_active = Column(Boolean, default=True)
     tags = Column(JSON, default=list)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class OrgResource(Base):
@@ -103,8 +103,8 @@ class OrgResource(Base):
     download_count = Column(Integer, default=0)
     is_public = Column(Boolean, default=False)
     tags = Column(JSON, default=list)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 class LegalDocument(Base):
@@ -122,7 +122,7 @@ class LegalDocument(Base):
     file_url = Column(String(500))
     notes = Column(Text)
     reminder_days = Column(Integer, default=30)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class DonorProfile(Base):
@@ -144,7 +144,7 @@ class DonorProfile(Base):
     application_process = Column(Text)
     notes = Column(Text)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class CountryProfile(Base):
@@ -168,8 +168,8 @@ class CountryProfile(Base):
     funding_required = Column(Float, default=0)
     funding_received = Column(Float, default=0)
     notes = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 class SectorReference(Base):
@@ -184,7 +184,7 @@ class SectorReference(Base):
     min_standards = Column(Text)
     guidelines_url = Column(String(500))
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class EmergencyContact(Base):
@@ -201,7 +201,7 @@ class EmergencyContact(Base):
     available_24h = Column(Boolean, default=False)
     notes = Column(Text)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class CurrencyRate(Base):
@@ -211,8 +211,8 @@ class CurrencyRate(Base):
     to_currency = Column(String(10), nullable=False)
     rate = Column(Float, nullable=False)
     source = Column(String(100))
-    effective_date = Column(DateTime, default=datetime.utcnow)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    effective_date = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 # ── Population Demographics ──────────────────────────────────────────────────
@@ -257,8 +257,8 @@ class PopulationRecord(Base):
     confidence_level = Column(String(50))
     notes = Column(Text)
     is_verified = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 # ── Camp / Site Management ───────────────────────────────────────────────────
@@ -298,8 +298,8 @@ class CampSiteProfile(Base):
     accessibility = Column(String(200))
     last_assessment_date = Column(DateTime)
     notes = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 # ── Market Studies ───────────────────────────────────────────────────────────
@@ -324,7 +324,7 @@ class MarketStudy(Base):
     conducted_by = Column(String(300))
     report_url = Column(String(500))
     notes = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class CommodityPrice(Base):
@@ -344,7 +344,7 @@ class CommodityPrice(Base):
     source = Column(String(300))
     is_meb_item = Column(Boolean, default=False)
     notes = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class MEBBasket(Base):
@@ -364,7 +364,7 @@ class MEBBasket(Base):
     methodology = Column(String(200))
     source = Column(String(300))
     notes = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 # ── Needs Assessments ────────────────────────────────────────────────────────
@@ -403,8 +403,8 @@ class NeedsAssessmentRecord(Base):
     hno_year = Column(Integer)
     ipc_phase = Column(String(50))
     notes = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
 # ── Sector Facilities ────────────────────────────────────────────────────────
@@ -455,5 +455,5 @@ class SectorFacility(Base):
     needs = Column(JSON, default=list)
     notes = Column(Text)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))

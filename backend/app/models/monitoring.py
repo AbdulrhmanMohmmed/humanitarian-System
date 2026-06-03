@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, Date, Text, ForeignKey, Enum as SAEnum
 from sqlalchemy.orm import relationship
-from datetime import datetime, date
+from datetime import datetime, timezone, date
 from app.database import Base
 from app.custom_values import CustomValuesMixin
 from .enums import IndicatorType, LogFrameLevel, DQAStatus
@@ -28,8 +28,8 @@ class Indicator(CustomValuesMixin, Base):
     deviation_explanation = Column(Text)
     corrective_action = Column(Text)
     custom_values_json = Column(Text, default="{}")
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     project = relationship("Project", back_populates="indicators")
     measurements = relationship("Measurement", back_populates="indicator")
@@ -45,7 +45,7 @@ class Measurement(Base):
     collected_by = Column(Integer, ForeignKey("users.id"))
     governorate = Column(String(100))
     district = Column(String(100))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     indicator = relationship("Indicator", back_populates="measurements")
 
@@ -61,7 +61,7 @@ class Survey(Base):
     start_date = Column(Date)
     end_date = Column(Date)
     created_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     questions = relationship("SurveyQuestion", back_populates="survey")
 
@@ -87,7 +87,7 @@ class SurveyResponse(Base):
     respondent_id = Column(Integer, ForeignKey("beneficiaries.id"))
     answer = Column(Text)
     collected_by = Column(Integer, ForeignKey("users.id"))
-    collected_at = Column(DateTime, default=datetime.utcnow)
+    collected_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     governorate = Column(String(100))
 
     question = relationship("SurveyQuestion", back_populates="responses")
@@ -110,8 +110,8 @@ class LogFrame(Base):
     disaggregation = Column(Text)
     parent_id = Column(Integer, ForeignKey("logframes.id"))
     order = Column(Integer, default=0)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     children = relationship("LogFrame", backref="parent", remote_side=[id])
 
@@ -132,7 +132,7 @@ class DataQualityAssessment(Base):
     findings = Column(Text)
     recommendations = Column(Text)
     assessed_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class IPTTEntry(Base):
     __tablename__ = "iptt_entries"
@@ -154,7 +154,7 @@ class IPTTEntry(Base):
     corrective_action = Column(Text)
     data_source = Column(String(255))
     entered_by = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class SectorIndicator(Base):
     __tablename__ = "sector_indicators"
@@ -171,4 +171,49 @@ class SectorIndicator(Base):
     target = Column(Float)
     unit = Column(String(50))
     is_standard = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+
+class PhoneSurvey(Base):
+    __tablename__ = "phone_surveys"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255))
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)
+    beneficiary_id = Column(Integer, ForeignKey("beneficiaries.id"), nullable=True)
+    phone_number = Column(String(20))
+    governorate = Column(String(100))
+    district = Column(String(100))
+    survey_type = Column(String(50), default="pdm")
+    questions = Column(Text, default="[]")
+    responses = Column(Text, default="{}")
+    status = Column(String(30), default="scheduled")
+    scheduled_date = Column(DateTime, nullable=True)
+    completed_date = Column(DateTime, nullable=True)
+    interviewer = Column(String(255))
+    call_duration_minutes = Column(Integer, nullable=True)
+    call_quality = Column(String(20), nullable=True)
+    notes = Column(Text, nullable=True)
+    consent_given = Column(Boolean, default=False)
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+
+class ThirdPartyCheck(Base):
+    __tablename__ = "third_party_checks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)
+    location = Column(String(255))
+    governorate = Column(String(100))
+    check_type = Column(String(50), default="verification")
+    third_party_name = Column(String(255))
+    methodology = Column(Text, nullable=True)
+    findings = Column(Text, nullable=True)
+    photos = Column(Text, default="[]")
+    gps_coordinates = Column(String(100), nullable=True)
+    status = Column(String(30), default="pending")
+    risk_level = Column(String(20), default="high")
+    access_constraints = Column(Text, nullable=True)
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))

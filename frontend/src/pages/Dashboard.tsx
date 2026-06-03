@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import type { LucideIcon } from 'lucide-react';
 import {
   Activity,
   AlertTriangle,
@@ -20,16 +21,97 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import api from '../services/api';
 import ActionCenter from '../components/ActionCenter';
 
-const trendFallback = [
-  { name: 'Jan', value: 400 },
-  { name: 'Feb', value: 700 },
-  { name: 'Mar', value: 1200 },
-  { name: 'Apr', value: 900 },
-  { name: 'May', value: 1500 },
-  { name: 'Jun', value: 2100 },
+const EMPTY_TREND = [
+  { name: 'Jan', value: 0 },
+  { name: 'Feb', value: 0 },
+  { name: 'Mar', value: 0 },
 ];
 
-const riskColor = {
+interface RiskAlert {
+  id: number | string;
+  type: string;
+  level: string;
+  msg: string;
+}
+
+interface OverviewData {
+  total_beneficiaries?: number;
+  active_projects?: number;
+  total_projects?: number;
+  budget_utilization?: number;
+  total_spent?: number;
+}
+
+interface AccountabilityData {
+  total?: number;
+  resolved?: number;
+  closed?: number;
+  overdue?: number;
+  satisfaction_rate?: number;
+  sensitive?: number;
+}
+
+interface CashData {
+  total_amount?: number;
+  pending_count?: number;
+}
+
+interface InventoryData {
+  total_items?: number;
+  low_stock?: number;
+}
+
+interface RiskData {
+  alerts: RiskAlert[];
+  risk_level?: string;
+  global_risk_index?: number;
+}
+
+interface GeoData {
+  beneficiaries_by_governorate: Array<{ governorate: string; count: number }>;
+}
+
+interface TrendPoint {
+  name: string;
+  value: number;
+}
+
+interface StatCard {
+  label: string;
+  value: string | number;
+  icon: LucideIcon;
+  color: string;
+  hint: string;
+}
+
+interface ProjectItem {
+  id: number | string;
+  name: string;
+  sector?: string;
+  governorate?: string;
+  budget?: number;
+  spent?: number;
+  status?: string;
+}
+
+interface ActivityItem {
+  id?: number | string;
+  progress?: number;
+  status?: string;
+}
+
+interface VisitItem {
+  id?: number | string;
+  status?: string;
+}
+
+interface IndicatorItem {
+  id?: number | string;
+  actual_value?: number;
+  target_value?: number;
+}
+
+const riskColor: Record<string, string> = {
   low: 'text-emerald-600 bg-emerald-50',
   medium: 'text-amber-600 bg-amber-50',
   high: 'text-orange-600 bg-orange-50',
@@ -37,17 +119,18 @@ const riskColor = {
 };
 
 export default function Dashboard() {
-  const [loading, setLoading] = useState(true);
-  const [overview, setOverview] = useState({});
-  const [accountability, setAccountability] = useState({});
-  const [cash, setCash] = useState({});
-  const [inventory, setInventory] = useState({});
-  const [risk, setRisk] = useState({ alerts: [] });
-  const [projects, setProjects] = useState([]);
-  const [activities, setActivities] = useState([]);
-  const [visits, setVisits] = useState([]);
-  const [indicators, setIndicators] = useState([]);
-  const [geo, setGeo] = useState({ beneficiaries_by_governorate: [] });
+  const [loading, setLoading] = useState<boolean>(true);
+  const [overview, setOverview] = useState<OverviewData>({});
+  const [accountability, setAccountability] = useState<AccountabilityData>({});
+  const [cash, setCash] = useState<CashData>({});
+  const [inventory, setInventory] = useState<InventoryData>({});
+  const [risk, setRisk] = useState<RiskData>({ alerts: [] });
+  const [projects, setProjects] = useState<ProjectItem[]>([]);
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
+  const [visits, setVisits] = useState<VisitItem[]>([]);
+  const [indicators, setIndicators] = useState<IndicatorItem[]>([]);
+  const [geo, setGeo] = useState<GeoData>({ beneficiaries_by_governorate: [] });
+  const [trend, setTrend] = useState<TrendPoint[]>([]);
 
   useEffect(() => {
     const calls = [
@@ -61,6 +144,11 @@ export default function Dashboard() {
       api.get('/field-visits/').then((r) => setVisits(Array.isArray(r.data) ? r.data : r.data.items || [])).catch(() => {}),
       api.get('/monitoring/indicators').then((r) => setIndicators(Array.isArray(r.data) ? r.data : r.data.items || [])).catch(() => {}),
       api.get('/analytics/geographic').then((r) => setGeo(r.data)).catch(() => {}),
+      api.get('/analytics/trends').then((r) => {
+        const trends = r.data?.trends || [];
+        const points = trends.flatMap(t => (t.data_points || []).map(dp => ({ name: dp.date, value: dp.value })));
+        setTrend(points.slice(-12));
+      }).catch(() => {}),
     ];
     Promise.allSettled(calls).finally(() => setLoading(false));
   }, []);
@@ -82,7 +170,7 @@ export default function Dashboard() {
     value: item.count,
   }));
 
-  const cards = [
+  const cards: StatCard[] = [
     { label: 'المستفيدون', value: Number(overview.total_beneficiaries || 0).toLocaleString(), icon: Users, color: 'text-blue-600', hint: 'مسجلون في النظام' },
     { label: 'المشاريع النشطة', value: overview.active_projects || 0, icon: Briefcase, color: 'text-indigo-600', hint: `${overview.total_projects || 0} مشروع إجمالي` },
     { label: 'استخدام الميزانية', value: `${overview.budget_utilization || 0}%`, icon: Banknote, color: 'text-emerald-600', hint: `${Number(overview.total_spent || 0).toLocaleString()} مصروف` },
@@ -143,7 +231,7 @@ export default function Dashboard() {
               </div>
               <div className="h-[260px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={geoChart.length ? geoChart : trendFallback}>
+                  <BarChart data={geoChart.length ? geoChart : EMPTY_TREND}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.06)" />
                     <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#64748b' }} />
                     <YAxis tick={{ fontSize: 10, fill: '#64748b' }} />
@@ -196,7 +284,7 @@ export default function Dashboard() {
               <h3 className="mb-4 flex items-center gap-2 font-black"><Calendar size={18} className="text-indigo-600" /> اتجاه الوصول</h3>
               <div className="h-[120px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={trendFallback}>
+                  <AreaChart data={trend.length ? trend : EMPTY_TREND}>
                     <Area type="monotone" dataKey="value" stroke="#4f46e5" strokeWidth={3} fill="#4f46e5" fillOpacity={0.12} />
                     <XAxis dataKey="name" hide />
                     <YAxis hide />

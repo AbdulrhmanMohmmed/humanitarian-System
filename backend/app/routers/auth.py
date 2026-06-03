@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import User
@@ -11,8 +11,9 @@ from app.auth import (
 from app.permissions import Permission, require_permission, roles_catalog
 from pydantic import BaseModel
 from typing import List
-from datetime import datetime
+from datetime import datetime, timezone
 from app.config import settings
+from app.middleware.rate_limit import limiter
 
 router = APIRouter(prefix="/auth", tags=["المصادقة"])
 
@@ -47,7 +48,9 @@ class TokenPair(BaseModel):
 # ── Register ───────────────────────────────────────────────────────────────────
 
 @router.post("/register", response_model=Token)
+@limiter.limit("5/minute")
 def register(
+    request: Request,
     user_data: UserCreate,
     db: Session = Depends(get_db),
     current_user: User | None = Depends(get_optional_current_user),
@@ -95,7 +98,8 @@ def register(
 # ── Login ──────────────────────────────────────────────────────────────────────
 
 @router.post("/login", response_model=Token)
-def login(user_data: UserLogin, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def login(request: Request, user_data: UserLogin, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == user_data.username).first()
 
     # Constant-time comparison to prevent timing attacks
@@ -177,7 +181,7 @@ def change_password(
         raise HTTPException(status_code=422, detail=error_msg)
 
     current_user.hashed_password = get_password_hash(body.new_password)
-    current_user.updated_at = datetime.utcnow()
+    current_user.updated_at = datetime.now(timezone.utc)
     db.commit()
     return {"message": "تم تغيير كلمة المرور بنجاح"}
 

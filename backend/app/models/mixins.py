@@ -2,7 +2,7 @@
 Reusable model mixins.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import Column, DateTime, Integer
 
@@ -24,5 +24,5 @@ class SoftDeleteMixin:
         return self.deleted_at is not None
 
     def soft_delete(self, user_id: int | None = None):
-        self.deleted_at = datetime.utcnow()
+        self.deleted_at = datetime.now(timezone.utc)
         self.deleted_by = user_id

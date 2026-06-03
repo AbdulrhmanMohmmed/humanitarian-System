@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, Date, Text, ForeignKey, Enum as SAEnum
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database import Base
 from .enums import AssetStatus, VehicleStatus, FuelType, Currency
 
@@ -25,8 +25,8 @@ class Asset(Base):
     project_id = Column(Integer, ForeignKey("projects.id"))
     
     notes = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 class Vehicle(Base):
     __tablename__ = "vehicles"
@@ -50,14 +50,14 @@ class Vehicle(Base):
     assigned_driver_id = Column(Integer, ForeignKey("users.id"))
     project_id = Column(Integer, ForeignKey("projects.id"))
     
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class FuelLog(Base):
     __tablename__ = "fuel_logs"
 
     id = Column(Integer, primary_key=True, index=True)
     vehicle_id = Column(Integer, ForeignKey("vehicles.id"), nullable=False)
-    date = Column(Date, default=datetime.utcnow().date())
+    date = Column(Date, default=lambda: datetime.now(timezone.utc).date())
     odometer_reading = Column(Integer)
     liters = Column(Float)
     cost = Column(Float)
@@ -66,4 +66,4 @@ class FuelLog(Base):
     coupon_number = Column(String(50))
     
     recorded_by_id = Column(Integer, ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
